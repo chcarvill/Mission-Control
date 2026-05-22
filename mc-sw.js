@@ -1,5 +1,5 @@
-const CACHE = 'mc-v1';
-const ASSETS = ['./index.html','./manifest.json'];
+const CACHE = 'mc-v2';
+const ASSETS = ['./index.html', './mc-manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
