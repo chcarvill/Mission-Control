@@ -303,6 +303,32 @@
   }
   .add-task-btn:hover { color: var(--active); }
 
+  /* Mission letter badge */
+  .mission-letter {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--active); background: var(--active-bg);
+    border: 0.5px solid var(--active);
+    border-radius: 4px; padding: 1px 7px;
+    letter-spacing: 0.06em; flex-shrink: 0;
+    display: inline-block;
+  }
+  .mission-seq-badge {
+    font-family: var(--mono); font-size: 9px;
+    padding: 1px 6px; border-radius: 3px;
+    flex-shrink: 0; letter-spacing: 0.03em;
+    display: inline-block; margin-left: 4px;
+  }
+  .mission-seq-after  { color: #60a5fa; background: #0d1e35; border: 0.5px solid #1e3a5f; }
+  .mission-seq-before { color: #f59e0b; background: #2a1f08; border: 0.5px solid #4a3510; }
+  .mission-blocked-banner {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--hold); background: var(--hold-bg);
+    border: 0.5px solid var(--hold);
+    border-radius: var(--radius-sm);
+    padding: 5px 10px; letter-spacing: 0.03em;
+    display: flex; align-items: center; gap: 6px;
+  }
+
   /* Task sequencing */
   .task-letter {
     font-family: var(--mono); font-size: 9px;
@@ -870,6 +896,36 @@
   </div>
 </div>
 
+<!-- Mission sequencing dialog -->
+<div class="seq-dialog-overlay" id="mseq-dialog-overlay">
+  <div class="seq-dialog">
+    <h3>Mission Sequence</h3>
+    <div class="seq-dialog-desc">
+      New mission <strong id="mseq-new-letter">A</strong> — "<span id="mseq-new-name" style="font-size:12px;color:var(--text);"></span>"
+    </div>
+    <div id="mseq-mission-list-wrap" style="display:none;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:5px;text-transform:uppercase;">Existing missions</div>
+      <div class="seq-task-list" id="mseq-mission-list"></div>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:7px;text-transform:uppercase;">This mission…</div>
+      <div class="seq-options">
+        <button class="seq-option-btn" id="mseq-btn-precedes" onclick="selectMseqMode('precedes')">precedes another</button>
+        <button class="seq-option-btn" id="mseq-btn-follows" onclick="selectMseqMode('follows')">follows another</button>
+        <button class="seq-option-btn selected-isolated" id="mseq-btn-isolated" onclick="selectMseqMode('isolated')">is independent</button>
+      </div>
+    </div>
+    <div id="mseq-letter-wrap" style="display:none;">
+      <input class="seq-letter-input" id="mseq-letter-input" maxlength="3"
+        placeholder="Type the mission letter(s), e.g. A  or  A, B" />
+    </div>
+    <div class="seq-actions">
+      <button class="seq-skip" onclick="skipMseq()">Skip</button>
+      <button class="seq-confirm" onclick="confirmMseq()">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add venture modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
@@ -1003,14 +1059,40 @@ function selectModalCat(btn) {
   btn.style.background = cat.bg;
   btn.style.color = cat.color;
 }
+// ── Mission letter assignment ──
+function nextMissionLetter() {
+  const ventures = load();
+  const used = new Set(ventures.map(v => v.letter).filter(Boolean));
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for (let i = 0; i < letters.length; i++) {
+    if (!used.has(letters[i])) return letters[i];
+  }
+  for (let i = 0; i < letters.length; i++) {
+    for (let j = 0; j < letters.length; j++) {
+      const l = letters[i] + letters[j];
+      if (!used.has(l)) return l;
+    }
+  }
+  return null;
+}
+
+// ── Mission seq dialog state ──
+let _mseqId = null;
+let _mseqMode = 'isolated';
+
 function confirmAddVenture() {
   const name = document.getElementById('modal-name').value.trim();
   if (!name) { document.getElementById('modal-name').focus(); return; }
   const ventures = load();
   const ventureLabel = document.getElementById('modal-venture').value.trim();
+  const letter = nextMissionLetter();
+  const id = Date.now();
   ventures.push({
-    id: Date.now(),
+    id,
     name,
+    letter,
+    precedes: null,
+    follows: null,
     venture: ventureLabel,
     department: document.getElementById('modal-department').value.trim(),
     description: document.getElementById('modal-description').value.trim(),
@@ -1030,7 +1112,88 @@ function confirmAddVenture() {
   renderPriority();
   renderArchive();
   renderFolders();
+  // Open mission sequencing dialog
+  openMseqDialog(id);
 }
+
+function openMseqDialog(vid) {
+  const ventures = load();
+  const v = ventures.find(x => x.id === vid);
+  if (!v) return;
+
+  _mseqId = vid;
+  _mseqMode = 'isolated';
+
+  document.getElementById('mseq-new-letter').textContent = v.letter || '?';
+  document.getElementById('mseq-new-name').textContent = v.name;
+
+  const others = ventures.filter(x => x.id !== vid);
+  const listEl = document.getElementById('mseq-mission-list');
+  const wrapEl = document.getElementById('mseq-mission-list-wrap');
+  listEl.innerHTML = '';
+  if (others.length) {
+    others.forEach(x => {
+      const item = document.createElement('div');
+      item.className = 'seq-task-list-item';
+      item.innerHTML = `<span class="task-letter">${x.letter || '?'}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(x.name)}</span>`;
+      listEl.appendChild(item);
+    });
+    wrapEl.style.display = 'block';
+  } else {
+    wrapEl.style.display = 'none';
+  }
+
+  selectMseqMode('isolated');
+  document.getElementById('mseq-letter-input').value = '';
+  document.getElementById('mseq-dialog-overlay').classList.add('visible');
+}
+
+function selectMseqMode(mode) {
+  _mseqMode = mode;
+  ['precedes','follows','isolated'].forEach(m => {
+    document.getElementById('mseq-btn-' + m).className = 'seq-option-btn' + (mode === m ? ' selected-' + m : '');
+  });
+  const wrap = document.getElementById('mseq-letter-wrap');
+  const inp = document.getElementById('mseq-letter-input');
+  if (mode === 'isolated') {
+    wrap.style.display = 'none';
+  } else {
+    wrap.style.display = 'block';
+    inp.placeholder = mode === 'precedes'
+      ? 'This mission precedes which mission? (e.g. B)'
+      : 'This mission follows which mission? (e.g. A)';
+    setTimeout(() => inp.focus(), 50);
+  }
+}
+
+function confirmMseq() {
+  if (!_mseqId) { closeMseqDialog(); return; }
+  const ventures = load();
+  const v = ventures.find(x => x.id === _mseqId);
+  if (!v) { closeMseqDialog(); return; }
+
+  if (_mseqMode !== 'isolated') {
+    const letters = document.getElementById('mseq-letter-input').value
+      .toUpperCase().split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+    if (letters.length) {
+      if (_mseqMode === 'precedes') v.precedes = letters;
+      else v.follows = letters;
+    }
+  }
+
+  save(ventures);
+  closeMseqDialog();
+  render();
+}
+
+function skipMseq() { closeMseqDialog(); }
+
+function closeMseqDialog() {
+  document.getElementById('mseq-dialog-overlay').classList.remove('visible');
+  _mseqId = null;
+}
+
+
 
 // ── Status cycle ──
 const statusCycle = ['active', 'on-hold', 'planning', 'completed'];
@@ -1264,14 +1427,32 @@ function buildCard(v, idx) {
       onclick="reassignCategory(${v.id},'${c.key}')">${c.label}</button>`;
   }).join('');
 
+  const missionBlocked = v.follows && v.follows.length && (() => {
+    const all = load();
+    return v.follows.some(fl => {
+      const dep = all.find(x => x.letter === fl);
+      return dep && dep.status !== 'completed';
+    });
+  })();
+
+  const missionSeqBadges = [
+    ...(v.follows  ? v.follows.map(l  => `<span class="mission-seq-badge mission-seq-after"  title="follows mission ${l}">after ${l}</span>`)  : []),
+    ...(v.precedes ? v.precedes.map(l => `<span class="mission-seq-badge mission-seq-before" title="precedes mission ${l}">before ${l}</span>`) : []),
+  ].join('');
+
   card.innerHTML = `
+    ${missionBlocked ? `<div class="mission-blocked-banner">⏸ Blocked — waiting on mission ${v.follows.join(', ')}</div>` : ''}
     <div class="card-top">
-      <input class="card-name" value="${esc(v.name)}" placeholder="Mission name..."
-        onchange="updateName(${v.id}, this.value)" />
+      <div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">
+        ${v.letter ? `<span class="mission-letter">${v.letter}</span>` : ''}
+        <input class="card-name" value="${esc(v.name)}" placeholder="Mission name..."
+          onchange="updateName(${v.id}, this.value)" />
+      </div>
       <button class="status-pill status-${v.status}" onclick="cycleStatus(${v.id})">
         ${statusLabels[v.status]}
       </button>
     </div>
+    ${missionSeqBadges ? `<div style="display:flex;gap:5px;flex-wrap:wrap;">${missionSeqBadges}</div>` : ''}
 
     ${v.venture ? `<div style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;">
       <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${v.color || getVentureColor(v.venture)};margin-right:5px;vertical-align:middle;"></span>${esc(v.venture)}${v.department ? ' › ' + esc(v.department) : ''}
@@ -1635,7 +1816,9 @@ function emailCurrentView() {
   ];
 
   filtered.forEach((v, i) => {
-    lines.push((i + 1) + '. ' + (v.name || '(unnamed)'));
+    lines.push((i + 1) + '. ' + (v.letter ? v.letter + '. ' : '') + (v.name || '(unnamed)'));
+    if (v.follows  && v.follows.length)  lines.push('   Follows:     Mission ' + v.follows.join(', '));
+    if (v.precedes && v.precedes.length) lines.push('   Precedes:    Mission ' + v.precedes.join(', '));
     if (v.venture)     lines.push('   Venture:     ' + v.venture + (v.department ? ' > ' + v.department : ''));
     if (v.description) lines.push('   Description: ' + v.description);
     lines.push('   Status:      ' + (statusLabels[v.status] || v.status));
@@ -1672,17 +1855,23 @@ document.getElementById('archive-modal').addEventListener('click', function(e) {
 
 // Keyboard shortcut
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeArchive(); closeSeqDialog(); }
+  if (e.key === 'Escape') { closeModal(); closeArchive(); closeSeqDialog(); closeMseqDialog(); }
 });
 
 // Seq dialog — confirm on Enter in letter input
 document.getElementById('seq-letter-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') confirmSeq();
 });
+document.getElementById('mseq-letter-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmMseq();
+});
 
-// Close seq dialog on overlay click
+// Close seq dialogs on overlay click
 document.getElementById('seq-dialog-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeSeqDialog();
+});
+document.getElementById('mseq-dialog-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeMseqDialog();
 });
 
 // ── Folder panel ──
