@@ -303,6 +303,114 @@
   }
   .add-task-btn:hover { color: var(--active); }
 
+  /* Task sequencing */
+  .task-letter {
+    font-family: var(--mono); font-size: 9px;
+    color: var(--text-hint); background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: 3px; padding: 1px 5px;
+    flex-shrink: 0; letter-spacing: 0.04em;
+    min-width: 18px; text-align: center;
+  }
+  .task-seq-badge {
+    font-family: var(--mono); font-size: 9px;
+    padding: 1px 5px; border-radius: 3px;
+    flex-shrink: 0; letter-spacing: 0.03em;
+    cursor: default;
+  }
+  .task-seq-after  { color: #60a5fa; background: #0d1e35; border: 0.5px solid #1e3a5f; }
+  .task-seq-before { color: #f59e0b; background: #2a1f08; border: 0.5px solid #4a3510; }
+  .task-item.task-blocked .task-text { color: var(--text-hint); font-style: italic; }
+  .task-blocked-icon {
+    font-size: 9px; color: var(--hold); flex-shrink: 0;
+    cursor: default; title: 'blocked';
+  }
+
+  /* Sequencing dialog */
+  .seq-dialog-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 300; backdrop-filter: blur(4px);
+  }
+  .seq-dialog-overlay.visible { display: flex; }
+  .seq-dialog {
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 1.5rem; width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .seq-dialog h3 {
+    font-family: var(--mono); font-size: 12px;
+    letter-spacing: 0.07em; color: var(--text);
+    text-transform: uppercase;
+  }
+  .seq-dialog-desc {
+    font-size: 13px; color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .seq-dialog-desc strong {
+    font-family: var(--mono); color: var(--active);
+    font-weight: 500;
+  }
+  .seq-task-list {
+    background: var(--surface2); border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border);
+    padding: 8px 10px; display: flex; flex-direction: column; gap: 4px;
+    max-height: 120px; overflow-y: auto;
+  }
+  .seq-task-list-item {
+    font-size: 11px; font-family: var(--mono);
+    color: var(--text-secondary);
+    display: flex; align-items: center; gap: 7px;
+  }
+  .seq-task-list-item .task-letter { font-size: 9px; }
+  .seq-options {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .seq-option-btn {
+    font-family: var(--mono); font-size: 10px;
+    padding: 5px 12px; border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent; color: var(--text-secondary);
+    cursor: pointer; letter-spacing: 0.04em;
+    transition: all 0.15s;
+  }
+  .seq-option-btn:hover { color: var(--text); border-color: var(--text-hint); }
+  .seq-option-btn.selected-precedes { background: #2a1f08; color: #f59e0b; border-color: #f59e0b; }
+  .seq-option-btn.selected-follows  { background: #0d1e35; color: #60a5fa; border-color: #60a5fa; }
+  .seq-option-btn.selected-isolated { background: var(--surface2); color: var(--text); border-color: var(--border2); }
+  .seq-letter-input {
+    width: 100%; background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px; font-size: 13px;
+    font-family: var(--mono); color: var(--text);
+    outline: none; letter-spacing: 0.08em;
+    transition: border-color 0.15s;
+    text-transform: uppercase;
+  }
+  .seq-letter-input:focus { border-color: var(--active); }
+  .seq-letter-input::placeholder { color: var(--text-hint); letter-spacing: 0.04em; font-size: 11px; text-transform: none; }
+  .seq-actions {
+    display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px;
+  }
+  .seq-skip { font-family: var(--mono); font-size: 11px;
+    padding: 7px 16px; border-radius: 20px;
+    border: 0.5px solid var(--border2);
+    background: transparent; color: var(--text-secondary);
+    cursor: pointer; letter-spacing: 0.04em; transition: all 0.15s;
+  }
+  .seq-skip:hover { color: var(--text); }
+  .seq-confirm { font-family: var(--mono); font-size: 11px;
+    padding: 7px 16px; border-radius: 20px;
+    border: none; background: var(--active);
+    color: #000; cursor: pointer; letter-spacing: 0.04em;
+    font-weight: 500; transition: opacity 0.15s;
+  }
+  .seq-confirm:hover { opacity: 0.85; }
+
   /* Card footer */
   .card-footer {
     display: flex; align-items: center; justify-content: space-between;
@@ -732,6 +840,36 @@
   </div>
 </div>
 
+<!-- Task sequencing dialog -->
+<div class="seq-dialog-overlay" id="seq-dialog-overlay">
+  <div class="seq-dialog">
+    <h3>Task Sequence</h3>
+    <div class="seq-dialog-desc">
+      New task <strong id="seq-new-letter">A</strong> — "<span id="seq-new-name" style="font-size:12px;color:var(--text);"></span>"
+    </div>
+    <div id="seq-task-list-wrap" style="display:none;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:5px;text-transform:uppercase;">Existing tasks</div>
+      <div class="seq-task-list" id="seq-task-list"></div>
+    </div>
+    <div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:7px;text-transform:uppercase;">This task…</div>
+      <div class="seq-options">
+        <button class="seq-option-btn" id="seq-btn-precedes" onclick="selectSeqMode('precedes')">precedes another</button>
+        <button class="seq-option-btn" id="seq-btn-follows" onclick="selectSeqMode('follows')">follows another</button>
+        <button class="seq-option-btn selected-isolated" id="seq-btn-isolated" onclick="selectSeqMode('isolated')">is independent</button>
+      </div>
+    </div>
+    <div id="seq-letter-wrap" style="display:none;">
+      <input class="seq-letter-input" id="seq-letter-input" maxlength="3"
+        placeholder="Type the task letter(s), e.g. A  or  A, B" />
+    </div>
+    <div class="seq-actions">
+      <button class="seq-skip" onclick="skipSeq()">Skip</button>
+      <button class="seq-confirm" onclick="confirmSeq()">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- Add venture modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
@@ -925,16 +1063,139 @@ function updateNotes(id, val) {
   if (v) { v.notes = val; save(ventures); }
 }
 
-// ── Tasks ──
+// ── Task letter assignment ──
+function nextTaskLetter(tasks) {
+  const used = new Set(tasks.map(t => t.letter).filter(Boolean));
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  // Single letters first
+  for (let i = 0; i < letters.length; i++) {
+    if (!used.has(letters[i])) return letters[i];
+  }
+  // Double letters AA, AB...
+  for (let i = 0; i < letters.length; i++) {
+    for (let j = 0; j < letters.length; j++) {
+      const l = letters[i] + letters[j];
+      if (!used.has(l)) return l;
+    }
+  }
+  return null;
+}
+
+// ── Seq dialog state ──
+let _seqVid = null;
+let _seqTid = null;
+let _seqMode = 'isolated';
+
 function addTask(id, inputEl) {
   const text = inputEl.value.trim();
   if (!text) return;
   const ventures = load(); const v = ventures.find(x => x.id === id);
-  if (v) {
-    v.tasks.push({ id: Date.now(), text, done: false });
-    save(ventures);
-    render();
+  if (!v) return;
+  const letter = nextTaskLetter(v.tasks);
+  const tid = Date.now();
+  v.tasks.push({ id: tid, text, done: false, letter, precedes: null, follows: null });
+  save(ventures);
+  inputEl.value = '';
+  render();
+  // Open sequencing dialog
+  openSeqDialog(id, tid);
+}
+
+function openSeqDialog(vid, tid) {
+  const ventures = load();
+  const v = ventures.find(x => x.id === vid);
+  if (!v) return;
+  const task = v.tasks.find(t => t.id === tid);
+  if (!task) return;
+
+  _seqVid = vid;
+  _seqTid = tid;
+  _seqMode = 'isolated';
+
+  document.getElementById('seq-new-letter').textContent = task.letter || '?';
+  document.getElementById('seq-new-name').textContent = task.text;
+
+  // Populate existing tasks list (all except the new one)
+  const others = v.tasks.filter(t => t.id !== tid);
+  const listEl = document.getElementById('seq-task-list');
+  const wrapEl = document.getElementById('seq-task-list-wrap');
+  listEl.innerHTML = '';
+  if (others.length) {
+    others.forEach(t => {
+      const item = document.createElement('div');
+      item.className = 'seq-task-list-item';
+      item.innerHTML = `<span class="task-letter">${t.letter || '?'}</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(t.text)}</span>`;
+      listEl.appendChild(item);
+    });
+    wrapEl.style.display = 'block';
+  } else {
+    wrapEl.style.display = 'none';
   }
+
+  // Reset mode buttons
+  selectSeqMode('isolated');
+  document.getElementById('seq-letter-input').value = '';
+
+  document.getElementById('seq-dialog-overlay').classList.add('visible');
+  setTimeout(() => {
+    if (_seqMode !== 'isolated') document.getElementById('seq-letter-input').focus();
+  }, 80);
+}
+
+function selectSeqMode(mode) {
+  _seqMode = mode;
+  ['precedes','follows','isolated'].forEach(m => {
+    document.getElementById('seq-btn-' + m).className = 'seq-option-btn' + (mode === m ? ' selected-' + m : '');
+  });
+  const wrap = document.getElementById('seq-letter-wrap');
+  const inp = document.getElementById('seq-letter-input');
+  if (mode === 'isolated') {
+    wrap.style.display = 'none';
+  } else {
+    wrap.style.display = 'block';
+    inp.placeholder = mode === 'precedes'
+      ? 'This task precedes which task? (e.g. B)'
+      : 'This task follows which task? (e.g. A)';
+    setTimeout(() => inp.focus(), 50);
+  }
+}
+
+function parseLetterInput(val) {
+  // Accept comma/space-separated letters, uppercase
+  return val.toUpperCase().split(/[\s,;]+/).map(s => s.trim()).filter(Boolean);
+}
+
+function confirmSeq() {
+  if (!_seqVid || !_seqTid) { closeSeqDialog(); return; }
+  const ventures = load();
+  const v = ventures.find(x => x.id === _seqVid);
+  if (!v) { closeSeqDialog(); return; }
+  const task = v.tasks.find(t => t.id === _seqTid);
+  if (!task) { closeSeqDialog(); return; }
+
+  if (_seqMode !== 'isolated') {
+    const letters = parseLetterInput(document.getElementById('seq-letter-input').value);
+    if (letters.length) {
+      if (_seqMode === 'precedes') {
+        task.precedes = letters; // this task must be done before these letters
+      } else {
+        task.follows = letters;  // this task cannot start until these letters are done
+      }
+    }
+  }
+
+  save(ventures);
+  closeSeqDialog();
+  render();
+}
+
+function skipSeq() {
+  closeSeqDialog();
+}
+
+function closeSeqDialog() {
+  document.getElementById('seq-dialog-overlay').classList.remove('visible');
+  _seqVid = null; _seqTid = null;
 }
 function toggleTask(vid, tid) {
   const ventures = load(); const v = ventures.find(x => x.id === vid);
@@ -1040,14 +1301,30 @@ function buildCard(v, idx) {
         <span class="tasks-label">Mini tasks</span>
         <span class="tasks-count">${doneTasks}/${totalTasks}</span>
       </div>
-      ${v.tasks.map(t => `
-        <div class="task-item">
+      ${v.tasks.map(t => {
+        // Determine if blocked: task follows letters, check if those are all done
+        let isBlocked = false;
+        if (t.follows && t.follows.length && !t.done) {
+          isBlocked = t.follows.some(fl => {
+            const dep = v.tasks.find(x => x.letter === fl);
+            return dep && !dep.done;
+          });
+        }
+        const seqBadges = [
+          ...(t.follows  ? t.follows.map(l  => `<span class="task-seq-badge task-seq-after"  title="follows ${l}">after ${l}</span>`)  : []),
+          ...(t.precedes ? t.precedes.map(l => `<span class="task-seq-badge task-seq-before" title="precedes ${l}">before ${l}</span>`) : []),
+        ].join('');
+        return `
+        <div class="task-item${isBlocked ? ' task-blocked' : ''}">
+          <span class="task-letter">${t.letter || '?'}</span>
           <button class="task-cb ${t.done ? 'done' : ''}" onclick="toggleTask(${v.id}, ${t.id})">${t.done ? '✓' : ''}</button>
           <input class="task-text ${t.done ? 'done' : ''}" value="${esc(t.text)}"
             onchange="updateTaskText(${v.id}, ${t.id}, this.value)" />
+          ${seqBadges}
+          ${isBlocked ? `<span class="task-blocked-icon" title="Blocked — waiting on ${t.follows.join(', ')}">⏸</span>` : ''}
           <button class="task-del" onclick="deleteTask(${v.id}, ${t.id})">✕</button>
-        </div>
-      `).join('')}
+        </div>`;
+      }).join('')}
       <div class="add-task-row">
         <input class="add-task-input" id="task-input-${v.id}" placeholder="Add task..."
           onkeydown="if(event.key==='Enter'){addTask(${v.id}, this);}" />
@@ -1366,7 +1643,12 @@ function emailCurrentView() {
     if (v.nextAction)  lines.push('   Next action: ' + v.nextAction);
     if (v.tasks && v.tasks.length) {
       lines.push('   Tasks:');
-      v.tasks.forEach(t => lines.push('     [' + (t.done ? 'x' : ' ') + '] ' + t.text));
+      v.tasks.forEach(t => {
+        let seqNote = '';
+        if (t.follows  && t.follows.length)  seqNote += ` [after: ${t.follows.join(', ')}]`;
+        if (t.precedes && t.precedes.length)  seqNote += ` [before: ${t.precedes.join(', ')}]`;
+        lines.push('     [' + (t.done ? 'x' : ' ') + '] ' + (t.letter ? t.letter + '. ' : '') + t.text + seqNote);
+      });
     }
     if (v.notes)       lines.push('   Notes:       ' + v.notes);
     lines.push('');
@@ -1390,7 +1672,17 @@ document.getElementById('archive-modal').addEventListener('click', function(e) {
 
 // Keyboard shortcut
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeArchive(); }
+  if (e.key === 'Escape') { closeModal(); closeArchive(); closeSeqDialog(); }
+});
+
+// Seq dialog — confirm on Enter in letter input
+document.getElementById('seq-letter-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmSeq();
+});
+
+// Close seq dialog on overlay click
+document.getElementById('seq-dialog-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closeSeqDialog();
 });
 
 // ── Folder panel ──
