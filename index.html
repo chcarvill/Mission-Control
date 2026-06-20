@@ -712,96 +712,138 @@
     font-size: 11px; color: #000; font-weight: 700;
   }
 
-  /* ── Homepage weekly grid ── */
+  /* ── Homepage weekly timeline ── */
   .homepage-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
+    display: flex;
     padding: 1rem 2.5rem 2.5rem;
-    background: var(--border);
+    overflow-x: auto;
   }
-  .homepage-day {
-    background: var(--surface);
-    min-height: 220px;
+  .homepage-time-gutter {
+    position: relative;
+    width: 52px; flex-shrink: 0;
+  }
+  .homepage-hour-label {
+    position: absolute; right: 8px;
+    transform: translateY(-50%);
+    font-family: var(--mono); font-size: 9.5px; color: var(--text-hint);
+    white-space: nowrap;
+  }
+  .homepage-days-wrap {
+    display: flex; flex: 1; gap: 1px; background: var(--border);
+    min-width: 700px;
+  }
+  .homepage-day-col {
+    flex: 1; min-width: 100px;
     display: flex; flex-direction: column;
-    padding: 0.75rem 0.6rem;
-    gap: 8px;
-  }
-  .homepage-day.is-today {
-    background: var(--surface2);
-    box-shadow: inset 0 2px 0 var(--active);
+    background: var(--bg);
   }
   .homepage-day-head {
-    display: flex; align-items: baseline; justify-content: space-between;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 4px 6px; border-bottom: 0.5px solid var(--border);
+    margin-bottom: 4px; position: relative;
   }
+  .homepage-day-head.is-today .homepage-day-name { color: var(--active); }
+  .homepage-day-head.is-today { box-shadow: inset 0 -2px 0 var(--active); }
   .homepage-day-name {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.06em;
     text-transform: uppercase; color: var(--text-secondary);
   }
-  .homepage-day.is-today .homepage-day-name { color: var(--active); }
   .homepage-day-date {
-    font-family: var(--mono); font-size: 10px; color: var(--text-hint);
-  }
-  .homepage-items {
-    display: flex; flex-direction: column; gap: 5px; flex: 1;
-  }
-  .homepage-item {
-    display: flex; align-items: center; gap: 6px;
-    padding: 5px 7px; border-radius: var(--radius-sm);
-    background: var(--surface2);
-    border-left: 3px solid var(--text-hint);
-    font-size: 11.5px; color: var(--text);
-    line-height: 1.3;
-  }
-  .homepage-item-text {
-    flex: 1; min-width: 0; overflow-wrap: break-word;
-  }
-  .homepage-item-tag {
-    font-family: var(--mono); font-size: 8.5px; color: var(--text-hint);
-    letter-spacing: 0.03em; text-transform: uppercase; flex-shrink: 0;
-  }
-  .homepage-item-del {
-    background: none; border: none; cursor: pointer;
-    color: var(--text-hint); font-size: 10px; flex-shrink: 0;
-    padding: 0 2px; line-height: 1;
-  }
-  .homepage-item-del:hover { color: #f87171; }
-  .homepage-empty-hint {
-    font-family: var(--mono); font-size: 10px; color: var(--text-hint);
-    letter-spacing: 0.03em; padding: 4px 2px;
+    font-family: var(--mono); font-size: 9.5px; color: var(--text-hint); flex: 1;
   }
   .homepage-add-btn {
-    font-family: var(--mono); font-size: 10px; color: var(--text-hint);
-    background: none; border: 0.5px dashed var(--border2);
-    border-radius: var(--radius-sm); padding: 5px 0;
-    cursor: pointer; letter-spacing: 0.04em; margin-top: auto;
-    transition: all 0.15s;
+    font-family: var(--mono); font-size: 13px; line-height: 1; color: var(--text-hint);
+    background: none; border: 0.5px solid var(--border2);
+    border-radius: 4px; width: 18px; height: 18px;
+    cursor: pointer; flex-shrink: 0; transition: all 0.15s;
   }
   .homepage-add-btn:hover { color: var(--active); border-color: var(--active); }
-  .homepage-add-form {
-    display: none; flex-direction: column; gap: 5px;
+  .homepage-day-track {
+    position: relative;
+    background: var(--surface);
+    margin: 0 2px;
+    border-radius: 4px;
+    overflow: hidden;
   }
-  .homepage-add-form.visible { display: flex; }
+  .homepage-hour-line {
+    position: absolute; left: 0; right: 0;
+    border-top: 0.5px solid var(--border);
+  }
+  .homepage-block {
+    position: absolute; left: 3px; right: 3px;
+    border-left: 3px solid var(--text-hint);
+    border-radius: 4px;
+    padding: 3px 5px;
+    cursor: pointer;
+    overflow: hidden;
+    transition: filter 0.15s;
+  }
+  .homepage-block:hover { filter: brightness(1.25); }
+  .homepage-block-text {
+    font-size: 10.5px; color: var(--text); line-height: 1.25;
+    font-weight: 500; overflow-wrap: break-word;
+  }
+  .homepage-block-time {
+    font-family: var(--mono); font-size: 8.5px; color: var(--text-secondary);
+    margin-top: 1px;
+  }
+  .homepage-block-tag {
+    font-family: var(--mono); font-size: 7.5px; color: var(--text-hint);
+    letter-spacing: 0.03em; text-transform: uppercase;
+    position: absolute; top: 3px; right: 5px;
+  }
+  .homepage-block-del {
+    position: absolute; top: 1px; right: 3px;
+    background: none; border: none; cursor: pointer;
+    color: var(--text-hint); font-size: 9px; padding: 2px;
+    line-height: 1; opacity: 0; transition: opacity 0.15s;
+  }
+  .homepage-block:hover .homepage-block-del { opacity: 1; }
+  .homepage-block-del:hover { color: #f87171; }
+
+  /* Popover for adding/editing a homepage item */
+  .homepage-popover {
+    z-index: 500;
+    background: var(--surface2);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 12px;
+    width: 210px;
+    display: flex; flex-direction: column; gap: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  .homepage-popover-title {
+    font-size: 12px; color: var(--text); font-weight: 500;
+    overflow-wrap: break-word;
+  }
   .homepage-add-input {
-    font-family: var(--sans); font-size: 11px;
+    font-family: var(--sans); font-size: 12px;
     background: var(--surface); border: 0.5px solid var(--border2);
     border-radius: var(--radius-sm); color: var(--text);
-    padding: 5px 7px; outline: none; width: 100%;
+    padding: 6px 8px; outline: none; width: 100%;
   }
   .homepage-add-input:focus { border-color: var(--active); }
-  .homepage-add-swatches { display: flex; gap: 4px; flex-wrap: wrap; }
-  .homepage-add-swatches .color-swatch { width: 16px; height: 16px; }
+  .homepage-time-row {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .homepage-time-input {
+    font-family: var(--mono); font-size: 11px;
+    background: var(--surface); border: 0.5px solid var(--border2);
+    border-radius: var(--radius-sm); color: var(--text);
+    padding: 4px 6px; outline: none; flex: 1; color-scheme: dark;
+  }
+  .homepage-time-input:focus { border-color: var(--active); }
+  .homepage-time-sep { color: var(--text-hint); font-size: 11px; }
+  .homepage-add-swatches { display: flex; gap: 5px; flex-wrap: wrap; }
+  .homepage-add-swatches .color-swatch { width: 17px; height: 17px; }
   .homepage-add-swatches .color-swatch.selected::after { font-size: 8px; }
-  .homepage-add-form-actions { display: flex; gap: 5px; }
+  .homepage-add-form-actions { display: flex; gap: 6px; }
   .homepage-add-form-actions button {
-    font-family: var(--mono); font-size: 10px; padding: 4px 9px;
+    font-family: var(--mono); font-size: 10px; padding: 5px 10px;
     border-radius: var(--radius-sm); cursor: pointer; letter-spacing: 0.03em;
   }
   .homepage-add-save { border: none; background: var(--active); color: #000; }
   .homepage-add-cancel { border: 0.5px solid var(--border2); background: transparent; color: var(--text-hint); }
-  @media (max-width: 900px) {
-    .homepage-grid { grid-template-columns: repeat(7, minmax(110px,1fr)); overflow-x: auto; }
-  }
 
   /* ── Column layout ── */
   .cat-columns-wrap {
@@ -2544,12 +2586,19 @@ function switchMasterTab(tab) {
   if (tab === 'homepage') { renderHomepage(); }
 }
 
-// ── Homepage (weekly view) ──
+// ── Homepage (weekly timeline view) ──
 function loadHomepageManual() {
   return JSON.parse(localStorage.getItem('mc_homepage_manual') || '[]');
 }
 function saveHomepageManual(arr) {
   localStorage.setItem('mc_homepage_manual', JSON.stringify(arr));
+}
+// Per-mission default/edited times for the homepage timeline, keyed by mission id
+function loadHomepageMissionTimes() {
+  return JSON.parse(localStorage.getItem('mc_homepage_mission_times') || '{}');
+}
+function saveHomepageMissionTimes(obj) {
+  localStorage.setItem('mc_homepage_mission_times', JSON.stringify(obj));
 }
 // Returns array of 7 Date objects, Monday..Sunday, for the week containing `d`
 function getWeekDates(d) {
@@ -2567,6 +2616,42 @@ function dateKey(d) {
   return `${y}-${m}-${day}`;
 }
 
+// ── Timeline geometry ──
+const HP_DAY_START_MIN = 6 * 60;   // 6:00am
+const HP_DAY_END_MIN   = 23 * 60;  // 11:00pm
+const HP_PX_PER_MIN    = 1.1;
+const HP_TRACK_HEIGHT   = (HP_DAY_END_MIN - HP_DAY_START_MIN) * HP_PX_PER_MIN;
+const HP_DEFAULT_START  = '09:00';
+const HP_DEFAULT_END    = '09:30';
+
+function hpMinsFromMidnight(hhmm) {
+  if (!hhmm) return null;
+  const [h, m] = hhmm.split(':').map(Number);
+  if (Number.isNaN(h) || Number.isNaN(m)) return null;
+  return h * 60 + m;
+}
+function hpFmtTime(hhmm) {
+  if (!hhmm) return '';
+  const mins = hpMinsFromMidnight(hhmm);
+  const h24 = Math.floor(mins / 60), m = mins % 60;
+  const ampm = h24 >= 12 ? 'pm' : 'am';
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${h12}${m ? ':' + String(m).padStart(2,'0') : ''}${ampm}`;
+}
+// Clamp a block's pixel top/height to the visible track, given start/end HH:MM
+function hpBlockGeometry(startHHMM, endHHMM) {
+  let startMin = hpMinsFromMidnight(startHHMM);
+  let endMin = hpMinsFromMidnight(endHHMM);
+  if (startMin == null) startMin = HP_DAY_START_MIN;
+  if (endMin == null || endMin <= startMin) endMin = startMin + 30;
+  const clampedStart = Math.max(HP_DAY_START_MIN, Math.min(startMin, HP_DAY_END_MIN));
+  const clampedEnd = Math.max(HP_DAY_START_MIN, Math.min(endMin, HP_DAY_END_MIN));
+  const top = (clampedStart - HP_DAY_START_MIN) * HP_PX_PER_MIN;
+  const height = Math.max(18, (clampedEnd - clampedStart) * HP_PX_PER_MIN);
+  return { top, height };
+}
+
+
 function renderHomepage() {
   const weekDates = getWeekDates(new Date());
   const todayKey = dateKey(new Date());
@@ -2576,17 +2661,22 @@ function renderHomepage() {
   document.getElementById('homepage-week-range').textContent =
     fmt(weekDates[0]) + ' – ' + fmt(weekDates[6]);
 
-  // Auto-pulled: missions (active/on-hold/planning) whose dueDate falls in this week
+  // Auto-pulled: missions (not completed) whose dueDate falls in this week
   const ventures = load();
   const weekKeys = weekDates.map(dateKey);
+  const missionTimes = loadHomepageMissionTimes();
   const autoByDay = {};
   weekKeys.forEach(k => autoByDay[k] = []);
   ventures.filter(v => v.status !== 'completed' && v.dueDate && weekKeys.includes(v.dueDate))
     .forEach(v => {
+      const t = missionTimes[v.id] || {};
       autoByDay[v.dueDate].push({
+        kind: 'mission',
+        id: v.id,
         text: v.name,
         color: v.color || getVentureColor(v.venture),
-        source: 'mission'
+        start: t.start || HP_DEFAULT_START,
+        end: t.end || HP_DEFAULT_END
       });
     });
 
@@ -2595,88 +2685,182 @@ function renderHomepage() {
   const manualByDay = {};
   weekKeys.forEach(k => manualByDay[k] = []);
   manual.forEach(item => {
-    if (manualByDay[item.date]) manualByDay[item.date].push(item);
+    if (manualByDay[item.date]) {
+      manualByDay[item.date].push({
+        kind: 'manual', id: item.id, text: item.text, color: item.color,
+        start: item.start || HP_DEFAULT_START, end: item.end || HP_DEFAULT_END
+      });
+    }
   });
+
+  // Hour labels for the shared time gutter
+  const hourLabels = [];
+  for (let m = HP_DAY_START_MIN; m <= HP_DAY_END_MIN; m += 60) {
+    hourLabels.push(`<div class="homepage-hour-label" style="top:${(m - HP_DAY_START_MIN) * HP_PX_PER_MIN}px;">${hpFmtTime(String(Math.floor(m/60)).padStart(2,'0')+':00')}</div>`);
+  }
+  const gutterHtml = `<div class="homepage-time-gutter" style="height:${HP_TRACK_HEIGHT}px;">${hourLabels.join('')}</div>`;
 
   const dayNames = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const grid = document.getElementById('homepage-grid');
-  grid.innerHTML = weekDates.map((d, i) => {
+  const daysHtml = weekDates.map((d, i) => {
     const key = dateKey(d);
     const isToday = key === todayKey;
-    const autoItems = autoByDay[key] || [];
-    const manualItems = manualByDay[key] || [];
+    const items = [...(autoByDay[key] || []), ...(manualByDay[key] || [])];
 
-    const autoHtml = autoItems.map(item => `
-      <div class="homepage-item" style="border-left-color:${item.color};">
-        <span class="homepage-item-text">${esc(item.text)}</span>
-        <span class="homepage-item-tag">mission</span>
-      </div>`).join('');
+    const blocksHtml = items.map(item => {
+      const { top, height } = hpBlockGeometry(item.start, item.end);
+      const showTimeLabel = height >= 32;
+      const delBtn = item.kind === 'manual'
+        ? `<button class="homepage-block-del" onclick="event.stopPropagation();deleteHomepageManualItem('${item.id}')" title="Remove">✕</button>`
+        : '';
+      return `
+        <div class="homepage-block" style="top:${top}px;height:${height}px;border-left-color:${item.color};background:${item.color}22;"
+          onclick="openHomepageTimeEditor('${item.kind}','${item.id}','${key}')">
+          <div class="homepage-block-text">${esc(item.text)}</div>
+          ${showTimeLabel ? `<div class="homepage-block-time">${hpFmtTime(item.start)}–${hpFmtTime(item.end)}</div>` : ''}
+          ${item.kind === 'mission' ? `<span class="homepage-block-tag">mission</span>` : ''}
+          ${delBtn}
+        </div>`;
+    }).join('');
 
-    const manualHtml = manualItems.map(item => `
-      <div class="homepage-item" style="border-left-color:${item.color};">
-        <span class="homepage-item-text">${esc(item.text)}</span>
-        <button class="homepage-item-del" onclick="deleteHomepageManualItem('${item.id}')" title="Remove">✕</button>
-      </div>`).join('');
-
-    const emptyHint = (!autoItems.length && !manualItems.length)
-      ? `<div class="homepage-empty-hint">nothing planned</div>` : '';
+    const hourLines = [];
+    for (let m = HP_DAY_START_MIN; m <= HP_DAY_END_MIN; m += 60) {
+      hourLines.push(`<div class="homepage-hour-line" style="top:${(m - HP_DAY_START_MIN) * HP_PX_PER_MIN}px;"></div>`);
+    }
 
     return `
-      <div class="homepage-day${isToday ? ' is-today' : ''}" id="hp-day-${key}">
-        <div class="homepage-day-head">
+      <div class="homepage-day-col">
+        <div class="homepage-day-head${isToday ? ' is-today' : ''}">
           <span class="homepage-day-name">${dayNames[i]}</span>
           <span class="homepage-day-date">${d.getDate()}</span>
+          <button class="homepage-add-btn" onclick="openHomepageAddPopover('${key}', this)">+</button>
         </div>
-        <div class="homepage-items">
-          ${autoHtml}${manualHtml}${emptyHint}
-        </div>
-        <button class="homepage-add-btn" onclick="toggleHomepageAddForm('${key}')">+ add</button>
-        <div class="homepage-add-form" id="hp-add-form-${key}">
-          <input type="text" class="homepage-add-input" id="hp-add-input-${key}" placeholder="What's planned?" onkeydown="if(event.key==='Enter'){saveHomepageManualItem('${key}');}" />
-          <div class="homepage-add-swatches" id="hp-add-swatches-${key}"></div>
-          <div class="homepage-add-form-actions">
-            <button class="homepage-add-save" onclick="saveHomepageManualItem('${key}')">Add</button>
-            <button class="homepage-add-cancel" onclick="toggleHomepageAddForm('${key}')">Cancel</button>
-          </div>
+        <div class="homepage-day-track" style="height:${HP_TRACK_HEIGHT}px;">
+          ${hourLines.join('')}
+          ${blocksHtml}
         </div>
       </div>`;
   }).join('');
+
+  grid.innerHTML = `${gutterHtml}<div class="homepage-days-wrap">${daysHtml}</div>`;
 }
 
-let hpPendingColor = {};
-function toggleHomepageAddForm(key) {
-  const form = document.getElementById('hp-add-form-' + key);
-  const opening = !form.classList.contains('visible');
-  form.classList.toggle('visible');
-  if (opening) {
-    hpPendingColor[key] = VENTURE_COLORS[0];
-    renderColorSwatchRow('hp-add-swatches-' + key, hpPendingColor[key], (c, row) => {
-      hpPendingColor[key] = c;
-      row.querySelectorAll('.color-swatch').forEach(b => b.classList.toggle('selected', b.dataset.color === c));
-    });
-    setTimeout(() => document.getElementById('hp-add-input-' + key).focus(), 30);
-  }
+
+// ── Add item popover ──
+let hpPopoverColor = VENTURE_COLORS[0];
+function closeHomepagePopovers() {
+  document.querySelectorAll('.homepage-popover').forEach(el => el.remove());
+}
+function openHomepageAddPopover(key, anchorBtn) {
+  closeHomepagePopovers();
+  hpPopoverColor = VENTURE_COLORS[0];
+  const pop = document.createElement('div');
+  pop.className = 'homepage-popover';
+  pop.innerHTML = `
+    <input type="text" class="homepage-add-input" id="hp-add-input" placeholder="What's planned?" />
+    <div class="homepage-time-row">
+      <input type="time" class="homepage-time-input" id="hp-add-start" value="${HP_DEFAULT_START}" />
+      <span class="homepage-time-sep">–</span>
+      <input type="time" class="homepage-time-input" id="hp-add-end" value="${HP_DEFAULT_END}" />
+    </div>
+    <div class="homepage-add-swatches" id="hp-add-swatches"></div>
+    <div class="homepage-add-form-actions">
+      <button class="homepage-add-save" onclick="saveHomepageManualItem('${key}')">Add</button>
+      <button class="homepage-add-cancel" onclick="closeHomepagePopovers()">Cancel</button>
+    </div>`;
+  document.body.appendChild(pop);
+  positionHomepagePopover(pop, anchorBtn);
+  renderColorSwatchRow('hp-add-swatches', hpPopoverColor, (c, row) => {
+    hpPopoverColor = c;
+    row.querySelectorAll('.color-swatch').forEach(b => b.classList.toggle('selected', b.dataset.color === c));
+  });
+  setTimeout(() => document.getElementById('hp-add-input').focus(), 30);
+}
+function positionHomepagePopover(pop, anchorEl) {
+  const rect = anchorEl.getBoundingClientRect();
+  pop.style.position = 'fixed';
+  pop.style.top = Math.min(rect.bottom + 6, window.innerHeight - 260) + 'px';
+  pop.style.left = Math.min(rect.left, window.innerWidth - 230) + 'px';
 }
 function saveHomepageManualItem(key) {
-  const input = document.getElementById('hp-add-input-' + key);
+  const input = document.getElementById('hp-add-input');
   const text = input.value.trim();
   if (!text) { input.focus(); return; }
+  const start = document.getElementById('hp-add-start').value || HP_DEFAULT_START;
+  let end = document.getElementById('hp-add-end').value || HP_DEFAULT_END;
   const manual = loadHomepageManual();
   manual.push({
     id: 'hp' + Date.now() + Math.random().toString(36).slice(2,6),
-    date: key,
-    text,
-    color: hpPendingColor[key] || VENTURE_COLORS[0]
+    date: key, text, start, end,
+    color: hpPopoverColor || VENTURE_COLORS[0]
   });
   saveHomepageManual(manual);
-  toggleHomepageAddForm(key);
+  closeHomepagePopovers();
   renderHomepage();
 }
 function deleteHomepageManualItem(id) {
   const manual = loadHomepageManual().filter(item => item.id !== id);
   saveHomepageManual(manual);
+  closeHomepagePopovers();
   renderHomepage();
 }
+
+// ── Edit time popover (existing manual item or mission block) ──
+function openHomepageTimeEditor(kind, id, dayKey) {
+  closeHomepagePopovers();
+  let current = { start: HP_DEFAULT_START, end: HP_DEFAULT_END, text: '' };
+  if (kind === 'manual') {
+    const manual = loadHomepageManual();
+    const item = manual.find(m => m.id === id);
+    if (!item) return;
+    current = { start: item.start || HP_DEFAULT_START, end: item.end || HP_DEFAULT_END, text: item.text };
+  } else {
+    const ventures = load();
+    const v = ventures.find(x => String(x.id) === String(id));
+    const t = loadHomepageMissionTimes()[id] || {};
+    current = { start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END, text: v ? v.name : '' };
+  }
+  const pop = document.createElement('div');
+  pop.className = 'homepage-popover';
+  pop.innerHTML = `
+    <div class="homepage-popover-title">${esc(current.text)}</div>
+    <div class="homepage-time-row">
+      <input type="time" class="homepage-time-input" id="hp-edit-start" value="${current.start}" />
+      <span class="homepage-time-sep">–</span>
+      <input type="time" class="homepage-time-input" id="hp-edit-end" value="${current.end}" />
+    </div>
+    <div class="homepage-add-form-actions">
+      <button class="homepage-add-save" onclick="saveHomepageItemTime('${kind}','${id}')">Save</button>
+      <button class="homepage-add-cancel" onclick="closeHomepagePopovers()">Close</button>
+    </div>`;
+  document.body.appendChild(pop);
+  // Center the popover on screen since the originating block could be anywhere in a scrolling track
+  pop.style.position = 'fixed';
+  pop.style.top = '40%';
+  pop.style.left = '50%';
+  pop.style.transform = 'translate(-50%,-50%)';
+}
+function saveHomepageItemTime(kind, id) {
+  const start = document.getElementById('hp-edit-start').value || HP_DEFAULT_START;
+  const end = document.getElementById('hp-edit-end').value || HP_DEFAULT_END;
+  if (kind === 'manual') {
+    const manual = loadHomepageManual();
+    const item = manual.find(m => m.id === id);
+    if (item) { item.start = start; item.end = end; saveHomepageManual(manual); }
+  } else {
+    const times = loadHomepageMissionTimes();
+    times[id] = { start, end };
+    saveHomepageMissionTimes(times);
+  }
+  closeHomepagePopovers();
+  renderHomepage();
+}
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.homepage-popover') && !e.target.closest('.homepage-add-btn')) {
+    closeHomepagePopovers();
+  }
+});
+
 </script>
 
 <!-- ══ PRODUCTIVENESS PANEL ══ -->
