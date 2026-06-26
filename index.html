@@ -2462,7 +2462,6 @@ renderPriority();
 renderArchive();
 renderFolders();
 renderProjects();
-renderHomepage();
 
 // ── Master tab switching ──
 // ══════════════════════════════════════════════
@@ -2981,6 +2980,9 @@ document.addEventListener('click', (e) => {
     closeHomepagePopovers();
   }
 });
+
+// Initial render of the homepage (must run after HP_* constants/functions above are defined)
+renderHomepage();
 
 </script>
 
