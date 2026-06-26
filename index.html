@@ -1375,6 +1375,13 @@
       <label style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;">Due date</label>
       <input type="date" class="modal-input due-date-input" id="modal-due" style="width:auto;flex:1;" />
     </div>
+    <div class="sched-days-row" style="margin-top:2px;">
+      <span class="sched-days-label">days</span>
+      <div class="sched-days-chips" id="modal-sched-chips"></div>
+      <input type="date" class="due-date-input sched-day-add-input" id="modal-sched-add" />
+      <button class="sched-day-add-btn" type="button" title="Allocate this day to the mission"
+        onclick="addModalScheduledDay(document.getElementById('modal-sched-add').value)">+</button>
+    </div>
     <div>
       <label style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;display:block;margin-bottom:6px;">Colour tag</label>
       <div class="color-swatch-row" id="modal-color-row"></div>
@@ -1406,6 +1413,7 @@ let currentCatFilter = 'all';
 let modalStatus = 'active';
 let modalCat = '';
 let modalColor = '';
+let modalScheduledDays = [];
 
 // ── Categories ──
 const CATEGORIES = {
@@ -1456,6 +1464,8 @@ function openModal() {
   document.getElementById('modal-name').value = '';
   document.getElementById('modal-next').value = '';
   document.getElementById('modal-due').value = '';
+  modalScheduledDays = [];
+  renderModalSchedChips();
   selectModalStatus(document.querySelector('[data-status="active"]'));
   modalCat = '';
   document.querySelectorAll('.modal-cat-btn').forEach(b => {
@@ -1573,7 +1583,7 @@ function confirmAddVenture() {
     category: modalCat || (proj ? proj.category : ''),
     nextAction: document.getElementById('modal-next').value.trim(),
     dueDate: document.getElementById('modal-due').value,
-    scheduledDays: [],
+    scheduledDays: modalScheduledDays.slice(),
     color: modalColor || getVentureColor(ventureLabel),
     tasks: [],
     notes: '',
@@ -1586,6 +1596,7 @@ function confirmAddVenture() {
   renderPriority();
   renderArchive();
   renderFolders();
+  if (typeof renderHomepage === 'function') renderHomepage();
   // Open mission sequencing dialog
   openMseqDialog(id);
 }
@@ -1725,6 +1736,33 @@ function removeScheduledDay(id, dateStr) {
   save(ventures);
   render();
   if (typeof renderHomepage === 'function') renderHomepage();
+}
+
+// ── Scheduled days picker inside the "Add mission" modal (mission has no id yet, so kept in local state) ──
+function renderModalSchedChips() {
+  const el = document.getElementById('modal-sched-chips');
+  if (!el) return;
+  const days = modalScheduledDays.slice().sort();
+  el.innerHTML = days.length
+    ? days.map(d => {
+        const label = new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+        return `<span class="sched-day-chip">${label}<button type="button" onclick="removeModalScheduledDay('${d}')" title="Remove this day">✕</button></span>`;
+      }).join('')
+    : `<span class="sched-days-empty">no days allocated</span>`;
+}
+function addModalScheduledDay(dateStr) {
+  if (!dateStr) return;
+  if (!modalScheduledDays.includes(dateStr)) {
+    modalScheduledDays.push(dateStr);
+    modalScheduledDays.sort();
+  }
+  const input = document.getElementById('modal-sched-add');
+  if (input) input.value = '';
+  renderModalSchedChips();
+}
+function removeModalScheduledDay(dateStr) {
+  modalScheduledDays = modalScheduledDays.filter(d => d !== dateStr);
+  renderModalSchedChips();
 }
 function updateNotes(id, val) {
   const ventures = load(); const v = ventures.find(x => x.id === id);
