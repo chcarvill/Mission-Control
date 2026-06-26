@@ -592,6 +592,46 @@
   .due-badge.overdue  { background: #3b0a0a; color: #f87171; }
   .due-badge.due-soon { background: #2d1a00; color: #fbbf24; }
 
+  /* Scheduled days (in addition to due date) */
+  .sched-days-row {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .sched-days-label {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text-hint); letter-spacing: 0.06em;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .sched-days-chips {
+    display: flex; gap: 5px; flex-wrap: wrap; flex: 1; min-width: 0;
+  }
+  .sched-day-chip {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--planning); background: var(--planning-bg);
+    border: 0.5px solid var(--planning);
+    border-radius: 20px; padding: 2px 4px 2px 9px;
+    display: inline-flex; align-items: center; gap: 3px;
+    white-space: nowrap;
+  }
+  .sched-day-chip button {
+    background: none; border: none; cursor: pointer;
+    color: var(--planning); font-size: 9px; padding: 0 4px;
+    line-height: 1; opacity: 0.65; transition: opacity 0.15s, color 0.15s;
+  }
+  .sched-day-chip button:hover { opacity: 1; color: #f87171; }
+  .sched-days-empty {
+    font-family: var(--mono); font-size: 10px;
+    color: var(--text-hint); opacity: 0.6;
+  }
+  .sched-day-add-input { width: auto; padding: 4px 6px; }
+  .sched-day-add-btn {
+    background: none; border: 0.5px solid var(--border);
+    color: var(--text-hint); border-radius: var(--radius-sm);
+    width: 23px; height: 23px; cursor: pointer;
+    font-size: 13px; line-height: 1; flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .sched-day-add-btn:hover { border-color: var(--active); color: var(--active); }
+
   /* Archive items (inside modal) */
   .archive-list {
     display: flex; flex-direction: column; gap: 4px;
@@ -1533,6 +1573,7 @@ function confirmAddVenture() {
     category: modalCat || (proj ? proj.category : ''),
     nextAction: document.getElementById('modal-next').value.trim(),
     dueDate: document.getElementById('modal-due').value,
+    scheduledDays: [],
     color: modalColor || getVentureColor(ventureLabel),
     tasks: [],
     notes: '',
@@ -1652,7 +1693,38 @@ function updateNextAction(id, val) {
 }
 function updateDueDate(id, val) {
   const ventures = load(); const v = ventures.find(x => x.id === id);
-  if (v) { v.dueDate = val; save(ventures); render(); renderPriority(); }
+  if (v) { v.dueDate = val; save(ventures); render(); renderPriority(); if (typeof renderHomepage === 'function') renderHomepage(); }
+}
+
+// ── Scheduled days (in addition to due date) ──
+function renderSchedDayChips(v) {
+  const days = (v.scheduledDays || []).slice().sort();
+  if (!days.length) return `<span class="sched-days-empty">no days allocated</span>`;
+  return days.map(d => {
+    const label = new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+    return `<span class="sched-day-chip">${label}<button onclick="removeScheduledDay(${v.id}, '${d}')" title="Remove this day">✕</button></span>`;
+  }).join('');
+}
+function addScheduledDay(id, dateStr) {
+  if (!dateStr) return;
+  const ventures = load(); const v = ventures.find(x => x.id === id);
+  if (!v) return;
+  if (!v.scheduledDays) v.scheduledDays = [];
+  if (!v.scheduledDays.includes(dateStr)) {
+    v.scheduledDays.push(dateStr);
+    v.scheduledDays.sort();
+  }
+  save(ventures);
+  render();
+  if (typeof renderHomepage === 'function') renderHomepage();
+}
+function removeScheduledDay(id, dateStr) {
+  const ventures = load(); const v = ventures.find(x => x.id === id);
+  if (!v) return;
+  v.scheduledDays = (v.scheduledDays || []).filter(d => d !== dateStr);
+  save(ventures);
+  render();
+  if (typeof renderHomepage === 'function') renderHomepage();
 }
 function updateNotes(id, val) {
   const ventures = load(); const v = ventures.find(x => x.id === id);
@@ -1901,6 +1973,14 @@ function buildCard(v, idx) {
       <input type="date" class="due-date-input" value="${v.dueDate || ''}"
         onchange="updateDueDate(${v.id}, this.value)" />
       ${dueBadge(v.dueDate)}
+    </div>
+
+    <div class="sched-days-row">
+      <span class="sched-days-label">days</span>
+      <div class="sched-days-chips">${renderSchedDayChips(v)}</div>
+      <input type="date" class="due-date-input sched-day-add-input" id="sched-add-${v.id}" />
+      <button class="sched-day-add-btn" title="Allocate this day to the mission"
+        onclick="addScheduledDay(${v.id}, document.getElementById('sched-add-${v.id}').value)">+</button>
     </div>
 
     <div>
@@ -2672,24 +2752,31 @@ function renderHomepage() {
   document.getElementById('homepage-week-range').textContent =
     fmt(weekDates[0]) + ' – ' + fmt(weekDates[6]);
 
-  // Auto-pulled: missions (not completed) whose dueDate falls in this week
+  // Auto-pulled: missions (not completed) whose dueDate OR an allocated scheduled day falls in this week
   const ventures = load();
   const weekKeys = weekDates.map(dateKey);
   const missionTimes = loadHomepageMissionTimes();
   const autoByDay = {};
   weekKeys.forEach(k => autoByDay[k] = []);
-  ventures.filter(v => v.status !== 'completed' && v.dueDate && weekKeys.includes(v.dueDate))
-    .forEach(v => {
-      const t = missionTimes[v.id] || {};
-      autoByDay[v.dueDate].push({
+  ventures.filter(v => v.status !== 'completed').forEach(v => {
+    // Dedupe in case dueDate and a scheduled day happen to be the same date
+    const days = new Set();
+    if (v.dueDate && weekKeys.includes(v.dueDate)) days.add(v.dueDate);
+    (v.scheduledDays || []).forEach(d => { if (weekKeys.includes(d)) days.add(d); });
+    if (!days.size) return;
+    const t = missionTimes[v.id] || {};
+    days.forEach(day => {
+      autoByDay[day].push({
         kind: 'mission',
         id: v.id,
         text: v.name,
         color: v.color || getVentureColor(v.venture),
         start: t.start || HP_DEFAULT_START,
-        end: t.end || HP_DEFAULT_END
+        end: t.end || HP_DEFAULT_END,
+        isDue: day === v.dueDate
       });
     });
+  });
 
   // Manual items
   const manual = loadHomepageManual();
@@ -2729,7 +2816,7 @@ function renderHomepage() {
           onclick="openHomepageTimeEditor('${item.kind}','${item.id}','${key}')">
           <div class="homepage-block-text">${esc(item.text)}</div>
           ${showTimeLabel ? `<div class="homepage-block-time">${hpFmtTime(item.start)}–${hpFmtTime(item.end)}</div>` : ''}
-          ${item.kind === 'mission' ? `<span class="homepage-block-tag">mission</span>` : ''}
+          ${item.kind === 'mission' ? `<span class="homepage-block-tag">${item.isDue ? 'due' : 'planned'}</span>` : ''}
           ${delBtn}
         </div>`;
     }).join('');
@@ -2775,9 +2862,12 @@ function buildHomepageLines() {
   weekDates.forEach((d, i) => {
     const key = weekKeys[i];
     const dayItems = [];
-    ventures.filter(v => v.status !== 'completed' && v.dueDate === key).forEach(v => {
+    ventures.filter(v => v.status !== 'completed').forEach(v => {
+      const isDue = v.dueDate === key;
+      const isScheduled = (v.scheduledDays || []).includes(key);
+      if (!isDue && !isScheduled) return;
       const t = missionTimes[v.id] || {};
-      dayItems.push({ text: v.name, start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END, tag: ' (mission)' });
+      dayItems.push({ text: v.name, start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END, tag: isDue ? ' (mission due)' : ' (mission planned)' });
     });
     manual.filter(m => m.date === key).forEach(m => {
       dayItems.push({ text: m.text, start: m.start || HP_DEFAULT_START, end: m.end || HP_DEFAULT_END, tag: '' });
@@ -2838,6 +2928,7 @@ function buildMissionsLines() {
       lines.push((i + 1) + '. ' + (v.letter ? v.letter + '. ' : '') + (v.name || '(unnamed)'));
       lines.push('   Status: ' + (statusLabels[v.status] || v.status));
       if (v.dueDate) lines.push('   Due:    ' + new Date(v.dueDate + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }));
+      if (v.scheduledDays && v.scheduledDays.length) lines.push('   Days:   ' + v.scheduledDays.map(d => new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })).join(', '));
       if (v.nextAction) lines.push('   Next:   ' + v.nextAction);
       lines.push('');
     });
