@@ -1073,6 +1073,23 @@
     .master-tab-bar { padding: 0 1rem; }
     .prod-toolbar, .prod-sub-bar, .prod-content { padding-left: 1rem; padding-right: 1rem; }
   }
+
+  /* ── Portfolio ── */
+  .pf-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:1rem; }
+  .pf-card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:1.1rem 1.3rem; position:relative; cursor:pointer; transition:border-color 0.15s; }
+  .pf-card:hover { border-color:var(--border2); }
+  .pf-card-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; margin-bottom:8px; }
+  .pf-card-name { font-family:var(--mono); font-size:14px; font-weight:500; color:var(--text); letter-spacing:0.03em; }
+  .pf-del { background:none; border:none; cursor:pointer; color:var(--text-hint); font-size:15px; line-height:1; padding:0 2px; }
+  .pf-del:hover { color:#ef4444; }
+  .pf-field-label { font-family:var(--mono); font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--text-hint); margin-top:8px; margin-bottom:2px; }
+  .pf-field-label:first-of-type { margin-top:0; }
+  .pf-field-val { font-size:12.5px; color:var(--text-secondary); line-height:1.5; }
+  .pf-status { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 9px; border-radius:20px; letter-spacing:0.04em; margin-top:10px; }
+  .pf-status.pf-active    { background:var(--active-bg);    color:var(--active);    border:0.5px solid var(--active); }
+  .pf-status.pf-on-hold   { background:var(--hold-bg);      color:var(--hold);      border:0.5px solid var(--hold); }
+  .pf-status.pf-planning  { background:var(--planning-bg);  color:var(--planning);  border:0.5px solid var(--planning); }
+  .pf-status.pf-completed { background:var(--completed-bg); color:var(--completed); border:0.5px solid var(--completed); }
 </style>
 </head>
 <body>
@@ -1097,6 +1114,7 @@
 <!-- Master tab bar -->
 <div class="master-tab-bar">
   <button class="master-tab master-active" id="mtab-homepage" onclick="switchMasterTab('homepage')">Homepage</button>
+  <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
@@ -1115,6 +1133,18 @@
     </div>
   </div>
   <div class="homepage-grid" id="homepage-grid"></div>
+</div>
+
+<!-- ══ PORTFOLIO PANEL ══ -->
+<div id="portfolio-panel" style="display:none;">
+  <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
+    <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New venture</button>
+    <button onclick="emailPortfolioView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
+  </div>
+  <div style="padding:1.5rem 2.5rem;">
+    <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no ventures yet — add one above</div>
+    <div class="pf-grid" id="portfolio-list"></div>
+  </div>
 </div>
 
 <!-- ══ PROJECTS PANEL ══ -->
@@ -1338,6 +1368,31 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeProjectModal()">Cancel</button>
       <button class="modal-confirm" onclick="confirmAddProject()">Add project</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add/edit portfolio venture modal -->
+<div class="modal-overlay" id="portfolio-modal">
+  <div class="modal">
+    <h2 id="pf-modal-title">NEW VENTURE</h2>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Venture name</div>
+    <input class="modal-input" id="pf-name" placeholder="e.g. MindRoar" />
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">What does it offer?</div>
+    <input class="modal-input" id="pf-offering" placeholder="In a sentence, what's the product or service?" />
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Who's it for?</div>
+    <input class="modal-input" id="pf-target" placeholder="e.g. Unfulfilled careerists and professionals" />
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Notes (optional)</div>
+    <input class="modal-input" id="pf-notes" placeholder="Anything else worth keeping on hand" />
+    <div class="modal-status-row" id="pf-status-row">
+      <button class="modal-status-btn sel-active" data-status="active" onclick="selectPfStatus(this)">Active</button>
+      <button class="modal-status-btn" data-status="on-hold" onclick="selectPfStatus(this)">On hold</button>
+      <button class="modal-status-btn" data-status="planning" onclick="selectPfStatus(this)">In planning</button>
+      <button class="modal-status-btn" data-status="completed" onclick="selectPfStatus(this)">Shelved</button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closePortfolioModal()">Cancel</button>
+      <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add venture</button>
     </div>
   </div>
 </div>
@@ -2704,8 +2759,10 @@ function emailProjectsView() {
 
 function switchMasterTab(tab) {
   document.getElementById('homepage-panel').style.display = tab === 'homepage' ? 'block' : 'none';
+  document.getElementById('portfolio-panel').style.display = tab === 'portfolio' ? 'block' : 'none';
   document.getElementById('projects-panel').style.display = tab === 'projects' ? 'block' : 'none';
   document.getElementById('mtab-homepage').classList.toggle('master-active', tab === 'homepage');
+  document.getElementById('mtab-portfolio').classList.toggle('master-active', tab === 'portfolio');
   document.getElementById('mtab-projects').classList.toggle('master-active', tab === 'projects');
   document.getElementById('mtab-missions').classList.toggle('master-active', tab === 'missions');
   document.getElementById('mtab-prod').classList.toggle('master-active', tab === 'prod');
@@ -2713,7 +2770,135 @@ function switchMasterTab(tab) {
   document.getElementById('prod-panel').classList.toggle('master-visible', tab === 'prod');
   if (tab === 'prod') { pUpdateMetrics(); pRenderMissionActions(); }
   if (tab === 'homepage') { renderHomepage(); }
+  if (tab === 'portfolio') { renderPortfolio(); }
 }
+
+// ══════════════════════════════════════════════
+//  PORTFOLIO
+// ══════════════════════════════════════════════
+const PORTFOLIO_KEY = 'mc_portfolio';
+const PF_STATUS_LABEL = { 'active':'Active', 'on-hold':'On hold', 'planning':'In planning', 'completed':'Shelved' };
+
+function loadPortfolio() {
+  try { return JSON.parse(localStorage.getItem(PORTFOLIO_KEY)) || []; } catch { return []; }
+}
+function savePortfolio(items) {
+  localStorage.setItem(PORTFOLIO_KEY, JSON.stringify(items));
+}
+function seedPortfolioIfEmpty() {
+  if (localStorage.getItem(PORTFOLIO_KEY) !== null) return; // already initialised (even if emptied deliberately)
+  const seed = [
+    { id: Date.now()+1, name:'MindRoar', offering:'Structured 10-session behaviour-change coaching program built on an externalizing, behaviour-first philosophy.', target:'Unfulfilled careerists and professionals.', notes:'', status:'active' },
+    { id: Date.now()+2, name:'Communic8 (incl. Orate)', offering:'PWA app suite for structured self-tracking — canvas app, Orate (initiation tracking), Do (task/time management).', target:'Personal use, with potential to open up to other users later.', notes:'', status:'active' },
+    { id: Date.now()+3, name:"The Replay, Applied to Money", offering:"Money/mindset book applying the 'Replay' behaviour-change tool to personal finance.", target:'General readers interested in a behaviour-based approach to money.', notes:'', status:'planning' },
+    { id: Date.now()+4, name:'Forex trading', offering:'Self-developed strategy combining indicator-based confluence scoring with price action judgement.', target:'Personal trading, possible future signal service.', notes:'', status:'active' },
+    { id: Date.now()+5, name:"Media (G'day G'day G'day / comedy film)", offering:'Melbourne street-show YouTube variety content, plus an indie Melbourne comedy ensemble film.', target:'General YouTube/film audience.', notes:'Flinders Street Station planned as home base for the street show.', status:'planning' }
+  ];
+  savePortfolio(seed);
+}
+
+let pfStatus = 'active';
+let pfEditId = null;
+
+function openPortfolioModal(editId) {
+  pfEditId = editId || null;
+  const item = editId ? loadPortfolio().find(p => p.id === editId) : null;
+  document.getElementById('pf-name').value = item ? item.name : '';
+  document.getElementById('pf-offering').value = item ? item.offering : '';
+  document.getElementById('pf-target').value = item ? item.target : '';
+  document.getElementById('pf-notes').value = item ? item.notes : '';
+  document.getElementById('pf-modal-title').textContent = item ? 'EDIT VENTURE' : 'NEW VENTURE';
+  document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add venture';
+  pfStatus = item ? item.status : 'active';
+  document.querySelectorAll('#pf-status-row .modal-status-btn').forEach(b => { b.className = 'modal-status-btn'; });
+  const activeBtn = document.querySelector(`#pf-status-row .modal-status-btn[data-status="${pfStatus}"]`);
+  if (activeBtn) activeBtn.classList.add('sel-' + pfStatus);
+  document.getElementById('portfolio-modal').classList.add('visible');
+  setTimeout(() => document.getElementById('pf-name').focus(), 50);
+}
+function closePortfolioModal() {
+  document.getElementById('portfolio-modal').classList.remove('visible');
+  pfEditId = null;
+}
+function selectPfStatus(btn) {
+  pfStatus = btn.dataset.status;
+  document.querySelectorAll('#pf-status-row .modal-status-btn').forEach(b => { b.className = 'modal-status-btn'; });
+  btn.classList.add('sel-' + pfStatus);
+}
+function confirmAddPortfolio() {
+  const name = document.getElementById('pf-name').value.trim();
+  if (!name) { document.getElementById('pf-name').focus(); return; }
+  const items = loadPortfolio();
+  const data = {
+    name,
+    offering: document.getElementById('pf-offering').value.trim(),
+    target: document.getElementById('pf-target').value.trim(),
+    notes: document.getElementById('pf-notes').value.trim(),
+    status: pfStatus
+  };
+  if (pfEditId) {
+    const idx = items.findIndex(p => p.id === pfEditId);
+    if (idx !== -1) items[idx] = { ...items[idx], ...data };
+  } else {
+    items.push({ id: Date.now(), ...data });
+  }
+  savePortfolio(items);
+  closePortfolioModal();
+  renderPortfolio();
+}
+function deletePortfolioItem(id, ev) {
+  if (ev) ev.stopPropagation();
+  if (!confirm('Remove this venture from the portfolio?')) return;
+  let items = loadPortfolio();
+  items = items.filter(p => p.id !== id);
+  savePortfolio(items);
+  renderPortfolio();
+}
+function renderPortfolio() {
+  const items = loadPortfolio();
+  const listEl = document.getElementById('portfolio-list');
+  const emptyEl = document.getElementById('portfolio-empty');
+  if (!items.length) {
+    emptyEl.style.display = 'block';
+    listEl.innerHTML = '';
+    return;
+  }
+  emptyEl.style.display = 'none';
+  listEl.innerHTML = items.map(p => `
+    <div class="pf-card" onclick="openPortfolioModal(${p.id})">
+      <div class="pf-card-top">
+        <div class="pf-card-name">${esc(p.name)}</div>
+        <button class="pf-del" onclick="deletePortfolioItem(${p.id}, event)" title="Remove">×</button>
+      </div>
+      ${p.offering ? `<div class="pf-field-label">Offering</div><div class="pf-field-val">${esc(p.offering)}</div>` : ''}
+      ${p.target ? `<div class="pf-field-label">Target market</div><div class="pf-field-val">${esc(p.target)}</div>` : ''}
+      ${p.notes ? `<div class="pf-field-label">Notes</div><div class="pf-field-val">${esc(p.notes)}</div>` : ''}
+      <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
+    </div>
+  `).join('');
+}
+function buildPortfolioLines() {
+  const items = loadPortfolio();
+  const dateStr = new Date().toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const lines = ['MISSION CONTROL — PORTFOLIO', '='.repeat(50), dateStr, ''];
+  items.forEach(p => {
+    lines.push(p.name + '  [' + (PF_STATUS_LABEL[p.status] || p.status) + ']');
+    if (p.offering) lines.push('  Offering: ' + p.offering);
+    if (p.target) lines.push('  Target market: ' + p.target);
+    if (p.notes) lines.push('  Notes: ' + p.notes);
+    lines.push('');
+  });
+  lines.push('-'.repeat(50));
+  return lines;
+}
+function emailPortfolioView() {
+  const lines = buildPortfolioLines();
+  lines.push('Generated by Mission Control.');
+  const subject = 'Mission Control — Portfolio (' + new Date().toLocaleDateString('en-AU') + ')';
+  window.location.href = 'mailto:?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(lines.join('\n'));
+}
+seedPortfolioIfEmpty();
+renderPortfolio();
 
 // ── Homepage (weekly timeline view) ──
 function loadHomepageManual() {
