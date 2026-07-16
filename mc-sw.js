@@ -1,4 +1,4 @@
-const CACHE = 'mc-v3';
+const CACHE = 'mc-v4';
 const ASSETS = ['./index.html', './mc-manifest.json'];
 
 self.addEventListener('install', e => {

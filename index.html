@@ -1140,7 +1140,12 @@
   <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
     <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New venture</button>
     <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export for Do</button>
+    <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
+    <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
     <button onclick="emailPortfolioView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
+  </div>
+  <div style="padding:0 2.5rem;">
+    <div id="notion-import-status" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;padding-top:10px;min-height:14px;"></div>
   </div>
   <div style="padding:1.5rem 2.5rem;">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no ventures yet — add one above</div>
@@ -2916,6 +2921,154 @@ function exportPortfolioJson() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// ── Notion CSV import ──────────────────────────────────────────
+// Handles two realities of Notion exports:
+// 1. Properly-renamed columns (Name/Offering/Target Market/Status/Notes) --
+//    matched directly by header text.
+// 2. Un-renamed default columns (Name/Text/Text 1/Text 2...) where the
+//    "real" column labels were instead typed into the first data row as
+//    text inside Notion itself. We detect that label row and use it to
+//    figure out what each column actually means, then skip it as data.
+
+// Parses raw CSV text into an array of row arrays, handling quoted fields
+// (commas/newlines/escaped "" inside quotes) and stripping a leading BOM.
+function parseCsv(text) {
+  const clean = text.replace(/^\uFEFF/, '');
+  const rows = [];
+  let row = [], field = '', inQuotes = false;
+  for (let i = 0; i < clean.length; i++) {
+    const c = clean[i], next = clean[i + 1];
+    if (inQuotes) {
+      if (c === '"' && next === '"') { field += '"'; i++; }
+      else if (c === '"') { inQuotes = false; }
+      else { field += c; }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\r') { /* skip, \n handles the break */ }
+      else if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; }
+      else { field += c; }
+    }
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(r => r.some(f => f.trim() !== ''));
+}
+
+const PF_FIELD_ALIASES = {
+  name: ['name', 'title', 'venture', 'idea'],
+  offering: ['offering', 'what it offers', 'description', 'product'],
+  target: ['target market', 'target', 'audience', "who's it for", 'who its for'],
+  status: ['status', 'stage'],
+  notes: ['notes', 'note', 'comment', 'comments'],
+};
+function pfMatchField(label) {
+  const norm = (label || '').trim().toLowerCase();
+  for (const field in PF_FIELD_ALIASES) {
+    if (PF_FIELD_ALIASES[field].includes(norm)) return field;
+  }
+  return null;
+}
+function pfGuessStatus(text) {
+  const norm = (text || '').toLowerCase();
+  if (/\b(active|launched|live)\b/.test(norm)) return 'active';
+  if (/\b(hold|paused|pause)\b/.test(norm)) return 'on-hold';
+  if (/\b(shelved|complete|completed|done|dead)\b/.test(norm)) return 'completed';
+  return 'planning'; // safe default for anything read as an "idea" -- readiness notes go to Notes either way
+}
+
+function importPortfolioCsv(csvText) {
+  const statusEl = document.getElementById('notion-import-status');
+  const rows = parseCsv(csvText);
+  if (rows.length < 2) {
+    if (statusEl) statusEl.textContent = "Couldn't find any rows in that file.";
+    return;
+  }
+  const headerRow = rows[0];
+  const candidateLabelRow = rows[1];
+
+  // Map header columns to known fields; if a column's header is generic
+  // (unmatched), fall back to checking whether the *first data row* looks
+  // like a set of labels instead (Chris's Notion layout) and use that.
+  let fieldMap = headerRow.map(h => pfMatchField(h));
+  const labelRowMatches = candidateLabelRow.map(v => pfMatchField(v));
+  const isLabelRow = labelRowMatches.filter(Boolean).length >= 2; // at least 2 recognisable labels
+  let dataStart = 1;
+  if (isLabelRow) {
+    fieldMap = fieldMap.map((f, i) => f || labelRowMatches[i]);
+    dataStart = 2; // skip the label row itself
+  }
+  // Determine which column supplies the venture's "name". Prefer an
+  // explicit Name column; if there isn't one (as in this export, where
+  // OFFERING doubles as the title), fall back to the Offering column, or
+  // finally just the first column -- but keep that column's original field
+  // tag too, so its text still populates Offering as well as Name.
+  let nameColIdx = fieldMap.indexOf('name');
+  if (nameColIdx === -1) nameColIdx = fieldMap.indexOf('offering');
+  if (nameColIdx === -1) nameColIdx = 0;
+
+  const items = loadPortfolio();
+  const existingNames = new Set(items.map(p => p.name.toLowerCase()));
+  let added = 0, skipped = 0;
+
+  for (let r = dataStart; r < rows.length; r++) {
+    const row = rows[r];
+    const rec = { name: '', offering: '', target: '', status: '', notes: '' };
+    let leftover = [];
+    row.forEach((val, i) => {
+      const field = fieldMap[i];
+      const trimmed = (val || '').trim();
+      if (!trimmed) return;
+      if (field && rec[field] !== undefined) {
+        rec[field] = rec[field] ? rec[field] + '; ' + trimmed : trimmed;
+      } else {
+        leftover.push(trimmed);
+      }
+    });
+    if (!rec.name) rec.name = (row[nameColIdx] || '').trim();
+    if (!rec.name) continue;
+    if (existingNames.has(rec.name.toLowerCase())) { skipped++; continue; }
+
+    const notesParts = [];
+    if (rec.notes) notesParts.push(rec.notes);
+    if (leftover.length) notesParts.push(leftover.join('; '));
+    const guessedStatus = rec.status ? pfGuessStatus(rec.status) : 'planning';
+    // If status was free text (not a clean match), keep the original wording in notes too.
+    if (rec.status && !['active','on-hold','planning','completed'].includes(rec.status.toLowerCase())) {
+      notesParts.unshift('From Notion: ' + rec.status);
+    }
+
+    items.push({
+      id: Date.now() + r,
+      name: rec.name,
+      offering: rec.offering,
+      target: rec.target,
+      notes: notesParts.join(' — '),
+      status: guessedStatus,
+    });
+    existingNames.add(rec.name.toLowerCase());
+    added++;
+  }
+
+  savePortfolio(items);
+  renderPortfolio();
+  if (statusEl) {
+    statusEl.textContent = added
+      ? `Imported ${added} idea${added === 1 ? '' : 's'} from Notion${skipped ? ` (${skipped} already in the portfolio, skipped)` : ''} — all set to "Planning", check statuses when you get a chance.`
+      : (skipped ? `Nothing new -- all ${skipped} already in the portfolio.` : "Couldn't find any usable rows in that file.");
+  }
+}
+document.getElementById('notion-import-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    importPortfolioCsv(reader.result);
+    e.target.value = '';
+  };
+  reader.readAsText(file);
+});
+
 seedPortfolioIfEmpty();
 renderPortfolio();
 
