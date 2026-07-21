@@ -1090,6 +1090,20 @@
   .pf-status.pf-on-hold   { background:var(--hold-bg);      color:var(--hold);      border:0.5px solid var(--hold); }
   .pf-status.pf-planning  { background:var(--planning-bg);  color:var(--planning);  border:0.5px solid var(--planning); }
   .pf-status.pf-completed { background:var(--completed-bg); color:var(--completed); border:0.5px solid var(--completed); }
+
+  /* ── Validation ── */
+  .val-criterion-label { font-family:var(--mono); font-size:12px; color:var(--text); letter-spacing:0.02em; margin-bottom:2px; }
+  .val-criterion-hint { font-size:11px; color:var(--text-hint); margin-bottom:6px; line-height:1.4; }
+  .val-score-row { display:flex; gap:6px; }
+  .val-score-btn { flex:1; font-family:var(--mono); font-size:10.5px; padding:6px 4px; border-radius:6px; border:0.5px solid var(--border2); background:var(--surface); color:var(--text-secondary); cursor:pointer; letter-spacing:0.02em; text-align:center; }
+  .val-score-btn.val-sel-0 { background:var(--hold-bg); color:var(--hold); border-color:var(--hold); }
+  .val-score-btn.val-sel-1 { background:var(--planning-bg); color:var(--planning); border-color:var(--planning); }
+  .val-score-btn.val-sel-2 { background:var(--active-bg); color:var(--active); border-color:var(--active); }
+  .pf-val-badge { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 9px; border-radius:20px; letter-spacing:0.03em; cursor:pointer; }
+  .pf-val-badge.val-none { background:var(--surface2); color:var(--text-hint); border:0.5px solid var(--border2); }
+  .pf-val-badge.val-low { background:var(--hold-bg); color:var(--hold); border:0.5px solid var(--hold); }
+  .pf-val-badge.val-mid { background:var(--planning-bg); color:var(--planning); border:0.5px solid var(--planning); }
+  .pf-val-badge.val-high { background:var(--active-bg); color:var(--active); border:0.5px solid var(--active); }
 </style>
 </head>
 <body>
@@ -1399,6 +1413,21 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closePortfolioModal()">Cancel</button>
       <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add venture</button>
+    </div>
+  </div>
+</div>
+
+<!-- Validation scorecard modal -->
+<div class="modal-overlay" id="validation-modal">
+  <div class="modal" style="max-width:520px;">
+    <h2 id="val-modal-title">VALIDATE VENTURE</h2>
+    <div id="val-criteria-list" style="display:flex; flex-direction:column; gap:14px; margin:10px 0 16px;"></div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Evidence / notes (optional)</div>
+    <input class="modal-input" id="val-notes" placeholder="What have you actually seen/heard that backs this up?" />
+    <div id="val-score-summary" style="font-family:var(--mono);font-size:12px;color:var(--text-secondary);margin-top:12px;letter-spacing:0.03em;"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeValidationModal()">Close</button>
+      <button class="modal-confirm" onclick="saveValidation()">Save validation</button>
     </div>
   </div>
 </div>
@@ -2863,6 +2892,92 @@ function deletePortfolioItem(id, ev) {
   savePortfolio(items);
   renderPortfolio();
 }
+// ── Validation scorecard ──────────────────────────────────────
+const VALIDATION_CRITERIA = [
+  { key: 'problem', label: 'Problem clarity', hint: 'Is the problem specific and painful enough that people actively want it solved?' },
+  { key: 'demand', label: 'Evidence of demand', hint: 'Have real people (not just you) confirmed interest — conversations, waitlist, pre-orders?' },
+  { key: 'competition', label: 'Competition & differentiation', hint: "Is there a clear reason to pick this over what's already out there?" },
+  { key: 'pricing', label: 'Willingness to pay', hint: 'Would people actually pay for this, and does the price make sense?' },
+  { key: 'feasibility', label: 'Feasibility', hint: 'Can you actually build/deliver this with your current time, skills, and resources?' },
+  { key: 'path', label: 'Path to first customer', hint: 'Is there a clear, near-term way to land the first paying customer?' },
+];
+const VAL_SCORE_LABELS = ['Not yet', 'Some evidence', 'Strong evidence'];
+const VAL_MAX = VALIDATION_CRITERIA.length * 2;
+
+function pfValidationTotal(item) {
+  if (!item.validation || !item.validation.scores) return 0;
+  return VALIDATION_CRITERIA.reduce((sum, c) => sum + (item.validation.scores[c.key] || 0), 0);
+}
+function pfValidationTier(total) {
+  if (total === 0) return { cls: 'val-none', label: 'Not yet validated' };
+  if (total <= VAL_MAX * 0.4) return { cls: 'val-low', label: 'Early idea' };
+  if (total <= VAL_MAX * 0.75) return { cls: 'val-mid', label: 'Needs more validation' };
+  return { cls: 'val-high', label: 'Well validated' };
+}
+
+let valEditId = null;
+let valScores = {};
+
+function openValidationModal(id, ev) {
+  if (ev) ev.stopPropagation();
+  const items = loadPortfolio();
+  const item = items.find(p => p.id === id);
+  if (!item) return;
+  valEditId = id;
+  valScores = Object.assign({}, (item.validation && item.validation.scores) || {});
+  document.getElementById('val-modal-title').textContent = 'VALIDATE — ' + item.name.toUpperCase();
+  document.getElementById('val-notes').value = (item.validation && item.validation.notes) || '';
+  const listEl = document.getElementById('val-criteria-list');
+  listEl.innerHTML = VALIDATION_CRITERIA.map(c => `
+    <div>
+      <div class="val-criterion-label">${esc(c.label)}</div>
+      <div class="val-criterion-hint">${esc(c.hint)}</div>
+      <div class="val-score-row" id="val-row-${c.key}">
+        ${[0,1,2].map(s => `<button type="button" class="val-score-btn" data-key="${c.key}" data-score="${s}" onclick="selectValScore(this)">${esc(VAL_SCORE_LABELS[s])}</button>`).join('')}
+      </div>
+    </div>
+  `).join('');
+  VALIDATION_CRITERIA.forEach(c => {
+    const s = valScores[c.key] || 0;
+    const btn = document.querySelector(`#val-row-${c.key} .val-score-btn[data-score="${s}"]`);
+    if (btn) btn.classList.add('val-sel-' + s);
+  });
+  updateValScoreSummary();
+  document.getElementById('validation-modal').classList.add('visible');
+}
+function closeValidationModal() {
+  document.getElementById('validation-modal').classList.remove('visible');
+  valEditId = null;
+}
+function selectValScore(btn) {
+  const key = btn.dataset.key, score = parseInt(btn.dataset.score, 10);
+  valScores[key] = score;
+  document.querySelectorAll(`#val-row-${key} .val-score-btn`).forEach(b => {
+    b.className = 'val-score-btn';
+  });
+  btn.classList.add('val-sel-' + score);
+  updateValScoreSummary();
+}
+function updateValScoreSummary() {
+  const total = VALIDATION_CRITERIA.reduce((sum, c) => sum + (valScores[c.key] || 0), 0);
+  const tier = pfValidationTier(total);
+  document.getElementById('val-score-summary').textContent = `Score: ${total}/${VAL_MAX} — ${tier.label}`;
+}
+function saveValidation() {
+  if (!valEditId) return;
+  const items = loadPortfolio();
+  const idx = items.findIndex(p => p.id === valEditId);
+  if (idx === -1) return;
+  items[idx].validation = {
+    scores: valScores,
+    notes: document.getElementById('val-notes').value.trim(),
+    updatedAt: new Date().toISOString(),
+  };
+  savePortfolio(items);
+  closeValidationModal();
+  renderPortfolio();
+}
+
 function renderPortfolio() {
   const items = loadPortfolio();
   const listEl = document.getElementById('portfolio-list');
@@ -2873,7 +2988,10 @@ function renderPortfolio() {
     return;
   }
   emptyEl.style.display = 'none';
-  listEl.innerHTML = items.map(p => `
+  listEl.innerHTML = items.map(p => {
+    const total = pfValidationTotal(p);
+    const tier = pfValidationTier(total);
+    return `
     <div class="pf-card" onclick="openPortfolioModal(${p.id})">
       <div class="pf-card-top">
         <div class="pf-card-name">${esc(p.name)}</div>
@@ -2882,12 +3000,14 @@ function renderPortfolio() {
       ${p.offering ? `<div class="pf-field-label">Offering</div><div class="pf-field-val">${esc(p.offering)}</div>` : ''}
       ${p.target ? `<div class="pf-field-label">Target market</div><div class="pf-field-val">${esc(p.target)}</div>` : ''}
       ${p.notes ? `<div class="pf-field-label">Notes</div><div class="pf-field-val">${esc(p.notes)}</div>` : ''}
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
+        <span class="pf-val-badge ${tier.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${tier.label}</span>
         <a href="${DO_APP_URL}?addVenture=${encodeURIComponent(p.name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 function buildPortfolioLines() {
   const items = loadPortfolio();
@@ -2898,6 +3018,10 @@ function buildPortfolioLines() {
     if (p.offering) lines.push('  Offering: ' + p.offering);
     if (p.target) lines.push('  Target market: ' + p.target);
     if (p.notes) lines.push('  Notes: ' + p.notes);
+    const total = pfValidationTotal(p);
+    const tier = pfValidationTier(total);
+    lines.push('  Validation: ' + total + '/' + VAL_MAX + ' — ' + tier.label);
+    if (p.validation && p.validation.notes) lines.push('  Validation notes: ' + p.validation.notes);
     lines.push('');
   });
   lines.push('-'.repeat(50));
