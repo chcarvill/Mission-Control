@@ -2909,7 +2909,7 @@ function pfValidationTotal(item) {
   return VALIDATION_CRITERIA.reduce((sum, c) => sum + (item.validation.scores[c.key] || 0), 0);
 }
 function pfValidationTier(total) {
-  if (total === 0) return { cls: 'val-none', label: 'Not yet validated' };
+  if (total === 0) return { cls: 'val-none', label: 'Validate' };
   if (total <= VAL_MAX * 0.4) return { cls: 'val-low', label: 'Early idea' };
   if (total <= VAL_MAX * 0.75) return { cls: 'val-mid', label: 'Needs more validation' };
   return { cls: 'val-high', label: 'Well validated' };
