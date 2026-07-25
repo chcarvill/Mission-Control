@@ -1,7 +1,7 @@
 {
   "name": "Mission Control",
   "short_name": "MC",
-  "description": "Your ventures, always visible.",
+  "description": "Your ventures and daily tasks, always visible.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0e0f11",

@@ -1104,6 +1104,1221 @@
   .pf-val-badge.val-low { background:var(--hold-bg); color:var(--hold); border:0.5px solid var(--hold); }
   .pf-val-badge.val-mid { background:var(--planning-bg); color:var(--planning); border:0.5px solid var(--planning); }
   .pf-val-badge.val-high { background:var(--active-bg); color:var(--active); border:0.5px solid var(--active); }
+
+
+  /* ══════════ DO APP (scoped under #do-panel) ══════════ */
+  :root {
+    --paper:      #FAF7F2;
+    --paper-dim:  #F1ECE3;
+    --ink:        #1F2937;
+    --ink-soft:   #5B6472;
+    --line:       #DAD3C6;
+
+    --sage:       #7A9B7E;
+    --sage-dark:  #4A6B4F;
+    --sage-tint:  #E7EEE6;
+
+    --clay:       #C97D5D;
+    --clay-dark:  #8A4F36;
+    --clay-tint:  #F3E3DA;
+
+    --amber:      #D9A441;
+    --amber-tint: #FBF1DC;
+    --amber-dark: #8A6418;
+
+    --gray-tint:  #ECECEC;
+
+    --shadow:      0 1px 2px rgba(31,41,55,0.06), 0 2px 8px rgba(31,41,55,0.06);
+    --shadow-lift: 0 6px 20px rgba(31,41,55,0.16);
+
+    --serif: "Source Serif 4", "Iowan Old Style", Georgia, serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  #do-panel {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    --sans:  "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono:  "IBM Plex Mono", "SF Mono", Consolas, monospace;
+  }
+
+  #app {
+    max-width: 720px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  header {
+    padding: 28px 24px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  header .top-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  header h1 {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: 0.2px;
+  }
+
+  header .today-label {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  .streak-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink-soft);
+    background: var(--sage-tint);
+    border: 1px solid var(--sage);
+    border-radius: 20px;
+    padding: 5px 12px;
+    white-space: nowrap;
+  }
+  .streak-badge b { color: var(--sage-dark); font-size: 15px; }
+
+  /* ── The three stones (signature element) ─────────────────── */
+  #stones-section {
+    padding: 32px 24px 8px;
+  }
+
+  #oration-gate {
+    background: var(--clay-tint);
+    border: 1px solid var(--clay);
+    border-radius: 12px;
+    padding: 14px 16px 16px;
+    margin-bottom: 14px;
+  }
+  #oration-gate-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--clay-dark);
+    margin-bottom: 10px;
+  }
+  #oration-gate .type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  #oration-gate .type-btn {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    padding: 10px 8px;
+    border-radius: 8px;
+    border: 1px solid var(--clay);
+    background: var(--paper);
+    color: var(--clay-dark);
+    cursor: pointer;
+    text-align: center;
+    transition: all .12s;
+  }
+  #oration-gate .type-btn:hover {
+    background: var(--clay);
+    color: #fff;
+  }
+  #oration-gate-done {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--sage-dark);
+    background: var(--sage-tint);
+    border: 1px solid var(--sage);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+  }
+
+  .stones-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+
+  .import-status {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--ink-muted, #888);
+    min-height: 16px;
+    margin-bottom: 12px;
+  }
+
+  #stones-row {
+    display: flex;
+    gap: 16px;
+  }
+
+  .stone.locked {
+    opacity: 0.4;
+    filter: grayscale(70%);
+    cursor: not-allowed;
+  }
+
+  .stone {
+    flex: 1;
+    position: relative;
+    aspect-ratio: 1 / 1.08;
+    border-radius: 16px;
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.18s, box-shadow 0.18s, transform 0.12s;
+  }
+  .stone:hover { box-shadow: var(--shadow-lift); transform: translateY(-1px); }
+
+  .stone .stone-number {
+    position: absolute;
+    top: 10px;
+    left: 12px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.55;
+  }
+
+  .stone.empty {
+    border-style: dashed;
+    border-color: var(--line);
+  }
+  .stone.empty .stone-cta {
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+  .stone.empty .stone-plus {
+    font-size: 26px;
+    color: var(--ink-soft);
+    line-height: 1;
+    margin-bottom: 4px;
+    font-weight: 300;
+  }
+
+  .stone.active {
+    border-color: var(--sage);
+    background: var(--sage-tint);
+  }
+  .stone.active .stone-activity {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--sage-dark);
+    line-height: 1.25;
+    margin-bottom: 10px;
+  }
+
+  .stone.done {
+    border-color: var(--sage-dark);
+    background: var(--sage);
+  }
+  .stone.done .stone-activity {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 16px;
+    color: white;
+    line-height: 1.25;
+    margin-bottom: 8px;
+    text-decoration: line-through;
+    text-decoration-thickness: 1.5px;
+    text-decoration-color: rgba(255,255,255,0.6);
+  }
+  .stone.done .stone-check {
+    font-size: 22px;
+    color: white;
+  }
+
+  .stone-mark-done {
+    margin-top: 2px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid var(--sage-dark);
+    background: var(--paper);
+    color: var(--sage-dark);
+    border-radius: 7px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .stone-mark-done:hover { background: var(--sage-dark); color: white; }
+
+  .stone-cancel {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+  }
+  .stone-cancel:hover { opacity: 1; color: var(--clay-dark); }
+
+  .stone-detail-btn {
+    position: absolute;
+    top: 8px;
+    right: 30px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+  }
+  .stone-detail-btn:hover { opacity: 1; color: var(--sage-dark); }
+
+  .stone-time-btn {
+    position: absolute;
+    top: 8px;
+    right: 52px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px;
+    line-height: 1;
+  }
+  .stone-time-btn:hover { opacity: 1; color: var(--amber-dark); }
+
+  .stone-indicators {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    font-size: 13px;
+    margin-top: -4px;
+    margin-bottom: 6px;
+  }
+  .stone-indicators a { text-decoration: none; }
+
+  #stones-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 12px;
+  }
+
+  /* ── Activity picker modal ──────────────────────────────── */
+  #picker-overlay, #reason-overlay, #manage-overlay, #detail-overlay, #log-time-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(31,41,55,0.35);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+  #picker-overlay.open, #reason-overlay.open, #manage-overlay.open, #detail-overlay.open, #log-time-overlay.open { display: flex; }
+
+  .do-modal {
+    background: var(--paper);
+    border-radius: 14px;
+    padding: 22px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: var(--shadow-lift);
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .do-modal h2 {
+    font-family: var(--serif);
+    font-size: 18px;
+    margin: 0 0 6px;
+  }
+  .do-modal .modal-sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+
+  #activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .activity-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    background: var(--paper);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .activity-option:hover { background: var(--sage-tint); border-color: var(--sage); }
+  .activity-option .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+
+  .modal-divider {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 14px 0;
+  }
+
+  #new-activity-row {
+    display: flex;
+    gap: 8px;
+  }
+  #new-activity-input {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  .btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    padding: 7px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .btn:hover { background: var(--sage-tint); border-color: var(--sage); }
+  .btn.primary { background: var(--sage); color: white; border-color: var(--sage-dark); }
+  .btn.primary:hover { background: var(--sage-dark); }
+  .btn.warn { background: var(--clay-tint); color: var(--clay-dark); border-color: var(--clay); }
+  .btn.warn:hover { background: var(--clay); color: white; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .do-modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  #reason-overlay textarea {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    min-height: 90px;
+    resize: vertical;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  #reason-activity-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--clay-dark);
+  }
+
+  /* ── History / streak section ──────────────────────────── */
+  #history-section {
+    padding: 28px 24px 40px;
+    flex: 1;
+  }
+
+  #history-section h2 {
+    font-family: var(--serif);
+    font-size: 16px;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  #manage-link {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink-soft);
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--line);
+  }
+  #manage-link:hover { color: var(--sage-dark); }
+
+  .day-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .day-row:last-child { border-bottom: none; }
+
+  .day-row .day-date {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    width: 76px;
+    flex: 0 0 auto;
+  }
+
+  .day-row .day-dots {
+    display: flex;
+    gap: 5px;
+    flex: 0 0 auto;
+  }
+  .day-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--gray-tint);
+    border: 1px solid var(--line);
+  }
+  .day-dot.done { background: var(--sage); border-color: var(--sage-dark); }
+  .day-dot.cancelled { background: var(--clay-tint); border-color: var(--clay); }
+
+  .day-row .day-summary {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  #history-empty {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* ── Log entries detail (cancel/substitute reasons) ───────── */
+  .log-entry-wrap {
+    padding: 2px 0 8px;
+  }
+  .log-entry {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    padding: 6px 0 6px 18px;
+    border-left: 2px solid var(--clay-tint);
+    margin-top: 4px;
+  }
+  .log-entry b { color: var(--clay-dark); font-weight: 600; }
+
+  /* ── Manage activities modal ──────────────────────────────── */
+  #manage-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .manage-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 8px 12px;
+  }
+  .manage-row .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .manage-row span.name { flex: 1; font-size: 13.5px; font-weight: 500; }
+  .manage-row .remove-activity {
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .manage-row .remove-activity:hover { opacity: 1; color: var(--clay-dark); }
+
+  /* ── Tab nav ────────────────────────────────────────────── */
+  #tab-nav {
+    display: flex;
+    gap: 6px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .tab-btn {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-soft);
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+  }
+  .tab-btn:hover { border-color: var(--sage); color: var(--ink); }
+  .tab-btn.active {
+    background: var(--sage-tint);
+    border-color: var(--sage);
+    color: var(--sage-dark);
+  }
+
+  /* ── Time wasters tab ───────────────────────────────────── */
+  #wasters-section {
+    padding: 28px 24px 40px;
+  }
+  .wasters-intro p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 28px;
+    border-left: 2px solid var(--clay);
+    padding-left: 12px;
+  }
+  .wasters-group { margin-bottom: 30px; }
+  .wasters-group h2 {
+    font-family: var(--serif);
+    font-size: 16px;
+    margin: 0 0 4px;
+  }
+  .wasters-group-sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+  .wasters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .waster-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 9px 12px;
+    background: var(--clay-tint);
+  }
+  .waster-row .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--clay);
+    flex: 0 0 auto;
+  }
+  .waster-row span.name {
+    flex: 1;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--clay-dark);
+  }
+  .waster-row .log-waster-time {
+    font-size: 13px;
+    color: var(--clay-dark);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+    flex: 0 0 auto;
+  }
+  .waster-row .log-waster-time:hover { opacity: 1; }
+  .waster-row .remove-waster {
+    font-size: 13px;
+    color: var(--clay-dark);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .waster-row .remove-waster:hover { opacity: 1; }
+  .wasters-empty {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    padding: 4px 2px;
+  }
+  .wasters-add-row {
+    display: flex;
+    gap: 8px;
+  }
+  .wasters-add-row input {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  /* ── This week tab ──────────────────────────────────────── */
+  #week-section {
+    padding: 28px 24px 8px;
+  }
+  .week-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .week-nav .btn {
+    padding: 5px 12px;
+    font-size: 15px;
+    line-height: 1;
+  }
+  .week-range {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--ink);
+    min-width: 150px;
+    text-align: center;
+  }
+  #btn-email-week, #btn-email-today, #btn-email-wasters {
+    display: block;
+    margin: 0 auto 24px;
+  }
+
+  #week-days {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .day-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    background: var(--paper);
+  }
+  .day-card.is-today {
+    border-color: var(--sage);
+    background: var(--sage-tint);
+  }
+  .day-card-header {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .day-card-date {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .day-card-today-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    background: white;
+    border: 1px solid var(--sage);
+    border-radius: 10px;
+    padding: 1px 7px;
+  }
+  .day-card-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .week-slot-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    background: var(--paper);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .week-slot-chip.empty {
+    border-style: dashed;
+    color: var(--ink-soft);
+    justify-content: center;
+  }
+  .week-slot-chip.empty:hover { border-color: var(--sage); background: var(--sage-tint); }
+  .week-slot-chip.active {
+    border-color: var(--sage);
+    background: white;
+  }
+  .week-slot-chip.done {
+    border-color: var(--sage-dark);
+    background: var(--sage-tint);
+  }
+  .week-slot-chip.done .chip-label {
+    text-decoration: line-through;
+    text-decoration-color: var(--sage-dark);
+  }
+  .chip-label {
+    flex: 1;
+    font-weight: 500;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chip-actions {
+    display: flex;
+    gap: 8px;
+    flex: 0 0 auto;
+  }
+  .chip-actions span {
+    opacity: 0.5;
+    cursor: pointer;
+    font-size: 12.5px;
+  }
+  .chip-actions span:hover { opacity: 1; }
+
+  /* ── Upcoming rolling list ──────────────────────────────── */
+  #upcoming-section {
+    padding: 24px 24px 40px;
+  }
+  #upcoming-section h2 {
+    font-family: var(--serif);
+    font-size: 16px;
+    margin: 0 0 12px;
+  }
+  .upcoming-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+  }
+  .upcoming-row:last-child { border-bottom: none; }
+  .upcoming-date {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    width: 76px;
+    flex: 0 0 auto;
+  }
+  .upcoming-label {
+    flex: 1;
+    color: var(--ink);
+    font-weight: 500;
+  }
+  #upcoming-empty {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  /* ── Detail & log-time modal fields ────────────────────────── */
+  .do-detail-label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin: 12px 0 5px;
+  }
+  .do-detail-label:first-of-type { margin-top: 0; }
+  #detail-overlay textarea,
+  #detail-overlay input,
+  #log-time-overlay textarea,
+  #log-time-overlay input,
+  #log-time-overlay select {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  #detail-overlay textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+  #detail-activity-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--sage-dark);
+  }
+  #log-time-item-name {
+    font-family: var(--serif);
+    font-weight: 600;
+    color: var(--sage-dark);
+  }
+  #log-time-picker-row {
+    margin-bottom: 4px;
+  }
+
+  /* ── Insights tab ───────────────────────────────────────── */
+  #insights-section {
+    padding: 28px 24px 8px;
+  }
+  .range-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .range-btn {
+    border-radius: 20px;
+  }
+  #btn-log-time-freeform {
+    display: block;
+    margin: 0 auto 20px;
+  }
+  #insights-summary {
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 20px;
+    min-height: 18px;
+  }
+  #insights-chart-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  #insights-chart-wrap svg {
+    width: 200px;
+    height: 200px;
+    max-width: 60vw;
+    max-height: 60vw;
+  }
+  #insights-empty {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-style: italic;
+    text-align: center;
+    padding: 20px 10px 40px;
+  }
+  #insights-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 40px;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .legend-row:last-child { border-bottom: none; }
+  .legend-row .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .legend-label {
+    flex: 1;
+    font-weight: 500;
+    color: var(--ink);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .legend-time {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    flex: 0 0 auto;
+  }
+  .legend-pct {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    width: 34px;
+    text-align: right;
+    flex: 0 0 auto;
+  }
+
+  /* ── Strategize tab ─────────────────────────────────────── */
+  #objectives-section, #commit-section {
+    padding: 28px 24px 8px;
+  }
+  .section-sub {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 16px;
+  }
+  #objectives-section h2, #commit-section h2 {
+    font-family: var(--serif);
+    font-size: 17px;
+    margin: 0 0 4px;
+  }
+
+  .objective-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 10px 12px;
+    background: var(--sage-tint);
+    margin-bottom: 8px;
+  }
+  .objective-main { flex: 1; }
+  .objective-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--sage-dark);
+    display: block;
+  }
+  .objective-detail {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 3px;
+  }
+  .remove-objective {
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+    flex: 0 0 auto;
+  }
+  .remove-objective:hover { opacity: 1; color: var(--clay-dark); }
+
+  .objective-add-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 14px 0 32px;
+  }
+  .objective-add-row input,
+  .objective-add-row textarea {
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .objective-add-row textarea {
+    min-height: 50px;
+    resize: vertical;
+  }
+
+  /* ── Targeted Action tab ────────────────────────────────── */
+  #ta-section {
+    padding: 28px 24px 8px;
+  }
+  #ta-section h2 {
+    font-family: var(--serif);
+    font-size: 17px;
+    margin: 0 0 4px;
+  }
+  .ta-venture-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 12px 14px;
+    background: var(--paper-dim);
+    margin-bottom: 10px;
+  }
+  .ta-venture-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .ta-venture-row select,
+  .ta-venture-row input {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--paper);
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  #ta-generate-form { margin-top: 8px; }
+  #btn-ta-generate { display: block; width: 100%; }
+  #ta-generate-result {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+  #ta-history {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 40px;
+  }
+  .action-badge {
+    display: inline-block;
+    font-size: 10.5px;
+    font-weight: 600;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+  .action-badge.market {
+    background: var(--clay-tint);
+    color: var(--clay-dark);
+  }
+  .action-badge.improve {
+    background: var(--sage-tint);
+    color: var(--sage-dark);
+  }
+  .action-badge.custom {
+    background: var(--gray-tint);
+    color: var(--ink-soft);
+  }
+  .waster-row input.ta-category-name-input {
+    flex: 1;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--ink);
+    padding: 3px 4px;
+    border-radius: 5px;
+  }
+  .waster-row input.ta-category-name-input:hover,
+  .waster-row input.ta-category-name-input:focus {
+    border-color: var(--line);
+    background: var(--paper);
+    outline: none;
+  }
+  .ta-category-reserved {
+    font-size: 10px;
+    color: var(--ink-soft);
+    opacity: 0.6;
+    flex: 0 0 auto;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .commit-form {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: var(--paper-dim);
+  }
+  .commit-form select,
+  .commit-form input {
+    width: 100%;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 11px;
+    background: var(--paper);
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .commit-mode-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .commit-mode-btn { border-radius: 20px; }
+  .commit-date-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .commit-date-row input { margin-bottom: 0; }
+  .commit-to {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    flex: 0 0 auto;
+  }
+  #btn-apply-commit { display: block; width: 100%; }
+  #commit-result {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    font-style: italic;
+    margin-top: 10px;
+    min-height: 16px;
+  }
+
+  #commit-history {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 40px;
+  }
+  .commit-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 9px 12px;
+  }
+  .commit-main { flex: 1; display: flex; flex-direction: column; }
+  .commit-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .commit-range {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .remove-commit {
+    font-size: 13px;
+    color: var(--ink-soft);
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 2px 4px;
+    flex: 0 0 auto;
+  }
+  .remove-commit:hover { opacity: 1; color: var(--clay-dark); }
+
+  ::-webkit-scrollbar { width: 9px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
+
+  /* ══════════ END DO APP CSS ══════════ */
 </style>
 </head>
 <body>
@@ -1132,6 +2347,7 @@
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
+  <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
 </div>
 
 <!-- ══ HOMEPAGE PANEL ══ -->
@@ -1149,11 +2365,296 @@
   <div class="homepage-grid" id="homepage-grid"></div>
 </div>
 
+<!-- ══ DO PANEL ══ -->
+<div id="do-panel" style="display:none;">
+
+<div id="app">
+
+  <header>
+    <div class="top-row">
+      <div>
+        <h1>Do</h1>
+        <div class="today-label" id="today-label"></div>
+      </div>
+      <div class="streak-badge" id="streak-badge"></div>
+    </div>
+    <nav id="tab-nav">
+      <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
+      <button class="tab-btn" id="tab-week" data-tab="week">This week</button>
+      <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
+      <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
+      <button class="tab-btn" id="tab-wasters" data-tab="wasters">Time wasters</button>
+      <button class="tab-btn" id="tab-insights" data-tab="insights">Insights</button>
+    </nav>
+  </header>
+
+  <div id="tab-today-panel" class="tab-panel">
+    <section id="stones-section">
+      <div id="oration-gate" style="display:none;">
+        <div id="oration-gate-header">
+          <span id="oration-gate-icon">🔒</span>
+          <span>Log today's oration to unlock your task slots</span>
+        </div>
+        <div class="type-grid" id="oration-type-grid"></div>
+      </div>
+      <div id="oration-gate-done" style="display:none;"></div>
+      <div class="stones-toolbar">
+        <button class="btn primary" id="btn-email-today">✉ Email today's tasks</button>
+      </div>
+      <div id="portfolio-sync-status" class="import-status"></div>
+      <div id="stones-row"></div>
+      <div id="stones-hint">Three, no more. Choose with intent.</div>
+    </section>
+
+    <section id="history-section">
+      <h2>
+        <span>Past days</span>
+        <span id="manage-link">Manage activities</span>
+      </h2>
+      <div id="history-list"></div>
+    </section>
+  </div>
+
+  <div id="tab-week-panel" class="tab-panel" style="display:none;">
+    <section id="week-section">
+      <div class="week-nav">
+        <button class="btn" id="btn-prev-week" title="Previous week">‹</button>
+        <div class="week-range" id="week-range-label"></div>
+        <button class="btn" id="btn-next-week" title="Next week">›</button>
+      </div>
+      <button class="btn primary" id="btn-email-week">✉ Email this week</button>
+      <div id="week-days"></div>
+    </section>
+
+    <section id="upcoming-section">
+      <h2>Upcoming</h2>
+      <div id="upcoming-list"></div>
+    </section>
+  </div>
+
+  <div id="tab-strategize-panel" class="tab-panel" style="display:none;">
+    <section id="objectives-section">
+      <h2>Long-term objectives</h2>
+      <p class="section-sub">The big picture worth keeping in view.</p>
+      <div id="objectives-list"></div>
+      <div class="objective-add-row">
+        <input id="objective-input" type="text" placeholder="e.g. Grow MindRoar to 10 paying clients" />
+        <textarea id="objective-detail-input" placeholder="Optional detail…"></textarea>
+        <button class="btn primary" id="btn-add-objective">Add objective</button>
+      </div>
+    </section>
+
+    <section id="commit-section">
+      <h2>Stipulate daily tasks</h2>
+      <p class="section-sub">Commit an activity to a day or a range — it fills an open slot automatically, skipping any day already full.</p>
+      <div class="commit-form">
+        <label class="do-detail-label">Activity</label>
+        <select id="commit-activity-select"></select>
+
+        <label class="do-detail-label">When</label>
+        <div class="commit-mode-toggle">
+          <button class="tab-btn commit-mode-btn active" data-mode="single">Single day</button>
+          <button class="tab-btn commit-mode-btn" data-mode="range">Date range</button>
+        </div>
+
+        <div id="commit-single-row" class="commit-date-row">
+          <input id="commit-date-single" type="date" />
+        </div>
+        <div id="commit-range-row" class="commit-date-row" style="display:none;">
+          <input id="commit-date-start" type="date" />
+          <span class="commit-to">to</span>
+          <input id="commit-date-end" type="date" />
+        </div>
+
+        <button class="btn primary" id="btn-apply-commit">Apply</button>
+        <div id="commit-result"></div>
+      </div>
+
+      <div id="commit-history"></div>
+    </section>
+  </div>
+
+  <div id="tab-targeted-action-panel" class="tab-panel" style="display:none;">
+    <section id="ta-section">
+      <h2>Targeted Action</h2>
+      <p class="section-sub">Marketing and improvement, married — not alternated. Set an outreach day per venture (it gets a sharpen-first market slot) and a stage/ratio (how many non-outreach days that week should carry an improve touch). Then generate the week — it fills open slots only, same as Strategize.</p>
+
+      <h2 style="margin-top:8px;">Attribution categories</h2>
+      <p class="section-sub">Market and Improve drive the generator below and can be renamed but not removed. Add your own (Admin, Delivery, whatever) and apply them to any task by tapping its ✎ detail button — this is what rolls up in Insights regardless of which venture the task belongs to.</p>
+      <div id="ta-categories-list"></div>
+      <div class="wasters-add-row">
+        <input id="ta-category-input" type="text" placeholder="e.g. Admin" />
+        <button class="btn" id="btn-add-ta-category">Add</button>
+      </div>
+
+      <h2 style="margin-top:24px;">Ventures</h2>
+      <div id="ta-ventures-list"></div>
+
+      <div class="commit-form" id="ta-generate-form">
+        <button class="btn primary" id="btn-ta-generate">Generate this week's schedule</button>
+        <div id="ta-generate-result"></div>
+      </div>
+
+      <h2 style="margin-top:28px;">Past runs</h2>
+      <div id="ta-history"></div>
+    </section>
+  </div>
+
+  <div id="tab-wasters-panel" class="tab-panel" style="display:none;">
+    <section id="wasters-section">
+      <button class="btn primary" id="btn-email-wasters">✉ Email these lists</button>
+      <div class="wasters-intro">
+        <p>Not a guilt list. A checkpoint — read it before you drift, not after.</p>
+      </div>
+
+      <div class="wasters-group">
+        <h2>Catch mid-motion</h2>
+        <p class="wasters-group-sub">Things to notice the moment you're about to start.</p>
+        <div id="waster-habits-list" class="wasters-list"></div>
+        <div class="wasters-add-row">
+          <input id="waster-habit-input" type="text" placeholder="e.g. Doomscrolling news" />
+          <button class="btn" id="btn-add-waster-habit">Add</button>
+        </div>
+      </div>
+
+      <div class="wasters-group">
+        <h2>Filter before saying yes</h2>
+        <p class="wasters-group-sub">Things to weigh before a commitment lands on your plate.</p>
+        <div id="waster-filters-list" class="wasters-list"></div>
+        <div class="wasters-add-row">
+          <input id="waster-filter-input" type="text" placeholder="e.g. Unpaid discovery calls" />
+          <button class="btn" id="btn-add-waster-filter">Add</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="tab-insights-panel" class="tab-panel" style="display:none;">
+    <section id="insights-section">
+      <div class="range-toggle">
+        <button class="tab-btn range-btn active" data-range="today">Today</button>
+        <button class="tab-btn range-btn" data-range="week">This week</button>
+        <button class="tab-btn range-btn" data-range="all">All time</button>
+      </div>
+      <button class="btn primary" id="btn-log-time-freeform">⏱ Log time</button>
+      <div id="insights-summary"></div>
+      <div id="insights-chart-wrap"></div>
+      <div id="insights-legend"></div>
+      <h2 id="insights-category-heading" style="font-family:var(--serif); font-size:15px; margin:22px 0 8px;">By category</h2>
+      <div id="insights-category-legend"></div>
+    </section>
+  </div>
+
+</div>
+
+<!-- Pick an activity for an empty stone -->
+<div id="picker-overlay">
+  <div class="do-modal">
+    <h2 id="picker-title">Choose your task</h2>
+    <p class="modal-sub" id="picker-sub">Pick one of your key empowering activities.</p>
+    <div id="activity-list"></div>
+    <hr class="modal-divider" />
+    <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:6px;">Add a new activity</label>
+    <div id="new-activity-row">
+      <input id="new-activity-input" type="text" placeholder="e.g. Cold outreach" />
+      <button class="btn" id="btn-add-activity">Add</button>
+    </div>
+    <div class="do-modal-actions">
+      <button class="btn" id="btn-cancel-picker">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reason required when cancelling/substituting an active task -->
+<div id="reason-overlay">
+  <div class="do-modal">
+    <h2>Why change <span id="reason-activity-name"></span>?</h2>
+    <p class="modal-sub">A quick, honest line. This gets kept in your history.</p>
+    <textarea id="reason-text" placeholder="What happened…"></textarea>
+    <div class="do-modal-actions">
+      <button class="btn" id="btn-cancel-reason">Never mind</button>
+      <button class="btn warn" id="btn-confirm-reason" disabled>Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage the activity pool -->
+<div id="manage-overlay">
+  <div class="do-modal">
+    <h2>Your activities</h2>
+    <p class="modal-sub">The pool you choose from each day.</p>
+    <div id="manage-list"></div>
+    <hr class="modal-divider" />
+    <div id="new-activity-row-2" style="display:flex; gap:8px;">
+      <input id="new-activity-input-2" type="text" placeholder="e.g. Cold outreach" style="flex:1; font-family: var(--sans); font-size:13px; border:1px solid var(--line); border-radius:7px; padding:8px 10px; background: var(--paper); color: var(--ink);" />
+      <button class="btn" id="btn-add-activity-2">Add</button>
+    </div>
+    <hr class="modal-divider" />
+    <button class="btn" id="btn-backup-data" style="width:100%;">⇩ Backup my data</button>
+    <input type="file" id="do-history-import-file" accept="application/json" style="display:none;" />
+    <button class="btn" id="btn-import-do-history" style="width:100%;margin-top:8px;">⇧ Import old Do history (one-time)</button>
+    <div id="do-history-import-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:6px;"></div>
+    <div class="do-modal-actions">
+      <button class="btn primary" id="btn-close-manage">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Task detail: notes, link, and a static "worth checking" reminder -->
+<div id="detail-overlay">
+  <div class="do-modal">
+    <h2>Details — <span id="detail-activity-name"></span></h2>
+    <p class="modal-sub">Nothing here is required. Leave any field blank.</p>
+    <label class="do-detail-label">Detail</label>
+    <textarea id="detail-text" placeholder="Any specifics for this task…"></textarea>
+    <label class="do-detail-label">Link</label>
+    <input id="detail-link" type="url" placeholder="https://…" />
+    <label class="do-detail-label">Worth checking</label>
+    <input id="detail-note" type="text" placeholder="e.g. Check Mission Control for context" />
+    <label class="do-detail-label">Category</label>
+    <select id="detail-category"></select>
+    <div class="do-modal-actions">
+      <button class="btn" id="btn-cancel-detail">Close</button>
+      <button class="btn primary" id="btn-save-detail">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Log time: manual duration entry, any date, against any task or time waster -->
+<div id="log-time-overlay">
+  <div class="do-modal">
+    <h2>Log time <span id="log-time-item-name-wrap">— <span id="log-time-item-name"></span></span></h2>
+    <p class="modal-sub">Any time of day, any date — this just adds to the total.</p>
+    <div id="log-time-picker-row" style="display:none;">
+      <label class="do-detail-label">Type</label>
+      <select id="log-time-type-select">
+        <option value="activity">Activity</option>
+        <option value="waster">Time waster</option>
+      </select>
+      <label class="do-detail-label">What</label>
+      <select id="log-time-item-select"></select>
+    </div>
+    <label class="do-detail-label">Date</label>
+    <input id="log-time-date" type="date" />
+    <label class="do-detail-label">Minutes</label>
+    <input id="log-time-minutes" type="number" min="1" placeholder="e.g. 45" />
+    <label class="do-detail-label">Category</label>
+    <select id="log-time-category-select"></select>
+    <div class="do-modal-actions">
+      <button class="btn" id="btn-cancel-log-time">Cancel</button>
+      <button class="btn primary" id="btn-save-log-time" disabled>Save</button>
+    </div>
+  </div>
+</div>
+
+
+</div>
+
 <!-- ══ PORTFOLIO PANEL ══ -->
 <div id="portfolio-panel" style="display:none;">
   <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
     <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New venture</button>
-    <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export for Do</button>
+    <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export backup</button>
     <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
     <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
     <button onclick="emailPortfolioView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
@@ -2796,16 +4297,19 @@ function switchMasterTab(tab) {
   document.getElementById('homepage-panel').style.display = tab === 'homepage' ? 'block' : 'none';
   document.getElementById('portfolio-panel').style.display = tab === 'portfolio' ? 'block' : 'none';
   document.getElementById('projects-panel').style.display = tab === 'projects' ? 'block' : 'none';
+  document.getElementById('do-panel').style.display = tab === 'do' ? 'block' : 'none';
   document.getElementById('mtab-homepage').classList.toggle('master-active', tab === 'homepage');
   document.getElementById('mtab-portfolio').classList.toggle('master-active', tab === 'portfolio');
   document.getElementById('mtab-projects').classList.toggle('master-active', tab === 'projects');
   document.getElementById('mtab-missions').classList.toggle('master-active', tab === 'missions');
   document.getElementById('mtab-prod').classList.toggle('master-active', tab === 'prod');
+  document.getElementById('mtab-do').classList.toggle('master-active', tab === 'do');
   document.getElementById('missions-panel').classList.toggle('master-hidden', tab !== 'missions');
   document.getElementById('prod-panel').classList.toggle('master-visible', tab === 'prod');
   if (tab === 'prod') { pUpdateMetrics(); pRenderMissionActions(); }
   if (tab === 'homepage') { renderHomepage(); }
   if (tab === 'portfolio') { renderPortfolio(); }
+  if (tab === 'do') { renderDo(); }
 }
 
 // ══════════════════════════════════════════════
@@ -2813,9 +4317,7 @@ function switchMasterTab(tab) {
 // ══════════════════════════════════════════════
 const PORTFOLIO_KEY = 'mc_portfolio';
 const PF_STATUS_LABEL = { 'active':'Active', 'on-hold':'On hold', 'planning':'In planning', 'completed':'Shelved' };
-// Where the Do App lives -- used to build "Open in Do" deep links from
-// venture cards. Update this if the Do App ever moves.
-const DO_APP_URL = 'https://chcarvill.github.io/Do/';
+// Do App now lives inside this same page (the "Do" master tab) --
 
 function loadPortfolio() {
   try { return JSON.parse(localStorage.getItem(PORTFOLIO_KEY)) || []; } catch { return []; }
@@ -3003,7 +4505,7 @@ function renderPortfolio() {
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
         <span class="pf-val-badge ${tier.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${tier.label}</span>
-        <a href="${DO_APP_URL}?addVenture=${encodeURIComponent(p.name)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
+        <a href="#" onclick="event.stopPropagation();event.preventDefault();switchMasterTab('do');" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
       </div>
     </div>
   `;
@@ -4088,5 +5590,6 @@ document.getElementById('mc-dismiss-btn').addEventListener('click', () => _banne
 window.addEventListener('appinstalled', () => _banner.style.display = 'none');
 </script>
 
+<script src="do-app.js"></script>
 </body>
 </html>

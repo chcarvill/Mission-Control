@@ -1,8 +1,21 @@
-const CACHE = 'mc-v6';
-const ASSETS = ['./index.html', './mc-manifest.json'];
+const CACHE = 'mc-v7-merged-do';
+const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  e.waitUntil(
+    caches.open(CACHE).then((cache) =>
+      // Cache each asset separately -- addAll() is all-or-nothing, so one
+      // failed request would silently abort the whole install and block
+      // "Add to Home Screen" with no visible error.
+      Promise.all(
+        ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('Skipping uncacheable asset during install:', url, err);
+          })
+        )
+      )
+    )
+  );
   self.skipWaiting();
 });
 
