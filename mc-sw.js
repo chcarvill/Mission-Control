@@ -1,4 +1,4 @@
-const CACHE = 'mc-v7-merged-do';
+const CACHE = 'mc-v8-bright-tabs';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
