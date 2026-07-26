@@ -756,9 +756,11 @@ function showPickerDetailsStep(activity) {
   document.getElementById("picker-step-list").style.display = "none";
   document.getElementById("picker-step-details").style.display = "";
   document.getElementById("picker-details-sub").textContent = `For "${activity.label}" — optional, skip if you just want it logged.`;
+  document.getElementById("picker-detail-day").value = pendingIso;
   document.getElementById("picker-detail-text").value = "";
   document.getElementById("picker-detail-link").value = "";
   document.getElementById("picker-detail-time").value = "";
+  document.getElementById("picker-day-status").textContent = "";
   document.getElementById("picker-detail-text").focus();
 }
 
@@ -785,14 +787,43 @@ function savePickerDetails() {
   const text = document.getElementById("picker-detail-text").value.trim();
   const link = document.getElementById("picker-detail-link").value.trim();
   const time = document.getElementById("picker-detail-time").value; // "" if not set
+  const chosenDay = document.getElementById("picker-detail-day").value || pendingIso;
+  const statusEl = document.getElementById("picker-day-status");
 
-  if (!text && !link && !time) {
-    // Nothing entered -- same as Skip, no point creating an empty calendar entry.
+  if (!text && !link && !time && chosenDay === pendingIso) {
+    // Nothing entered and day unchanged -- same as Skip, no point creating an empty calendar entry.
     finishPickerDetailsStep();
     return;
   }
 
-  const slot = dayData(pendingIso).slots[pendingSlotIndex];
+  let targetIso = pendingIso;
+  let targetSlotIndex = pendingSlotIndex;
+
+  if (chosenDay !== pendingIso) {
+    ensureDay(chosenDay);
+    const targetDay = dayData(chosenDay);
+    const emptyIndex = targetDay.slots.findIndex((s) => s.status === "empty");
+    if (emptyIndex === -1) {
+      // That day's already got 3 tasks -- respect "three, no more" rather
+      // than overriding it. Don't close yet: reset the day field back to
+      // where the task actually still is, and let the person either pick
+      // a different day or hit Save again to accept staying put.
+      if (statusEl) statusEl.textContent = `${chosenDay} already has three tasks. Pick a different day, or save again to keep it on ${pendingIso}.`;
+      document.getElementById("picker-detail-day").value = pendingIso;
+      return;
+    }
+    // Move it: clear the original slot, assign fresh on the target day.
+    const original = dayData(pendingIso).slots[pendingSlotIndex];
+    original.activityId = null;
+    original.status = "empty";
+    original.detail = "";
+    original.link = "";
+    assignActivity(chosenDay, emptyIndex, pendingPickerActivity.id);
+    targetIso = chosenDay;
+    targetSlotIndex = emptyIndex;
+  }
+
+  const slot = dayData(targetIso).slots[targetSlotIndex];
   if (text) slot.detail = text;
   if (link) slot.link = link;
   saveToStorage();
@@ -808,7 +839,7 @@ function savePickerDetails() {
     const manual = loadHomepageManual();
     manual.push({
       id: "hp" + Date.now() + Math.random().toString(36).slice(2, 6),
-      date: pendingIso,
+      date: targetIso,
       text: text || pendingPickerActivity.label,
       start,
       end,
@@ -1458,7 +1489,7 @@ function renderUpcomingList() {
   if (!rows.length) {
     const empty = document.createElement("div");
     empty.id = "upcoming-empty";
-    empty.textContent = "Nothing planned ahead yet — assign a task on This week to see it here.";
+    empty.textContent = "Nothing planned ahead yet — assign a task on Plan week to see it here.";
     list.appendChild(empty);
     return;
   }

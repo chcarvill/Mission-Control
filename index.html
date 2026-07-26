@@ -990,6 +990,7 @@
   }
   .master-tab:hover { color: var(--active); }
   .master-tab.master-active { color: var(--active); border-bottom-color: var(--active); }
+  #mtab-do { font-weight: 700; }
 
   /* ── Productiveness panel ── */
   #prod-panel { display: none; }
@@ -2388,7 +2389,7 @@
     </div>
     <nav id="tab-nav">
       <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
-      <button class="tab-btn" id="tab-week" data-tab="week">This week</button>
+      <button class="tab-btn" id="tab-week" data-tab="week">Plan week</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
       <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
       <button class="tab-btn" id="tab-wasters" data-tab="wasters">Time wasters</button>
@@ -2575,12 +2576,15 @@
     <div id="picker-step-details" style="display:none;">
       <h2>Add detail <span style="font-weight:400;font-size:12px;color:var(--ink-soft);">(optional)</span></h2>
       <p class="modal-sub" id="picker-details-sub"></p>
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Day</label>
+      <input id="picker-detail-day" type="date" style="margin-bottom:10px;" />
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Task description</label>
       <input id="picker-detail-text" type="text" placeholder="What specifically? e.g. Draft chapter 3" style="margin-bottom:10px;" />
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Link</label>
       <input id="picker-detail-link" type="text" placeholder="Optional URL" style="margin-bottom:10px;" />
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Time <span style="font-weight:400;">(optional — defaults to 9:00am on the calendar if left blank)</span></label>
       <input id="picker-detail-time" type="time" style="margin-bottom:4px;" />
+      <div id="picker-day-status" style="font-family: var(--sans); font-size: 12px; color: var(--clay-dark); min-height: 16px; margin-top:6px;"></div>
       <div class="do-modal-actions">
         <button class="btn" id="btn-picker-skip">Skip — just log it</button>
         <button class="btn primary" id="btn-picker-save-detail">Save</button>
