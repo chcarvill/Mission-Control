@@ -840,6 +840,13 @@
   }
   .homepage-block:hover .homepage-block-del { opacity: 1; }
   .homepage-block-del:hover { color: #f87171; }
+  .homepage-block-link {
+    position: absolute; top: 1px; right: 17px;
+    background: none; border: none; cursor: pointer;
+    font-size: 9px; padding: 2px;
+    line-height: 1; opacity: 0; transition: opacity 0.15s;
+  }
+  .homepage-block:hover .homepage-block-link { opacity: 1; }
 
   /* Popover for adding/editing a homepage item */
   .homepage-popover {
@@ -1951,7 +1958,8 @@
   #detail-overlay input,
   #log-time-overlay textarea,
   #log-time-overlay input,
-  #log-time-overlay select {
+  #log-time-overlay select,
+  #picker-step-details input {
     width: 100%;
     font-family: var(--sans);
     font-size: 13.5px;
@@ -2477,17 +2485,17 @@
   <div id="tab-targeted-action-panel" class="tab-panel" style="display:none;">
     <section id="ta-section">
       <h2>Targeted Action</h2>
-      <p class="section-sub">Marketing and improvement, married — not alternated. Set an outreach day per venture (it gets a sharpen-first market slot) and a stage/ratio (how many non-outreach days that week should carry an improve touch). Then generate the week — it fills open slots only, same as Strategize.</p>
+      <p class="section-sub">Marketing and improvement, married — not alternated. Set an outreach day per project (it gets a sharpen-first market slot) and a stage/ratio (how many non-outreach days that week should carry an improve touch). Then generate the week — it fills open slots only, same as Strategize.</p>
 
       <h2 style="margin-top:8px;">Attribution categories</h2>
-      <p class="section-sub">Market and Improve drive the generator below and can be renamed but not removed. Add your own (Admin, Delivery, whatever) and apply them to any task by tapping its ✎ detail button — this is what rolls up in Insights regardless of which venture the task belongs to.</p>
+      <p class="section-sub">Market and Improve drive the generator below and can be renamed but not removed. Add your own (Admin, Delivery, whatever) and apply them to any task by tapping its ✎ detail button — this is what rolls up in Insights regardless of which project the task belongs to.</p>
       <div id="ta-categories-list"></div>
       <div class="wasters-add-row">
         <input id="ta-category-input" type="text" placeholder="e.g. Admin" />
         <button class="btn" id="btn-add-ta-category">Add</button>
       </div>
 
-      <h2 style="margin-top:24px;">Ventures</h2>
+      <h2 style="margin-top:24px;">Projects</h2>
       <div id="ta-ventures-list"></div>
 
       <div class="commit-form" id="ta-generate-form">
@@ -2550,17 +2558,33 @@
 <!-- Pick an activity for an empty stone -->
 <div id="picker-overlay">
   <div class="do-modal">
-    <h2 id="picker-title">Choose your task</h2>
-    <p class="modal-sub" id="picker-sub">Pick one of your key empowering activities.</p>
-    <div id="activity-list"></div>
-    <hr class="modal-divider" />
-    <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:6px;">Add a new activity</label>
-    <div id="new-activity-row">
-      <input id="new-activity-input" type="text" placeholder="e.g. Cold outreach" />
-      <button class="btn" id="btn-add-activity">Add</button>
+    <div id="picker-step-list">
+      <h2 id="picker-title">Choose your task</h2>
+      <p class="modal-sub" id="picker-sub">Pick one of your key empowering activities.</p>
+      <div id="activity-list"></div>
+      <hr class="modal-divider" />
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:6px;">Add a new activity</label>
+      <div id="new-activity-row">
+        <input id="new-activity-input" type="text" placeholder="e.g. Cold outreach" />
+        <button class="btn" id="btn-add-activity">Add</button>
+      </div>
+      <div class="do-modal-actions">
+        <button class="btn" id="btn-cancel-picker">Cancel</button>
+      </div>
     </div>
-    <div class="do-modal-actions">
-      <button class="btn" id="btn-cancel-picker">Cancel</button>
+    <div id="picker-step-details" style="display:none;">
+      <h2>Add detail <span style="font-weight:400;font-size:12px;color:var(--ink-soft);">(optional)</span></h2>
+      <p class="modal-sub" id="picker-details-sub"></p>
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Task description</label>
+      <input id="picker-detail-text" type="text" placeholder="What specifically? e.g. Draft chapter 3" style="margin-bottom:10px;" />
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Link</label>
+      <input id="picker-detail-link" type="text" placeholder="Optional URL" style="margin-bottom:10px;" />
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Time <span style="font-weight:400;">(optional — defaults to 9:00am on the calendar if left blank)</span></label>
+      <input id="picker-detail-time" type="time" style="margin-bottom:4px;" />
+      <div class="do-modal-actions">
+        <button class="btn" id="btn-picker-skip">Skip — just log it</button>
+        <button class="btn primary" id="btn-picker-save-detail">Save</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2653,7 +2677,7 @@
 <!-- ══ PORTFOLIO PANEL ══ -->
 <div id="portfolio-panel" style="display:none;">
   <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
-    <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New venture</button>
+    <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
     <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export backup</button>
     <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
     <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
@@ -2663,7 +2687,7 @@
     <div id="notion-import-status" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;padding-top:10px;min-height:14px;"></div>
   </div>
   <div style="padding:1.5rem 2.5rem;">
-    <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no ventures yet — add one above</div>
+    <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div class="pf-grid" id="portfolio-list"></div>
   </div>
 </div>
@@ -2896,8 +2920,8 @@
 <!-- Add/edit portfolio venture modal -->
 <div class="modal-overlay" id="portfolio-modal">
   <div class="modal">
-    <h2 id="pf-modal-title">NEW VENTURE</h2>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Venture name</div>
+    <h2 id="pf-modal-title">NEW PROJECT</h2>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Project name</div>
     <input class="modal-input" id="pf-name" placeholder="e.g. MindRoar" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">What does it offer?</div>
     <input class="modal-input" id="pf-offering" placeholder="In a sentence, what's the product or service?" />
@@ -2913,7 +2937,7 @@
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closePortfolioModal()">Cancel</button>
-      <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add venture</button>
+      <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add project</button>
     </div>
   </div>
 </div>
@@ -2921,7 +2945,7 @@
 <!-- Validation scorecard modal -->
 <div class="modal-overlay" id="validation-modal">
   <div class="modal" style="max-width:520px;">
-    <h2 id="val-modal-title">VALIDATE VENTURE</h2>
+    <h2 id="val-modal-title">VALIDATE PROJECT</h2>
     <div id="val-criteria-list" style="display:flex; flex-direction:column; gap:14px; margin:10px 0 16px;"></div>
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Evidence / notes (optional)</div>
     <input class="modal-input" id="val-notes" placeholder="What have you actually seen/heard that backs this up?" />
@@ -2933,7 +2957,7 @@
   </div>
 </div>
 
-<!-- Add venture modal -->
+<!-- Add mission-venture modal (Missions tab — unrelated internal naming, left as-is) -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <h2>NEW MISSION</h2>
@@ -4347,8 +4371,8 @@ function openPortfolioModal(editId) {
   document.getElementById('pf-offering').value = item ? item.offering : '';
   document.getElementById('pf-target').value = item ? item.target : '';
   document.getElementById('pf-notes').value = item ? item.notes : '';
-  document.getElementById('pf-modal-title').textContent = item ? 'EDIT VENTURE' : 'NEW VENTURE';
-  document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add venture';
+  document.getElementById('pf-modal-title').textContent = item ? 'EDIT PROJECT' : 'NEW PROJECT';
+  document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add project';
   pfStatus = item ? item.status : 'active';
   document.querySelectorAll('#pf-status-row .modal-status-btn').forEach(b => { b.className = 'modal-status-btn'; });
   const activeBtn = document.querySelector(`#pf-status-row .modal-status-btn[data-status="${pfStatus}"]`);
@@ -4388,7 +4412,7 @@ function confirmAddPortfolio() {
 }
 function deletePortfolioItem(id, ev) {
   if (ev) ev.stopPropagation();
-  if (!confirm('Remove this venture from the portfolio?')) return;
+  if (!confirm('Remove this project from the portfolio?')) return;
   let items = loadPortfolio();
   items = items.filter(p => p.id !== id);
   savePortfolio(items);
@@ -4806,7 +4830,7 @@ function renderHomepage() {
   manual.forEach(item => {
     if (manualByDay[item.date]) {
       manualByDay[item.date].push({
-        kind: 'manual', id: item.id, text: item.text, color: item.color,
+        kind: 'manual', id: item.id, text: item.text, color: item.color, link: item.link || null,
         start: item.start || HP_DEFAULT_START, end: item.end || HP_DEFAULT_END
       });
     }
@@ -4832,12 +4856,16 @@ function renderHomepage() {
       const delBtn = item.kind === 'manual'
         ? `<button class="homepage-block-del" onclick="event.stopPropagation();deleteHomepageManualItem('${item.id}')" title="Remove">✕</button>`
         : '';
+      const linkBtn = item.link
+        ? `<button class="homepage-block-link" onclick="event.stopPropagation();window.open('${item.link.replace(/'/g, "\\'")}','_blank','noopener')" title="Open link">🔗</button>`
+        : '';
       return `
         <div class="homepage-block" style="top:${top}px;height:${height}px;border-left-color:${item.color};background:${item.color}22;"
           onclick="openHomepageTimeEditor('${item.kind}','${item.id}','${key}')">
           <div class="homepage-block-text">${esc(item.text)}</div>
           ${showTimeLabel ? `<div class="homepage-block-time">${hpFmtTime(item.start)}–${hpFmtTime(item.end)}</div>` : ''}
           ${item.kind === 'mission' ? `<span class="homepage-block-tag">${item.isDue ? 'due' : 'planned'}</span>` : ''}
+          ${linkBtn}
           ${delBtn}
         </div>`;
     }).join('');

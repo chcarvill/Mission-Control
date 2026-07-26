@@ -1,4 +1,4 @@
-const CACHE = 'mc-v8-bright-tabs';
+const CACHE = 'mc-v9-project-calendar';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

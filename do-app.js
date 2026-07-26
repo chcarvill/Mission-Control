@@ -59,6 +59,7 @@ const RESERVED_CATEGORY_IDS = [CAT_MARKET_ID, CAT_IMPROVE_ID];
 
 let pendingSlotIndex = null;   // which stone (0/1/2) the picker modal is filling
 let pendingIso = null;         // which day's slot the picker modal is filling
+let pendingPickerActivity = null; // the activity chosen in the picker, awaiting the optional details step
 let pendingCancelSlot = null;  // which stone is being cancelled/substituted, awaiting a reason
 let pendingCancelIso = null;   // which day's stone is being cancelled/substituted
 let pendingSubstituteActivityId = null; // if cancelling-to-substitute, the new activity chosen
@@ -395,7 +396,7 @@ function renderDo() {
   const statusEl = document.getElementById("portfolio-sync-status");
   if (statusEl) {
     statusEl.textContent = added
-      ? `✓ ${added} new venture${added === 1 ? "" : "s"} synced in from the Portfolio.`
+      ? `✓ ${added} new project${added === 1 ? "" : "s"} synced in from the Portfolio.`
       : "";
   }
   renderHeader();
@@ -714,6 +715,7 @@ function openPicker(iso, slotIndex) {
   document.getElementById("picker-sub").textContent = "Pick one of your key empowering activities.";
   renderActivityList();
   document.getElementById("new-activity-input").value = "";
+  showPickerListStep();
   document.getElementById("picker-overlay").classList.add("open");
 }
 
@@ -732,18 +734,102 @@ function renderActivityList() {
         document.getElementById("picker-overlay").classList.remove("open");
         openReasonModal(pendingCancelIso, pendingCancelSlot, "substituted", activity.id);
       } else {
+        // Assigning a brand-new task: the fast path (immediate assign) still
+        // happens here, same as always -- but we now offer an optional next
+        // step to add a description/link/time before the picker closes,
+        // rather than forcing it. "Skip" in that step is the exact old
+        // one-click behavior.
         assignActivity(pendingIso, pendingSlotIndex, activity.id);
-        closePicker();
+        pendingPickerActivity = activity;
+        showPickerDetailsStep(activity);
       }
     });
     list.appendChild(opt);
   });
 }
 
-function closePicker() {
+function showPickerListStep() {
+  document.getElementById("picker-step-list").style.display = "";
+  document.getElementById("picker-step-details").style.display = "none";
+}
+function showPickerDetailsStep(activity) {
+  document.getElementById("picker-step-list").style.display = "none";
+  document.getElementById("picker-step-details").style.display = "";
+  document.getElementById("picker-details-sub").textContent = `For "${activity.label}" — optional, skip if you just want it logged.`;
+  document.getElementById("picker-detail-text").value = "";
+  document.getElementById("picker-detail-link").value = "";
+  document.getElementById("picker-detail-time").value = "";
+  document.getElementById("picker-detail-text").focus();
+}
+
+function finishPickerDetailsStep() {
   document.getElementById("picker-overlay").classList.remove("open");
+  showPickerListStep(); // reset for next time it opens
   pendingIso = null;
   pendingSlotIndex = null;
+  pendingPickerActivity = null;
+}
+
+// "Skip" — exactly the original fast path. The activity's already assigned
+// (that happened the moment it was picked); this just closes without
+// adding any description/link/calendar entry.
+function skipPickerDetails() {
+  finishPickerDetailsStep();
+}
+
+// "Save" — carries the description/link into the slot's existing detail
+// fields (same fields the ✎ button edits), and if a time was given (or
+// even if not -- project + description is enough to be worth a calendar
+// entry), pushes a color-coded block onto the Homepage weekly calendar.
+function savePickerDetails() {
+  const text = document.getElementById("picker-detail-text").value.trim();
+  const link = document.getElementById("picker-detail-link").value.trim();
+  const time = document.getElementById("picker-detail-time").value; // "" if not set
+
+  if (!text && !link && !time) {
+    // Nothing entered -- same as Skip, no point creating an empty calendar entry.
+    finishPickerDetailsStep();
+    return;
+  }
+
+  const slot = dayData(pendingIso).slots[pendingSlotIndex];
+  if (text) slot.detail = text;
+  if (link) slot.link = link;
+  saveToStorage();
+
+  // Push onto the Homepage calendar (loadHomepageManual/saveHomepageManual/
+  // dateKey/renderHomepage are defined in Mission Control's own script,
+  // loaded before this file, since they now share one page).
+  if (typeof loadHomepageManual === "function" && pendingPickerActivity) {
+    const start = time || HP_DEFAULT_START_DO;
+    const [h, m] = start.split(":").map(Number);
+    const endTotal = h * 60 + m + 30; // default 30-minute block
+    const end = String(Math.floor(endTotal / 60) % 24).padStart(2, "0") + ":" + String(endTotal % 60).padStart(2, "0");
+    const manual = loadHomepageManual();
+    manual.push({
+      id: "hp" + Date.now() + Math.random().toString(36).slice(2, 6),
+      date: pendingIso,
+      text: text || pendingPickerActivity.label,
+      start,
+      end,
+      color: colorHex(pendingPickerActivity.color),
+      link: link || null,
+    });
+    saveHomepageManual(manual);
+  }
+
+  finishPickerDetailsStep();
+  renderDo();
+  if (typeof renderHomepage === "function") renderHomepage();
+}
+const HP_DEFAULT_START_DO = "09:00"; // matches Mission Control's own HP_DEFAULT_START
+
+function closePicker() {
+  document.getElementById("picker-overlay").classList.remove("open");
+  showPickerListStep();
+  pendingIso = null;
+  pendingSlotIndex = null;
+  pendingPickerActivity = null;
 }
 
 /* ---------------------------------------------------------- */
@@ -1756,7 +1842,7 @@ function renderTaVentureList() {
   list.innerHTML = "";
 
   if (!STATE.activities.length) {
-    list.innerHTML = `<div class="wasters-empty">No ventures yet — add one from Today first.</div>`;
+    list.innerHTML = `<div class="wasters-empty">No projects yet — add one from Today first.</div>`;
     return;
   }
 
@@ -1804,7 +1890,7 @@ function generateTargetedActionWeek() {
   if (resultEl) resultEl.textContent = "";
 
   if (!STATE.activities.length) {
-    if (resultEl) resultEl.textContent = "Add a venture from Today first.";
+    if (resultEl) resultEl.textContent = "Add a project from Today first.";
     return;
   }
 
@@ -1935,6 +2021,8 @@ function switchTab(tab) {
 
 function wireUI() {
   document.getElementById("btn-cancel-picker").addEventListener("click", closePicker);
+  document.getElementById("btn-picker-skip").addEventListener("click", skipPickerDetails);
+  document.getElementById("btn-picker-save-detail").addEventListener("click", savePickerDetails);
 
   document.getElementById("btn-add-activity").addEventListener("click", () => {
     const input = document.getElementById("new-activity-input");
