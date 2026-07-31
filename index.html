@@ -992,6 +992,19 @@
   .master-tab.master-active { color: var(--active); border-bottom-color: var(--active); }
   #mtab-do { font-weight: 700; }
 
+  .picker-date-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--sans); font-size: 12.5px;
+    background: var(--sage-tint); color: var(--sage-dark);
+    border: 1px solid var(--sage); border-radius: 20px;
+    padding: 4px 6px 4px 10px;
+  }
+  .picker-date-chip button {
+    background: none; border: none; cursor: pointer;
+    color: var(--sage-dark); font-size: 12px; line-height: 1; padding: 2px;
+  }
+  .picker-date-chip button:hover { color: #f87171; }
+
   /* ── Productiveness panel ── */
   #prod-panel { display: none; }
   #prod-panel.master-visible { display: block; }
@@ -2560,8 +2573,8 @@
 <div id="picker-overlay">
   <div class="do-modal">
     <div id="picker-step-list">
-      <h2 id="picker-title">Choose your task</h2>
-      <p class="modal-sub" id="picker-sub">Pick one of your key empowering activities.</p>
+      <h2 id="picker-title">Part of which project?</h2>
+      <p class="modal-sub" id="picker-sub">Pick the project (or activity) this task belongs to.</p>
       <div id="activity-list"></div>
       <hr class="modal-divider" />
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:6px;">Add a new activity</label>
@@ -2576,13 +2589,17 @@
     <div id="picker-step-details" style="display:none;">
       <h2>Add detail <span style="font-weight:400;font-size:12px;color:var(--ink-soft);">(optional)</span></h2>
       <p class="modal-sub" id="picker-details-sub"></p>
-      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Day</label>
-      <input id="picker-detail-day" type="date" style="margin-bottom:10px;" />
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Day(s)</label>
+      <div style="display:flex; gap:8px; margin-bottom:6px;">
+        <input id="picker-detail-day-input" type="date" style="flex:1;" />
+        <button class="btn" type="button" id="btn-add-picker-date">+ Add date</button>
+      </div>
+      <div id="picker-date-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;"></div>
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Task description</label>
       <input id="picker-detail-text" type="text" placeholder="What specifically? e.g. Draft chapter 3" style="margin-bottom:10px;" />
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Link</label>
       <input id="picker-detail-link" type="text" placeholder="Optional URL" style="margin-bottom:10px;" />
-      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Time <span style="font-weight:400;">(optional — defaults to 9:00am on the calendar if left blank)</span></label>
+      <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Time <span style="font-weight:400;">(optional — defaults to 9:00am on the calendar if left blank, same time used for every day selected)</span></label>
       <input id="picker-detail-time" type="time" style="margin-bottom:4px;" />
       <div id="picker-day-status" style="font-family: var(--sans); font-size: 12px; color: var(--clay-dark); min-height: 16px; margin-top:6px;"></div>
       <div class="do-modal-actions">
@@ -2891,7 +2908,7 @@
     <h2>NEW PROJECT</h2>
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Project name</div>
     <input class="modal-input" id="proj-name" placeholder="e.g. Website Redesign" />
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Part of which business?</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Part of which business (within your portfolio)?</div>
     <input class="modal-input" id="proj-business" placeholder="e.g. Acme Corp" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Department / team (optional)</div>
     <input class="modal-input" id="proj-department" placeholder="e.g. Marketing" />

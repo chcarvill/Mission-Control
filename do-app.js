@@ -60,6 +60,7 @@ const RESERVED_CATEGORY_IDS = [CAT_MARKET_ID, CAT_IMPROVE_ID];
 let pendingSlotIndex = null;   // which stone (0/1/2) the picker modal is filling
 let pendingIso = null;         // which day's slot the picker modal is filling
 let pendingPickerActivity = null; // the activity chosen in the picker, awaiting the optional details step
+let pendingPickerDates = [];   // day(s) this task should land on, from the details step's multi-date list
 let pendingCancelSlot = null;  // which stone is being cancelled/substituted, awaiting a reason
 let pendingCancelIso = null;   // which day's stone is being cancelled/substituted
 let pendingSubstituteActivityId = null; // if cancelling-to-substitute, the new activity chosen
@@ -558,6 +559,7 @@ function renderStones() {
           markDone(iso, i);
         });
       }
+      stone.addEventListener("click", () => openDetailModal(iso, i));
     }
 
     row.appendChild(stone);
@@ -711,8 +713,8 @@ function openPicker(iso, slotIndex) {
   pendingSlotIndex = slotIndex;
   pendingCancelIso = null;
   pendingCancelSlot = null;
-  document.getElementById("picker-title").textContent = "Choose your task";
-  document.getElementById("picker-sub").textContent = "Pick one of your key empowering activities.";
+  document.getElementById("picker-title").textContent = "Part of which project?";
+  document.getElementById("picker-sub").textContent = "Pick the project (or activity) this task belongs to.";
   renderActivityList();
   document.getElementById("new-activity-input").value = "";
   showPickerListStep();
@@ -756,12 +758,46 @@ function showPickerDetailsStep(activity) {
   document.getElementById("picker-step-list").style.display = "none";
   document.getElementById("picker-step-details").style.display = "";
   document.getElementById("picker-details-sub").textContent = `For "${activity.label}" — optional, skip if you just want it logged.`;
-  document.getElementById("picker-detail-day").value = pendingIso;
+  pendingPickerDates = [pendingIso];
+  renderPickerDateChips();
+  document.getElementById("picker-detail-day-input").value = "";
   document.getElementById("picker-detail-text").value = "";
   document.getElementById("picker-detail-link").value = "";
   document.getElementById("picker-detail-time").value = "";
   document.getElementById("picker-day-status").textContent = "";
   document.getElementById("picker-detail-text").focus();
+}
+
+function renderPickerDateChips() {
+  const wrap = document.getElementById("picker-date-chips");
+  wrap.innerHTML = pendingPickerDates
+    .slice()
+    .sort()
+    .map((iso) => {
+      const label = fmtDayLabelShort(iso);
+      const removable = pendingPickerDates.length > 1;
+      return `<span class="picker-date-chip" data-iso="${iso}">${escapeHtml(label)}${
+        removable ? `<button type="button" data-remove="${iso}" title="Remove">✕</button>` : ""
+      }</span>`;
+    })
+    .join("");
+  wrap.querySelectorAll("button[data-remove]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      pendingPickerDates = pendingPickerDates.filter((d) => d !== btn.dataset.remove);
+      renderPickerDateChips();
+    });
+  });
+}
+
+function addPickerDate() {
+  const input = document.getElementById("picker-detail-day-input");
+  const val = input.value;
+  if (!val) return;
+  if (!pendingPickerDates.includes(val)) {
+    pendingPickerDates.push(val);
+    renderPickerDateChips();
+  }
+  input.value = "";
 }
 
 function finishPickerDetailsStep() {
@@ -770,6 +806,7 @@ function finishPickerDetailsStep() {
   pendingIso = null;
   pendingSlotIndex = null;
   pendingPickerActivity = null;
+  pendingPickerDates = [];
 }
 
 // "Skip" — exactly the original fast path. The activity's already assigned
@@ -783,70 +820,85 @@ function skipPickerDetails() {
 // fields (same fields the ✎ button edits), and if a time was given (or
 // even if not -- project + description is enough to be worth a calendar
 // entry), pushes a color-coded block onto the Homepage weekly calendar.
+// Runs once per date selected in the multi-date list.
 function savePickerDetails() {
   const text = document.getElementById("picker-detail-text").value.trim();
   const link = document.getElementById("picker-detail-link").value.trim();
   const time = document.getElementById("picker-detail-time").value; // "" if not set
-  const chosenDay = document.getElementById("picker-detail-day").value || pendingIso;
   const statusEl = document.getElementById("picker-day-status");
+  const dates = pendingPickerDates.length ? pendingPickerDates : [pendingIso];
+  const onlyOriginalDay = dates.length === 1 && dates[0] === pendingIso;
 
-  if (!text && !link && !time && chosenDay === pendingIso) {
-    // Nothing entered and day unchanged -- same as Skip, no point creating an empty calendar entry.
+  if (!text && !link && !time && onlyOriginalDay) {
+    // Nothing entered and no extra dates -- same as Skip, no point creating an empty calendar entry.
     finishPickerDetailsStep();
     return;
   }
 
-  let targetIso = pendingIso;
-  let targetSlotIndex = pendingSlotIndex;
-
-  if (chosenDay !== pendingIso) {
-    ensureDay(chosenDay);
-    const targetDay = dayData(chosenDay);
-    const emptyIndex = targetDay.slots.findIndex((s) => s.status === "empty");
-    if (emptyIndex === -1) {
-      // That day's already got 3 tasks -- respect "three, no more" rather
-      // than overriding it. Don't close yet: reset the day field back to
-      // where the task actually still is, and let the person either pick
-      // a different day or hit Save again to accept staying put.
-      if (statusEl) statusEl.textContent = `${chosenDay} already has three tasks. Pick a different day, or save again to keep it on ${pendingIso}.`;
-      document.getElementById("picker-detail-day").value = pendingIso;
-      return;
-    }
-    // Move it: clear the original slot, assign fresh on the target day.
+  // If the original day got removed from the date list, the person no
+  // longer wants the task there -- clear that slot.
+  if (!dates.includes(pendingIso)) {
     const original = dayData(pendingIso).slots[pendingSlotIndex];
     original.activityId = null;
     original.status = "empty";
     original.detail = "";
     original.link = "";
-    assignActivity(chosenDay, emptyIndex, pendingPickerActivity.id);
-    targetIso = chosenDay;
-    targetSlotIndex = emptyIndex;
   }
 
-  const slot = dayData(targetIso).slots[targetSlotIndex];
-  if (text) slot.detail = text;
-  if (link) slot.link = link;
-  saveToStorage();
+  const skippedFull = [];
+  const manual = typeof loadHomepageManual === "function" ? loadHomepageManual() : null;
+  const start = time || HP_DEFAULT_START_DO;
+  const [h, m] = start.split(":").map(Number);
+  const endTotal = h * 60 + m + 30; // default 30-minute block
+  const end = String(Math.floor(endTotal / 60) % 24).padStart(2, "0") + ":" + String(endTotal % 60).padStart(2, "0");
 
-  // Push onto the Homepage calendar (loadHomepageManual/saveHomepageManual/
-  // dateKey/renderHomepage are defined in Mission Control's own script,
-  // loaded before this file, since they now share one page).
-  if (typeof loadHomepageManual === "function" && pendingPickerActivity) {
-    const start = time || HP_DEFAULT_START_DO;
-    const [h, m] = start.split(":").map(Number);
-    const endTotal = h * 60 + m + 30; // default 30-minute block
-    const end = String(Math.floor(endTotal / 60) % 24).padStart(2, "0") + ":" + String(endTotal % 60).padStart(2, "0");
-    const manual = loadHomepageManual();
-    manual.push({
-      id: "hp" + Date.now() + Math.random().toString(36).slice(2, 6),
-      date: targetIso,
-      text: text || pendingPickerActivity.label,
-      start,
-      end,
-      color: colorHex(pendingPickerActivity.color),
-      link: link || null,
-    });
-    saveHomepageManual(manual);
+  dates.forEach((iso) => {
+    let slotIndex;
+    if (iso === pendingIso) {
+      // Already assigned here from the initial pick -- reuse it.
+      slotIndex = pendingSlotIndex;
+    } else {
+      ensureDay(iso);
+      const targetDay = dayData(iso);
+      const emptyIndex = targetDay.slots.findIndex((s) => s.status === "empty");
+      if (emptyIndex === -1) {
+        // Respect "three, no more" -- skip this day rather than overriding it.
+        skippedFull.push(iso);
+        return;
+      }
+      assignActivity(iso, emptyIndex, pendingPickerActivity.id);
+      slotIndex = emptyIndex;
+    }
+
+    const slot = dayData(iso).slots[slotIndex];
+    if (text) slot.detail = text;
+    if (link) slot.link = link;
+
+    if (manual) {
+      manual.push({
+        id: "hp" + Date.now() + Math.random().toString(36).slice(2, 6) + iso,
+        date: iso,
+        text: text || pendingPickerActivity.label,
+        start,
+        end,
+        color: colorHex(pendingPickerActivity.color),
+        link: link || null,
+      });
+    }
+  });
+
+  saveToStorage();
+  if (manual) saveHomepageManual(manual);
+
+  if (skippedFull.length) {
+    if (statusEl) statusEl.textContent = `${skippedFull.join(", ")} already had three tasks, so those were skipped — everything else saved.`;
+    // Leave the modal open so this is actually seen, and remove the full
+    // days from the list so a second Save doesn't retry them pointlessly.
+    pendingPickerDates = dates.filter((d) => !skippedFull.includes(d));
+    renderPickerDateChips();
+    renderDo();
+    if (typeof renderHomepage === "function") renderHomepage();
+    return;
   }
 
   finishPickerDetailsStep();
@@ -861,6 +913,7 @@ function closePicker() {
   pendingIso = null;
   pendingSlotIndex = null;
   pendingPickerActivity = null;
+  pendingPickerDates = [];
 }
 
 /* ---------------------------------------------------------- */
@@ -1460,6 +1513,7 @@ function renderWeekDays() {
         });
         const linkEl = chip.querySelector(".stone-link");
         if (linkEl) linkEl.addEventListener("click", (e) => e.stopPropagation());
+        chip.addEventListener("click", () => openDetailModal(iso, i));
       }
       slotsWrap.appendChild(chip);
     });
@@ -2054,6 +2108,7 @@ function wireUI() {
   document.getElementById("btn-cancel-picker").addEventListener("click", closePicker);
   document.getElementById("btn-picker-skip").addEventListener("click", skipPickerDetails);
   document.getElementById("btn-picker-save-detail").addEventListener("click", savePickerDetails);
+  document.getElementById("btn-add-picker-date").addEventListener("click", addPickerDate);
 
   document.getElementById("btn-add-activity").addEventListener("click", () => {
     const input = document.getElementById("new-activity-input");

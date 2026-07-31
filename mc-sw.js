@@ -1,4 +1,4 @@
-const CACHE = 'mc-v10-plan-week-day-picker';
+const CACHE = 'mc-v11-multidate-clickdetail';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
