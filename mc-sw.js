@@ -1,4 +1,4 @@
-const CACHE = 'mc-v12-calendar-note';
+const CACHE = 'mc-v13-tab-separator';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
