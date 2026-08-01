@@ -1,4 +1,4 @@
-const CACHE = 'mc-v11-multidate-clickdetail';
+const CACHE = 'mc-v12-calendar-note';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
