@@ -1457,6 +1457,10 @@ function renderWeekTab() {
   if (!currentWeekStart) currentWeekStart = mondayOf(todayISO());
   ensureWeek(currentWeekStart);
   document.getElementById("week-range-label").textContent = fmtWeekRangeLabel(currentWeekStart);
+  const carryBtn = document.getElementById("btn-carry-forward");
+  const isPastWeek = currentWeekStart < mondayOf(todayISO());
+  carryBtn.style.display = isPastWeek ? "" : "none";
+  document.getElementById("carry-forward-status").textContent = "";
   renderWeekDays();
   renderUpcomingList();
 }
@@ -1567,6 +1571,66 @@ function renderUpcomingList() {
 function goToWeek(offsetDays) {
   currentWeekStart = isoPlusDays(currentWeekStart, offsetDays);
   renderWeekTab();
+}
+
+// Carries any unfinished tasks (assigned but never marked done) from the
+// week currently being viewed into the actual current week -- so a task
+// that didn't happen isn't just silently lost. Only pulls "active" slots,
+// since an empty slot never had anything in it to carry. The original
+// slot is left exactly as it was, since a past week is history -- this
+// only adds a copy into the current week, it doesn't rewrite what did or
+// didn't happen back then.
+function carryWeekForward() {
+  const statusEl = document.getElementById("carry-forward-status");
+  const actualCurrentWeekStart = mondayOf(todayISO());
+  if (currentWeekStart >= actualCurrentWeekStart) {
+    if (statusEl) statusEl.textContent = "You're already on the current week.";
+    return;
+  }
+
+  const toCarry = [];
+  weekDates(currentWeekStart).forEach((iso) => {
+    const day = dayData(iso);
+    if (!day) return;
+    day.slots.forEach((slot) => {
+      if (slot.status === "active" && slot.activityId) {
+        toCarry.push({ activityId: slot.activityId, detail: slot.detail || "", link: slot.link || "" });
+      }
+    });
+  });
+
+  if (!toCarry.length) {
+    if (statusEl) statusEl.textContent = "Nothing unfinished that week — nothing to carry forward.";
+    return;
+  }
+
+  ensureWeek(actualCurrentWeekStart);
+  const currentDates = weekDates(actualCurrentWeekStart);
+  let carried = 0;
+
+  toCarry.forEach((item) => {
+    for (const iso of currentDates) {
+      ensureDay(iso);
+      const day = dayData(iso);
+      const emptyIdx = day.slots.findIndex((s) => s.status === "empty");
+      if (emptyIdx !== -1) {
+        day.slots[emptyIdx].activityId = item.activityId;
+        day.slots[emptyIdx].status = "active";
+        if (item.detail) day.slots[emptyIdx].detail = item.detail;
+        if (item.link) day.slots[emptyIdx].link = item.link;
+        carried++;
+        break;
+      }
+    }
+  });
+
+  saveToStorage();
+  renderDo();
+  const notCarried = toCarry.length - carried;
+  const msg = notCarried
+    ? `Carried ${carried} task${carried === 1 ? "" : "s"} into this week. ${notCarried} couldn't fit — this week's already full.`
+    : `Carried ${carried} task${carried === 1 ? "" : "s"} into this week.`;
+  document.getElementById("carry-forward-status").textContent = msg;
 }
 
 function emailWeek() {
@@ -2202,6 +2266,7 @@ function wireUI() {
   document.getElementById("btn-prev-week").addEventListener("click", () => goToWeek(-7));
   document.getElementById("btn-next-week").addEventListener("click", () => goToWeek(7));
   document.getElementById("btn-email-week").addEventListener("click", emailWeek);
+  document.getElementById("btn-carry-forward").addEventListener("click", carryWeekForward);
   document.getElementById("btn-email-today").addEventListener("click", emailToday);
   document.getElementById("btn-email-wasters").addEventListener("click", emailWasters);
 

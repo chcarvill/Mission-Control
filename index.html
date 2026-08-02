@@ -2445,7 +2445,11 @@
         <div class="week-range" id="week-range-label"></div>
         <button class="btn" id="btn-next-week" title="Next week">›</button>
       </div>
-      <button class="btn primary" id="btn-email-week">✉ Email this week</button>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn primary" id="btn-email-week">✉ Email this week</button>
+        <button class="btn" id="btn-carry-forward" style="display:none;">↷ Carry week forward</button>
+      </div>
+      <div id="carry-forward-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:4px;"></div>
       <div id="week-days"></div>
     </section>
 
