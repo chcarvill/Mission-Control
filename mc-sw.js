@@ -1,4 +1,4 @@
-const CACHE = 'mc-v14-carry-forward';
+const CACHE = 'mc-v15-edit-task-date';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

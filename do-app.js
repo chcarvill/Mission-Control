@@ -1007,6 +1007,8 @@ function openDetailModal(iso, slotIndex) {
   const slot = dayData(iso).slots[slotIndex];
   const activity = activityById(slot.activityId);
   document.getElementById("detail-activity-name").textContent = activity ? activity.label : "this task";
+  document.getElementById("detail-day").value = iso;
+  document.getElementById("detail-day-status").textContent = "";
   document.getElementById("detail-text").value = slot.detail || "";
   document.getElementById("detail-link").value = slot.link || "";
   document.getElementById("detail-note").value = slot.note || "";
@@ -1023,7 +1025,39 @@ function closeDetailModal() {
 }
 
 function saveDetail() {
-  const slot = dayData(pendingDetailIso).slots[pendingDetailSlot];
+  const chosenDay = document.getElementById("detail-day").value || pendingDetailIso;
+  const statusEl = document.getElementById("detail-day-status");
+
+  let targetIso = pendingDetailIso;
+  let targetSlot = pendingDetailSlot;
+
+  if (chosenDay !== pendingDetailIso) {
+    ensureDay(chosenDay);
+    const targetDay = dayData(chosenDay);
+    const emptyIdx = targetDay.slots.findIndex((s) => s.status === "empty");
+    if (emptyIdx === -1) {
+      // Respect "three, no more" -- don't move it, and say why, rather
+      // than silently failing or overriding a slot that's already taken.
+      if (statusEl) statusEl.textContent = `${chosenDay} already has three tasks. Pick a different day, or save again to keep it on ${pendingDetailIso}.`;
+      document.getElementById("detail-day").value = pendingDetailIso;
+      return;
+    }
+    const original = dayData(pendingDetailIso).slots[pendingDetailSlot];
+    const moved = { ...original };
+    original.activityId = null;
+    original.status = "empty";
+    original.detail = "";
+    original.link = "";
+    original.note = "";
+    original.actionType = null;
+    const newSlot = targetDay.slots[emptyIdx];
+    newSlot.activityId = moved.activityId;
+    newSlot.status = moved.status === "done" ? "done" : "active";
+    targetIso = chosenDay;
+    targetSlot = emptyIdx;
+  }
+
+  const slot = dayData(targetIso).slots[targetSlot];
   slot.detail = document.getElementById("detail-text").value.trim();
   slot.link = document.getElementById("detail-link").value.trim();
   slot.note = document.getElementById("detail-note").value.trim();
