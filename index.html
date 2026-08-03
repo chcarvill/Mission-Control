@@ -40,12 +40,16 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html {
+    overflow-x: hidden;
+  }
   body {
     font-family: var(--sans);
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     padding: 0;
+    overflow-x: hidden;
   }
 
   /* Header */
@@ -150,7 +154,7 @@
   /* Filter bar */
   .filter-bar {
     padding: 1rem 2.5rem;
-    display: flex; gap: 6px; align-items: center;
+    display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
     border-bottom: 0.5px solid var(--border);
   }
   .filter-btn {
@@ -973,7 +977,7 @@
 
   /* ── Master tabs ── */
   .master-tab-bar {
-    display: flex; gap: 0;
+    display: flex; gap: 0; flex-wrap: wrap;
     border-bottom: 0.5px solid var(--border);
     background: var(--bg);
     padding: 0 2.5rem;
@@ -1092,7 +1096,17 @@
   @media (max-width: 600px) {
     .p-metric-grid { grid-template-columns: repeat(2,1fr); }
     .master-tab-bar { padding: 0 1rem; }
+    .master-tab { padding: 8px 12px; font-size: 11px; }
     .prod-toolbar, .prod-sub-bar, .prod-content { padding-left: 1rem; padding-right: 1rem; }
+    .pf-grid { grid-template-columns: 1fr; }
+    .header, .priority-panel, .filter-bar, .ventures-grid, .folders-panel, .homepage-grid {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+    .mc-mobile-pad {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
   }
 
   /* ── Portfolio ── */
@@ -2374,7 +2388,7 @@
 
 <!-- ══ HOMEPAGE PANEL ══ -->
 <div id="homepage-panel">
-  <div style="padding:1.25rem 2.5rem 0.5rem;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+  <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0.5rem;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div>
       <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">This week</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:2px;" id="homepage-week-range"></div>
@@ -2595,7 +2609,7 @@
       <h2>Add detail <span style="font-weight:400;font-size:12px;color:var(--ink-soft);">(optional)</span></h2>
       <p class="modal-sub" id="picker-details-sub"></p>
       <label style="font-size:12px; color:var(--ink-soft); display:block; margin-bottom:4px;">Day(s)</label>
-      <div style="display:flex; gap:8px; margin-bottom:6px;">
+      <div style="display:flex;flex-wrap:wrap; gap:8px; margin-bottom:6px;">
         <input id="picker-detail-day-input" type="date" style="flex:1;" />
         <button class="btn" type="button" id="btn-add-picker-date">+ Add date</button>
       </div>
@@ -2635,7 +2649,7 @@
     <p class="modal-sub">The pool you choose from each day.</p>
     <div id="manage-list"></div>
     <hr class="modal-divider" />
-    <div id="new-activity-row-2" style="display:flex; gap:8px;">
+    <div id="new-activity-row-2" style="display:flex;flex-wrap:wrap; gap:8px;">
       <input id="new-activity-input-2" type="text" placeholder="e.g. Cold outreach" style="flex:1; font-family: var(--sans); font-size:13px; border:1px solid var(--line); border-radius:7px; padding:8px 10px; background: var(--paper); color: var(--ink);" />
       <button class="btn" id="btn-add-activity-2">Add</button>
     </div>
@@ -2705,17 +2719,17 @@
 
 <!-- ══ PORTFOLIO PANEL ══ -->
 <div id="portfolio-panel" style="display:none;">
-  <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
+  <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
     <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export backup</button>
     <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
     <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
     <button onclick="emailPortfolioView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
-  <div style="padding:0 2.5rem;">
+  <div class="mc-mobile-pad" style="padding:0 2.5rem;">
     <div id="notion-import-status" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;padding-top:10px;min-height:14px;"></div>
   </div>
-  <div style="padding:1.5rem 2.5rem;">
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div class="pf-grid" id="portfolio-list"></div>
   </div>
@@ -2723,11 +2737,11 @@
 
 <!-- ══ PROJECTS PANEL ══ -->
 <div id="projects-panel" style="display:none;">
-  <div style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;align-items:center;gap:10px;">
+  <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="openProjectModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
     <button onclick="emailProjectsView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
-  <div style="padding:1.5rem 2.5rem;" id="projects-grid">
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;" id="projects-grid">
     <div id="projects-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;" id="projects-list"></div>
   </div>
@@ -2735,7 +2749,7 @@
 
 <!-- ══ MISSIONS PANEL ══ -->
 <div id="missions-panel" class="master-hidden">
-<div style="padding:0.6rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);">
+<div class="mc-mobile-pad" style="padding:0.6rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);">
   <button onclick="emailCurrentView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);transform:translateY(0);transition:all 0.1s ease;position:relative;top:0;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email this view</button>
   <button onclick="openCalModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#6baef6 0%,#4285f4 50%,#2a6fdb 100%);color:#fff;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4);transform:translateY(0);transition:all 0.1s ease;position:relative;top:0;" onmousedown="this.style.boxShadow='0 1px 0 #1a4fa0, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">📅 Add to Calendar</button>
 </div>
@@ -2808,7 +2822,7 @@
 <!-- Archive modal -->
 <div class="modal-overlay" id="archive-modal">
   <div class="modal" style="max-width:560px;max-height:80vh;overflow-y:auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;">
       <h2>COMPLETED MISSIONS</h2>
       <button class="modal-cancel" onclick="closeArchive()" style="padding:4px 10px;">✕</button>
     </div>
@@ -2824,7 +2838,7 @@
     <select id="cal-mission-select" class="modal-input" style="cursor:pointer;">
       <option value="">— choose a mission —</option>
     </select>
-    <div style="display:flex;gap:10px;align-items:flex-end;">
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;">
       <div style="flex:1;">
         <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:6px;">Date</div>
         <input type="date" id="cal-date" class="modal-input due-date-input" style="width:100%;" />
@@ -3015,7 +3029,7 @@
         </button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;margin-top:2px;">
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:2px;">
       <label style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;">Due date</label>
       <input type="date" class="modal-input due-date-input" id="modal-due" style="width:auto;flex:1;" />
     </div>
@@ -3630,7 +3644,7 @@ function buildCard(v, idx) {
   card.innerHTML = `
     ${missionBlocked ? `<div class="mission-blocked-banner">⏸ Blocked — waiting on mission ${v.follows.join(', ')}</div>` : ''}
     <div class="card-top">
-      <div style="display:flex;align-items:center;gap:7px;flex:1;min-width:0;">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px;flex:1;min-width:0;">
         ${v.letter ? `<span class="mission-letter">${v.letter}</span>` : ''}
         <input class="card-name" value="${esc(v.name)}" placeholder="Mission name..."
           onchange="updateName(${v.id}, this.value)" />
@@ -3720,7 +3734,7 @@ function buildCard(v, idx) {
     </div>
 
     <div class="card-footer">
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
         <button class="card-notes-toggle" onclick="toggleDetails(${v.id})">
           ${(v.detailsVisible || alwaysShowDetails) ? '− Details' : '+ Details'}
         </button>
@@ -3728,7 +3742,7 @@ function buildCard(v, idx) {
           <svg width="10" height="10" viewBox="0 0 24 24" fill="${alwaysShowDetails ? '#2bce8c' : '#555b66'}" style="vertical-align:middle;margin-right:3px;"><path d="M16 3a1 1 0 0 1 .7 1.7L14 7.4l1.3 5.2-3.3 3.3V21l-1-1v-5.1L7.7 11.6l-1.4.3a1 1 0 0 1-.9-1.7l9-7a1 1 0 0 1 .6-.2z"/></svg>${alwaysShowDetails ? 'always on' : 'always show'}
         </button>
       </div>
-      <div style="display:flex;gap:10px;align-items:center;">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
         <button class="card-notes-toggle" onclick="archiveMission(${v.id})" style="color:var(--active);">✓ complete</button>
         <button class="card-delete" onclick="deleteVenture(${v.id})">remove</button>
       </div>
@@ -4323,7 +4337,7 @@ function renderProjects() {
     const activeMissions = ventures.filter(v => v.projectId === p.id && v.status === 'active').length;
     return `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;position:relative;border-left:3px solid ${cat.color};">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
+      <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
         <div>
           <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-primary);letter-spacing:0.04em;">${p.name}</div>
           ${p.business ? `<div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:2px;">part of <span style="color:var(--text-secondary)">${p.business}</span>${p.department ? ' · ' + p.department : ''}</div>` : ''}
@@ -4331,7 +4345,7 @@ function renderProjects() {
         <button onclick="deleteProject(${p.id})" style="background:none;border:none;cursor:pointer;color:var(--text-hint);font-size:16px;line-height:1;padding:0 2px;" title="Delete project">×</button>
       </div>
       ${p.description ? `<div style="font-family:var(--mono);font-size:11px;color:var(--text-secondary);margin-bottom:8px;line-height:1.5;">${p.description}</div>` : ''}
-      <div style="display:flex;gap:10px;align-items:center;margin-top:8px;">
+      <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px;">
         <span style="font-family:var(--mono);font-size:10px;color:${cat.color};background:${cat.bg};border:1px solid ${cat.color};border-radius:4px;padding:2px 8px;letter-spacing:0.06em;">${p.category || 'no category'}</span>
         <span style="font-family:var(--mono);font-size:10px;color:var(--text-hint);">${missionCount} mission${missionCount !== 1 ? 's' : ''} · ${activeMissions} active</span>
       </div>
@@ -5507,7 +5521,7 @@ function pRenderWasters() {
     item.innerHTML = `
       <span class="p-row-name" style="flex:1;">${esc(w.name)}</span>
       <span class="p-limit-badge">${esc(w.limit)}</span>
-      <div style="display:flex;align-items:center;gap:7px;flex-shrink:0;">
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:7px;flex-shrink:0;">
         <label style="font-family:var(--mono);font-size:10px;color:var(--text-hint);letter-spacing:0.04em;text-transform:uppercase;white-space:nowrap;">Wasted today</label>
         <input type="text" placeholder="e.g. 20m" value="${esc(String(todayMins))}"
           style="font-family:var(--mono);font-size:12px;width:75px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:5px 8px;color:#f87171;outline:none;"
