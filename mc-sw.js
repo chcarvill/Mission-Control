@@ -1,4 +1,4 @@
-const CACHE = 'mc-v15-edit-task-date';
+const CACHE = 'mc-v16-calendar-sync-fix';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

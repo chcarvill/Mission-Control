@@ -836,13 +836,19 @@ function savePickerDetails() {
   }
 
   // If the original day got removed from the date list, the person no
-  // longer wants the task there -- clear that slot.
+  // longer wants the task there -- clear that slot and any calendar entry
+  // it already had.
   if (!dates.includes(pendingIso)) {
     const original = dayData(pendingIso).slots[pendingSlotIndex];
+    if (original.homepageEventId && typeof loadHomepageManual === "function") {
+      const m = loadHomepageManual().filter((item) => item.id !== original.homepageEventId);
+      saveHomepageManual(m);
+    }
     original.activityId = null;
     original.status = "empty";
     original.detail = "";
     original.link = "";
+    original.homepageEventId = null;
   }
 
   const skippedFull = [];
@@ -875,8 +881,9 @@ function savePickerDetails() {
     if (link) slot.link = link;
 
     if (manual) {
+      const eventId = "hp" + Date.now() + Math.random().toString(36).slice(2, 6) + iso;
       manual.push({
-        id: "hp" + Date.now() + Math.random().toString(36).slice(2, 6) + iso,
+        id: eventId,
         date: iso,
         text: text || pendingPickerActivity.label,
         start,
@@ -884,6 +891,7 @@ function savePickerDetails() {
         color: colorHex(pendingPickerActivity.color),
         link: link || null,
       });
+      slot.homepageEventId = eventId;
     }
   });
 
@@ -987,14 +995,20 @@ function confirmReason() {
     slot.activityId = pendingSubstituteActivityId;
     slot.status = "active";
   } else {
+    if (slot.homepageEventId && typeof loadHomepageManual === "function") {
+      const manual = loadHomepageManual().filter((m) => m.id !== slot.homepageEventId);
+      saveHomepageManual(manual);
+    }
     slot.activityId = null;
     slot.status = "empty";
     slot.actionType = null;
+    slot.homepageEventId = null;
   }
 
   saveToStorage();
   closeReasonModal();
   renderDo();
+  if (typeof renderHomepage === "function") renderHomepage();
 }
 
 /* ---------------------------------------------------------- */
@@ -1050,9 +1064,11 @@ function saveDetail() {
     original.link = "";
     original.note = "";
     original.actionType = null;
+    original.homepageEventId = null;
     const newSlot = targetDay.slots[emptyIdx];
     newSlot.activityId = moved.activityId;
     newSlot.status = moved.status === "done" ? "done" : "active";
+    newSlot.homepageEventId = moved.homepageEventId || null;
     targetIso = chosenDay;
     targetSlot = emptyIdx;
   }
@@ -1063,8 +1079,26 @@ function saveDetail() {
   slot.note = document.getElementById("detail-note").value.trim();
   slot.actionType = document.getElementById("detail-category").value || null;
   saveToStorage();
+
+  // Keep the linked Homepage calendar block (if this task has one) in sync
+  // -- same date, text, and link as whatever was just saved here, rather
+  // than letting it drift out of date or get left behind on a day the
+  // task no longer lands on.
+  if (slot.homepageEventId && typeof loadHomepageManual === "function") {
+    const manual = loadHomepageManual();
+    const item = manual.find((m) => m.id === slot.homepageEventId);
+    if (item) {
+      item.date = targetIso;
+      const activity = activityById(slot.activityId);
+      item.text = slot.detail || (activity ? activity.label : item.text);
+      item.link = slot.link || null;
+      saveHomepageManual(manual);
+    }
+  }
+
   closeDetailModal();
   renderDo();
+  if (typeof renderHomepage === "function") renderHomepage();
 }
 
 /* ---------------------------------------------------------- */
