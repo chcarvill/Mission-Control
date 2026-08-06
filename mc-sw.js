@@ -1,4 +1,4 @@
-const CACHE = 'mc-v17-mobile-pass';
+const CACHE = 'mc-v18-reschedule-calendar-fix';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

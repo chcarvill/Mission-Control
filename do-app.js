@@ -1041,11 +1041,12 @@ function closeDetailModal() {
 function saveDetail() {
   const chosenDay = document.getElementById("detail-day").value || pendingDetailIso;
   const statusEl = document.getElementById("detail-day-status");
+  const dayChanged = chosenDay !== pendingDetailIso;
 
   let targetIso = pendingDetailIso;
   let targetSlot = pendingDetailSlot;
 
-  if (chosenDay !== pendingDetailIso) {
+  if (dayChanged) {
     ensureDay(chosenDay);
     const targetDay = dayData(chosenDay);
     const emptyIdx = targetDay.slots.findIndex((s) => s.status === "empty");
@@ -1078,24 +1079,45 @@ function saveDetail() {
   slot.link = document.getElementById("detail-link").value.trim();
   slot.note = document.getElementById("detail-note").value.trim();
   slot.actionType = document.getElementById("detail-category").value || null;
-  saveToStorage();
 
-  // Keep the linked Homepage calendar block (if this task has one) in sync
-  // -- same date, text, and link as whatever was just saved here, rather
-  // than letting it drift out of date or get left behind on a day the
-  // task no longer lands on.
-  if (slot.homepageEventId && typeof loadHomepageManual === "function") {
+  // Keep the linked Homepage calendar block in sync -- and if this task
+  // never had one (created with Skip, or from before this link existed,
+  // or just never had detail/link filled in), give it one now if there's
+  // now something worth showing: either a day was deliberately chosen
+  // here, or there's a description/link to display.
+  if (typeof loadHomepageManual === "function") {
     const manual = loadHomepageManual();
-    const item = manual.find((m) => m.id === slot.homepageEventId);
-    if (item) {
-      item.date = targetIso;
+    if (slot.homepageEventId) {
+      const item = manual.find((m) => m.id === slot.homepageEventId);
+      if (item) {
+        item.date = targetIso;
+        const activity = activityById(slot.activityId);
+        item.text = slot.detail || (activity ? activity.label : item.text);
+        item.link = slot.link || null;
+        saveHomepageManual(manual);
+      }
+    } else if (dayChanged || slot.detail || slot.link) {
       const activity = activityById(slot.activityId);
-      item.text = slot.detail || (activity ? activity.label : item.text);
-      item.link = slot.link || null;
+      const eventId = "hp" + Date.now() + Math.random().toString(36).slice(2, 6) + targetIso;
+      manual.push({
+        id: eventId,
+        date: targetIso,
+        text: slot.detail || (activity ? activity.label : "Task"),
+        start: HP_DEFAULT_START_DO,
+        end: (() => {
+          const [h, m] = HP_DEFAULT_START_DO.split(":").map(Number);
+          const t = h * 60 + m + 30;
+          return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
+        })(),
+        color: activity ? colorHex(activity.color) : "var(--sage)",
+        link: slot.link || null,
+      });
+      slot.homepageEventId = eventId;
       saveHomepageManual(manual);
     }
   }
 
+  saveToStorage();
   closeDetailModal();
   renderDo();
   if (typeof renderHomepage === "function") renderHomepage();
