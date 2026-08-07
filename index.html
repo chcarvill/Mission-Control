@@ -2170,6 +2170,75 @@
     resize: vertical;
   }
 
+  /* ── Prioritise Next Week tab (pyramid) ─────────────────── */
+  #nextweek-section {
+    padding: 28px 24px 32px;
+  }
+  #nextweek-section h2 {
+    font-family: var(--serif);
+    font-size: 17px;
+    margin: 0 0 4px;
+  }
+  #nextweek-range-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-bottom: 4px !important;
+  }
+  .pyramid-rung {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin: 0 auto 14px;
+    background: var(--paper);
+  }
+  .pyramid-rung-1 { width: 100%; background: var(--sage-tint); border-color: var(--sage); }
+  .pyramid-rung-2 { width: 88%; background: var(--amber-tint); border-color: var(--amber); }
+  .pyramid-rung-3 { width: 76%; background: var(--clay-tint); border-color: var(--clay); }
+  .pyramid-rung-label {
+    font-family: var(--serif);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+  .pyramid-subgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .pyramid-sub .do-detail-label { margin-top: 0; }
+  .nw-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 8px 10px;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 70px;
+    resize: vertical;
+  }
+  .nextweek-save-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .nextweek-save-status {
+    font-size: 12px;
+    color: var(--sage-dark);
+    font-style: italic;
+  }
+  @media (max-width: 640px) {
+    .pyramid-rung-2, .pyramid-rung-3 { width: 100%; }
+    .pyramid-subgrid { grid-template-columns: 1fr; }
+  }
+
   /* ── Targeted Action tab ────────────────────────────────── */
   #ta-section {
     padding: 28px 24px 8px;
@@ -2420,6 +2489,7 @@
       <button class="tab-btn" id="tab-week" data-tab="week">Plan week</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
       <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
+      <button class="tab-btn" id="tab-nextweek" data-tab="nextweek">Prioritise Next Week</button>
       <button class="tab-btn" id="tab-wasters" data-tab="wasters">Time wasters</button>
       <button class="tab-btn" id="tab-insights" data-tab="insights">Insights</button>
     </nav>
@@ -2512,6 +2582,52 @@
       </div>
 
       <div id="commit-history"></div>
+    </section>
+  </div>
+
+  <div id="tab-nextweek-panel" class="tab-panel" style="display:none;">
+    <section id="nextweek-section">
+      <h2>Prioritise Next Week</h2>
+      <p class="section-sub" id="nextweek-range-label"></p>
+      <p class="section-sub">Plan it now, ahead of the week starting — split between deciding and doing, top-down.</p>
+
+      <div class="pyramid-rung pyramid-rung-1">
+        <div class="pyramid-rung-label">Strategic Objectives</div>
+        <textarea id="nw-strategic" class="nw-textarea" placeholder="What matters most this week, at the top level?"></textarea>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-2">
+        <div class="pyramid-rung-label">Mass Communication</div>
+        <div class="pyramid-subgrid">
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Plan content</label>
+            <textarea id="nw-mass-plan" class="nw-textarea" placeholder="What content/film work needs deciding this week?"></textarea>
+          </div>
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Execute plan</label>
+            <textarea id="nw-mass-execute" class="nw-textarea" placeholder="What actually gets made/published this week?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-3">
+        <div class="pyramid-rung-label">1:1 Communication</div>
+        <div class="pyramid-subgrid">
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Plan interactions</label>
+            <textarea id="nw-1to1-plan" class="nw-textarea" placeholder="Who needs reaching out to, and how?"></textarea>
+          </div>
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Instigate interactions</label>
+            <textarea id="nw-1to1-instigate" class="nw-textarea" placeholder="What actually gets sent/said this week?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="nextweek-save-row">
+        <button class="btn primary" id="btn-save-nextweek">Save priorities</button>
+        <span id="nextweek-save-status" class="nextweek-save-status"></span>
+      </div>
     </section>
   </div>
 

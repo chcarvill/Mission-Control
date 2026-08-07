@@ -32,6 +32,14 @@ let STATE = {
   },
   taRuns: [], // [{id, weekLabel, marketApplied, improveApplied, skipped, createdAt}]
   categories: [], // [{id, label}] -- user-managed attribution categories for tasks/time
+  nextWeekPlan: {
+    weekOf: null,        // Monday ISO this plan is for
+    strategic: "",        // rung 1: Strategic Objectives
+    massPlan: "",          // rung 2: Mass Communication -> Plan Content
+    massExecute: "",       // rung 2: Mass Communication -> Execute Plan
+    oneToOnePlan: "",      // rung 3: 1:1 Communication -> Plan Interactions
+    oneToOneInstigate: "", // rung 3: 1:1 Communication -> Instigate Interactions
+  },
 };
 
 const TA_RATIO_LABELS = {
@@ -135,6 +143,19 @@ function boot() {
       { id: CAT_MARKET_ID, label: "Market" },
       { id: CAT_IMPROVE_ID, label: "Improve" },
     ];
+  }
+
+  // migrate: saved states from before "Prioritise Next Week" existed won't
+  // have this field, so backfill it with empty defaults rather than crashing.
+  if (!STATE.nextWeekPlan) {
+    STATE.nextWeekPlan = {
+      weekOf: null,
+      strategic: "",
+      massPlan: "",
+      massExecute: "",
+      oneToOnePlan: "",
+      oneToOneInstigate: "",
+    };
   }
 
   saveToStorage();
@@ -1851,6 +1872,72 @@ function removeObjective(id) {
   renderObjectives();
 }
 
+/* ---------------------------------------------------------- */
+/* Prioritise Next Week — three-rung pyramid of free-text      */
+/* areas (Strategic Objectives / Mass Communication / 1:1      */
+/* Communication) tied to the upcoming Monday.                  */
+/* ---------------------------------------------------------- */
+
+function upcomingMondayISO() {
+  return isoPlusDays(mondayOf(todayISO()), 7);
+}
+
+function renderNextWeek() {
+  const nextMonday = upcomingMondayISO();
+
+  // If the saved plan was for an earlier week (it's now this week or past),
+  // roll it forward into a fresh blank plan for the new upcoming week --
+  // but keep the old text nowhere near the new fields so nothing is lost
+  // silently; the user re-enters intentionally each planning session.
+  if (STATE.nextWeekPlan.weekOf && STATE.nextWeekPlan.weekOf !== nextMonday) {
+    STATE.nextWeekPlan = {
+      weekOf: nextMonday,
+      strategic: "",
+      massPlan: "",
+      massExecute: "",
+      oneToOnePlan: "",
+      oneToOneInstigate: "",
+    };
+    saveToStorage();
+  } else if (!STATE.nextWeekPlan.weekOf) {
+    STATE.nextWeekPlan.weekOf = nextMonday;
+    saveToStorage();
+  }
+
+  document.getElementById("nextweek-range-label").textContent =
+    "Week of " + fmtWeekRangeLabel(nextMonday);
+
+  document.getElementById("nw-strategic").value = STATE.nextWeekPlan.strategic || "";
+  document.getElementById("nw-mass-plan").value = STATE.nextWeekPlan.massPlan || "";
+  document.getElementById("nw-mass-execute").value = STATE.nextWeekPlan.massExecute || "";
+  document.getElementById("nw-1to1-plan").value = STATE.nextWeekPlan.oneToOnePlan || "";
+  document.getElementById("nw-1to1-instigate").value = STATE.nextWeekPlan.oneToOneInstigate || "";
+
+  setNextWeekSaveStatus("");
+}
+
+function saveNextWeekPlan() {
+  STATE.nextWeekPlan.weekOf = STATE.nextWeekPlan.weekOf || upcomingMondayISO();
+  STATE.nextWeekPlan.strategic = document.getElementById("nw-strategic").value;
+  STATE.nextWeekPlan.massPlan = document.getElementById("nw-mass-plan").value;
+  STATE.nextWeekPlan.massExecute = document.getElementById("nw-mass-execute").value;
+  STATE.nextWeekPlan.oneToOnePlan = document.getElementById("nw-1to1-plan").value;
+  STATE.nextWeekPlan.oneToOneInstigate = document.getElementById("nw-1to1-instigate").value;
+  saveToStorage();
+  setNextWeekSaveStatus("Saved.");
+}
+
+let nextWeekSaveStatusTimer = null;
+function setNextWeekSaveStatus(msg) {
+  const el = document.getElementById("nextweek-save-status");
+  if (!el) return;
+  el.textContent = msg;
+  if (nextWeekSaveStatusTimer) clearTimeout(nextWeekSaveStatusTimer);
+  if (msg) {
+    nextWeekSaveStatusTimer = setTimeout(() => { el.textContent = ""; }, 2500);
+  }
+}
+
 function renderCommitActivitySelect() {
   const select = document.getElementById("commit-activity-select");
   if (!select) return;
@@ -2240,18 +2327,21 @@ function switchTab(tab) {
   document.getElementById("tab-week-panel").style.display = tab === "week" ? "" : "none";
   document.getElementById("tab-strategize-panel").style.display = tab === "strategize" ? "" : "none";
   document.getElementById("tab-targeted-action-panel").style.display = tab === "targeted-action" ? "" : "none";
+  document.getElementById("tab-nextweek-panel").style.display = tab === "nextweek" ? "" : "none";
   document.getElementById("tab-wasters-panel").style.display = tab === "wasters" ? "" : "none";
   document.getElementById("tab-insights-panel").style.display = tab === "insights" ? "" : "none";
   document.getElementById("tab-today").classList.toggle("active", tab === "today");
   document.getElementById("tab-week").classList.toggle("active", tab === "week");
   document.getElementById("tab-strategize").classList.toggle("active", tab === "strategize");
   document.getElementById("tab-targeted-action").classList.toggle("active", tab === "targeted-action");
+  document.getElementById("tab-nextweek").classList.toggle("active", tab === "nextweek");
   document.getElementById("tab-wasters").classList.toggle("active", tab === "wasters");
   document.getElementById("tab-insights").classList.toggle("active", tab === "insights");
   if (tab === "week") renderWeekTab();
   if (tab === "insights") renderInsights();
   if (tab === "strategize") renderStrategize();
   if (tab === "targeted-action") renderTargetedAction();
+  if (tab === "nextweek") renderNextWeek();
 }
 
 /* ---------------------------------------------------------- */
@@ -2319,8 +2409,11 @@ function wireUI() {
   document.getElementById("tab-week").addEventListener("click", () => switchTab("week"));
   document.getElementById("tab-strategize").addEventListener("click", () => switchTab("strategize"));
   document.getElementById("tab-targeted-action").addEventListener("click", () => switchTab("targeted-action"));
+  document.getElementById("tab-nextweek").addEventListener("click", () => switchTab("nextweek"));
   document.getElementById("tab-wasters").addEventListener("click", () => switchTab("wasters"));
   document.getElementById("tab-insights").addEventListener("click", () => switchTab("insights"));
+
+  document.getElementById("btn-save-nextweek").addEventListener("click", saveNextWeekPlan);
 
   document.getElementById("btn-ta-generate").addEventListener("click", generateTargetedActionWeek);
 
