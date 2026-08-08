@@ -35,7 +35,13 @@ let STATE = {
   nextWeekPlan: {
     weekOf: null,        // Monday ISO this plan is for
     strategic: "",        // rung 1: Strategic Objectives
-    massPlan: "",          // rung 2: Mass Communication -> Plan Content
+    massPlan: {            // rung 2: Mass Communication -> Plan Content (guided)
+      purpose: "",
+      theme: "",
+      location: "",
+      backingTrack: "",
+      script: "",
+    },
     massExecute: "",       // rung 2: Mass Communication -> Execute Plan
     oneToOnePlan: "",      // rung 3: 1:1 Communication -> Plan Interactions
     oneToOneInstigate: "", // rung 3: 1:1 Communication -> Instigate Interactions
@@ -151,10 +157,21 @@ function boot() {
     STATE.nextWeekPlan = {
       weekOf: null,
       strategic: "",
-      massPlan: "",
+      massPlan: { purpose: "", theme: "", location: "", backingTrack: "", script: "" },
       massExecute: "",
       oneToOnePlan: "",
       oneToOneInstigate: "",
+    };
+  }
+  // migrate: "Plan Content" used to be a single free-text field -- fold any
+  // existing text into the new Script field so nothing typed before is lost.
+  if (typeof STATE.nextWeekPlan.massPlan === "string") {
+    STATE.nextWeekPlan.massPlan = {
+      purpose: "",
+      theme: "",
+      location: "",
+      backingTrack: "",
+      script: STATE.nextWeekPlan.massPlan,
     };
   }
 
@@ -1893,7 +1910,7 @@ function renderNextWeek() {
     STATE.nextWeekPlan = {
       weekOf: nextMonday,
       strategic: "",
-      massPlan: "",
+      massPlan: { purpose: "", theme: "", location: "", backingTrack: "", script: "" },
       massExecute: "",
       oneToOnePlan: "",
       oneToOneInstigate: "",
@@ -1908,7 +1925,11 @@ function renderNextWeek() {
     "Week of " + fmtWeekRangeLabel(nextMonday);
 
   document.getElementById("nw-strategic").value = STATE.nextWeekPlan.strategic || "";
-  document.getElementById("nw-mass-plan").value = STATE.nextWeekPlan.massPlan || "";
+  document.getElementById("nw-mass-purpose").value = STATE.nextWeekPlan.massPlan.purpose || "";
+  document.getElementById("nw-mass-theme").value = STATE.nextWeekPlan.massPlan.theme || "";
+  document.getElementById("nw-mass-location").value = STATE.nextWeekPlan.massPlan.location || "";
+  document.getElementById("nw-mass-track").value = STATE.nextWeekPlan.massPlan.backingTrack || "";
+  document.getElementById("nw-mass-script").value = STATE.nextWeekPlan.massPlan.script || "";
   document.getElementById("nw-mass-execute").value = STATE.nextWeekPlan.massExecute || "";
   document.getElementById("nw-1to1-plan").value = STATE.nextWeekPlan.oneToOnePlan || "";
   document.getElementById("nw-1to1-instigate").value = STATE.nextWeekPlan.oneToOneInstigate || "";
@@ -1919,7 +1940,13 @@ function renderNextWeek() {
 function saveNextWeekPlan() {
   STATE.nextWeekPlan.weekOf = STATE.nextWeekPlan.weekOf || upcomingMondayISO();
   STATE.nextWeekPlan.strategic = document.getElementById("nw-strategic").value;
-  STATE.nextWeekPlan.massPlan = document.getElementById("nw-mass-plan").value;
+  STATE.nextWeekPlan.massPlan = {
+    purpose: document.getElementById("nw-mass-purpose").value,
+    theme: document.getElementById("nw-mass-theme").value,
+    location: document.getElementById("nw-mass-location").value,
+    backingTrack: document.getElementById("nw-mass-track").value,
+    script: document.getElementById("nw-mass-script").value,
+  };
   STATE.nextWeekPlan.massExecute = document.getElementById("nw-mass-execute").value;
   STATE.nextWeekPlan.oneToOnePlan = document.getElementById("nw-1to1-plan").value;
   STATE.nextWeekPlan.oneToOneInstigate = document.getElementById("nw-1to1-instigate").value;

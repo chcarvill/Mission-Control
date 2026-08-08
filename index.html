@@ -2210,6 +2210,32 @@
     gap: 14px;
   }
   .pyramid-sub .do-detail-label { margin-top: 0; }
+  .nw-guided-form {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nw-field-label {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--sage-dark);
+    margin-top: 8px;
+  }
+  .nw-field-label:first-child { margin-top: 0; }
+  .nw-input {
+    width: 100%;
+    box-sizing: border-box;
+    font-family: var(--sans);
+    font-size: 13px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 7px 10px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+  .nw-guided-form .nw-textarea { min-height: 60px; }
   .nw-textarea {
     width: 100%;
     box-sizing: border-box;
@@ -2601,7 +2627,22 @@
         <div class="pyramid-subgrid">
           <div class="pyramid-sub">
             <label class="do-detail-label">Plan content</label>
-            <textarea id="nw-mass-plan" class="nw-textarea" placeholder="What content/film work needs deciding this week?"></textarea>
+            <div class="nw-guided-form">
+              <label class="nw-field-label">Purpose</label>
+              <input type="text" id="nw-mass-purpose" class="nw-input" placeholder="Why this video — what's it meant to do?">
+
+              <label class="nw-field-label">Theme</label>
+              <input type="text" id="nw-mass-theme" class="nw-input" placeholder="The core idea or message">
+
+              <label class="nw-field-label">Location</label>
+              <input type="text" id="nw-mass-location" class="nw-input" placeholder="Where it's shot">
+
+              <label class="nw-field-label">Backing track</label>
+              <input type="text" id="nw-mass-track" class="nw-input" placeholder="Song/style (check licensing — see below)">
+
+              <label class="nw-field-label">Basic script</label>
+              <textarea id="nw-mass-script" class="nw-textarea" placeholder="Rough beats or lines — doesn't need to be polished"></textarea>
+            </div>
           </div>
           <div class="pyramid-sub">
             <label class="do-detail-label">Execute plan</label>
