@@ -2515,6 +2515,7 @@
       <button class="tab-btn" id="tab-week" data-tab="week">Plan week</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
       <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
+      <button class="tab-btn" id="tab-thisweek" data-tab="thisweek">This week, prioritised</button>
       <button class="tab-btn" id="tab-nextweek" data-tab="nextweek">Prioritise Next Week</button>
       <button class="tab-btn" id="tab-wasters" data-tab="wasters">Time wasters</button>
       <button class="tab-btn" id="tab-insights" data-tab="insights">Insights</button>
@@ -2608,6 +2609,77 @@
       </div>
 
       <div id="commit-history"></div>
+    </section>
+  </div>
+
+  <div id="tab-thisweek-panel" class="tab-panel" style="display:none;">
+    <section id="thisweek-section">
+      <h2>This Week, Prioritised</h2>
+      <p class="section-sub" id="thisweek-range-label"></p>
+      <p class="section-sub">Same structure as next week's plan, but for the week already underway.</p>
+
+      <div class="pyramid-rung pyramid-rung-1">
+        <div class="pyramid-rung-label">Focus Projects</div>
+        <textarea id="tw-focus-projects" class="nw-textarea" placeholder="What 1-2 (max) projects will you focus on this week?"></textarea>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-1">
+        <div class="pyramid-rung-label">Communication</div>
+        <textarea id="tw-communication" class="nw-textarea" placeholder="What do you need to communicate this week? Both to your mass market? To particular people?"></textarea>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-1">
+        <div class="pyramid-rung-label">Strategic Objectives</div>
+        <textarea id="tw-strategic" class="nw-textarea" placeholder="What matters most this week, at the top level?"></textarea>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-2">
+        <div class="pyramid-rung-label">Mass Communication</div>
+        <div class="pyramid-subgrid">
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Plan content</label>
+            <div class="nw-guided-form">
+              <label class="nw-field-label">Purpose</label>
+              <input type="text" id="tw-mass-purpose" class="nw-input" placeholder="Why this video — what's it meant to do?">
+
+              <label class="nw-field-label">Theme</label>
+              <input type="text" id="tw-mass-theme" class="nw-input" placeholder="The core idea or message">
+
+              <label class="nw-field-label">Location</label>
+              <input type="text" id="tw-mass-location" class="nw-input" placeholder="Where it's shot">
+
+              <label class="nw-field-label">Backing track</label>
+              <input type="text" id="tw-mass-track" class="nw-input" placeholder="Song/style (check licensing — see below)">
+
+              <label class="nw-field-label">Basic script</label>
+              <textarea id="tw-mass-script" class="nw-textarea" placeholder="Rough beats or lines — doesn't need to be polished"></textarea>
+            </div>
+          </div>
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Execute plan</label>
+            <textarea id="tw-mass-execute" class="nw-textarea" placeholder="What actually gets made/published this week?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="pyramid-rung pyramid-rung-3">
+        <div class="pyramid-rung-label">1:1 Communication</div>
+        <div class="pyramid-subgrid">
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Plan interactions</label>
+            <textarea id="tw-1to1-plan" class="nw-textarea" placeholder="Who needs reaching out to, and how?"></textarea>
+          </div>
+          <div class="pyramid-sub">
+            <label class="do-detail-label">Instigate interactions</label>
+            <textarea id="tw-1to1-instigate" class="nw-textarea" placeholder="What actually gets sent/said this week?"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="nextweek-save-row">
+        <button class="btn primary" id="btn-save-thisweek">Save priorities</button>
+        <span id="thisweek-save-status" class="nextweek-save-status"></span>
+      </div>
     </section>
   </div>
 

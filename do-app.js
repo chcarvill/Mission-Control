@@ -46,6 +46,16 @@ let STATE = {
     oneToOnePlan: "",      // rung 3: 1:1 Communication -> Plan Interactions
     oneToOneInstigate: "", // rung 3: 1:1 Communication -> Instigate Interactions
   },
+  thisWeekPlan: {
+    weekOf: null,          // Monday ISO of the week already underway
+    focusProjects: "",     // 1-2 (max) projects to focus on this week
+    communication: "",     // what needs communicating, mass market + particular people
+    strategic: "",
+    massPlan: { purpose: "", theme: "", location: "", backingTrack: "", script: "" },
+    massExecute: "",
+    oneToOnePlan: "",
+    oneToOneInstigate: "",
+  },
 };
 
 const TA_RATIO_LABELS = {
@@ -172,6 +182,21 @@ function boot() {
       location: "",
       backingTrack: "",
       script: STATE.nextWeekPlan.massPlan,
+    };
+  }
+
+  // migrate: saved states from before "This week, prioritised" existed
+  // won't have this field, so backfill it with empty defaults.
+  if (!STATE.thisWeekPlan) {
+    STATE.thisWeekPlan = {
+      weekOf: null,
+      focusProjects: "",
+      communication: "",
+      strategic: "",
+      massPlan: { purpose: "", theme: "", location: "", backingTrack: "", script: "" },
+      massExecute: "",
+      oneToOnePlan: "",
+      oneToOneInstigate: "",
     };
   }
 
@@ -1965,6 +1990,87 @@ function setNextWeekSaveStatus(msg) {
   }
 }
 
+/* ---------------------------------------------------------- */
+/* This Week, Prioritised — same pyramid, plus focus projects   */
+/* and a communication question, tied to the week already      */
+/* underway (this week's Monday) rather than next week's.       */
+/* ---------------------------------------------------------- */
+
+function thisWeekMondayISO() {
+  return mondayOf(todayISO());
+}
+
+function renderThisWeek() {
+  const thisMonday = thisWeekMondayISO();
+
+  // Same roll-forward pattern as Prioritise Next Week: if the saved plan
+  // is for an earlier week, start fresh for the current one rather than
+  // silently carrying old text into a new week's fields.
+  if (STATE.thisWeekPlan.weekOf && STATE.thisWeekPlan.weekOf !== thisMonday) {
+    STATE.thisWeekPlan = {
+      weekOf: thisMonday,
+      focusProjects: "",
+      communication: "",
+      strategic: "",
+      massPlan: { purpose: "", theme: "", location: "", backingTrack: "", script: "" },
+      massExecute: "",
+      oneToOnePlan: "",
+      oneToOneInstigate: "",
+    };
+    saveToStorage();
+  } else if (!STATE.thisWeekPlan.weekOf) {
+    STATE.thisWeekPlan.weekOf = thisMonday;
+    saveToStorage();
+  }
+
+  document.getElementById("thisweek-range-label").textContent =
+    "Week of " + fmtWeekRangeLabel(thisMonday);
+
+  document.getElementById("tw-focus-projects").value = STATE.thisWeekPlan.focusProjects || "";
+  document.getElementById("tw-communication").value = STATE.thisWeekPlan.communication || "";
+  document.getElementById("tw-strategic").value = STATE.thisWeekPlan.strategic || "";
+  document.getElementById("tw-mass-purpose").value = STATE.thisWeekPlan.massPlan.purpose || "";
+  document.getElementById("tw-mass-theme").value = STATE.thisWeekPlan.massPlan.theme || "";
+  document.getElementById("tw-mass-location").value = STATE.thisWeekPlan.massPlan.location || "";
+  document.getElementById("tw-mass-track").value = STATE.thisWeekPlan.massPlan.backingTrack || "";
+  document.getElementById("tw-mass-script").value = STATE.thisWeekPlan.massPlan.script || "";
+  document.getElementById("tw-mass-execute").value = STATE.thisWeekPlan.massExecute || "";
+  document.getElementById("tw-1to1-plan").value = STATE.thisWeekPlan.oneToOnePlan || "";
+  document.getElementById("tw-1to1-instigate").value = STATE.thisWeekPlan.oneToOneInstigate || "";
+
+  setThisWeekSaveStatus("");
+}
+
+function saveThisWeekPlan() {
+  STATE.thisWeekPlan.weekOf = STATE.thisWeekPlan.weekOf || thisWeekMondayISO();
+  STATE.thisWeekPlan.focusProjects = document.getElementById("tw-focus-projects").value;
+  STATE.thisWeekPlan.communication = document.getElementById("tw-communication").value;
+  STATE.thisWeekPlan.strategic = document.getElementById("tw-strategic").value;
+  STATE.thisWeekPlan.massPlan = {
+    purpose: document.getElementById("tw-mass-purpose").value,
+    theme: document.getElementById("tw-mass-theme").value,
+    location: document.getElementById("tw-mass-location").value,
+    backingTrack: document.getElementById("tw-mass-track").value,
+    script: document.getElementById("tw-mass-script").value,
+  };
+  STATE.thisWeekPlan.massExecute = document.getElementById("tw-mass-execute").value;
+  STATE.thisWeekPlan.oneToOnePlan = document.getElementById("tw-1to1-plan").value;
+  STATE.thisWeekPlan.oneToOneInstigate = document.getElementById("tw-1to1-instigate").value;
+  saveToStorage();
+  setThisWeekSaveStatus("Saved.");
+}
+
+let thisWeekSaveStatusTimer = null;
+function setThisWeekSaveStatus(msg) {
+  const el = document.getElementById("thisweek-save-status");
+  if (!el) return;
+  el.textContent = msg;
+  if (thisWeekSaveStatusTimer) clearTimeout(thisWeekSaveStatusTimer);
+  if (msg) {
+    thisWeekSaveStatusTimer = setTimeout(() => { el.textContent = ""; }, 2500);
+  }
+}
+
 function renderCommitActivitySelect() {
   const select = document.getElementById("commit-activity-select");
   if (!select) return;
@@ -2354,6 +2460,7 @@ function switchTab(tab) {
   document.getElementById("tab-week-panel").style.display = tab === "week" ? "" : "none";
   document.getElementById("tab-strategize-panel").style.display = tab === "strategize" ? "" : "none";
   document.getElementById("tab-targeted-action-panel").style.display = tab === "targeted-action" ? "" : "none";
+  document.getElementById("tab-thisweek-panel").style.display = tab === "thisweek" ? "" : "none";
   document.getElementById("tab-nextweek-panel").style.display = tab === "nextweek" ? "" : "none";
   document.getElementById("tab-wasters-panel").style.display = tab === "wasters" ? "" : "none";
   document.getElementById("tab-insights-panel").style.display = tab === "insights" ? "" : "none";
@@ -2361,6 +2468,7 @@ function switchTab(tab) {
   document.getElementById("tab-week").classList.toggle("active", tab === "week");
   document.getElementById("tab-strategize").classList.toggle("active", tab === "strategize");
   document.getElementById("tab-targeted-action").classList.toggle("active", tab === "targeted-action");
+  document.getElementById("tab-thisweek").classList.toggle("active", tab === "thisweek");
   document.getElementById("tab-nextweek").classList.toggle("active", tab === "nextweek");
   document.getElementById("tab-wasters").classList.toggle("active", tab === "wasters");
   document.getElementById("tab-insights").classList.toggle("active", tab === "insights");
@@ -2368,6 +2476,7 @@ function switchTab(tab) {
   if (tab === "insights") renderInsights();
   if (tab === "strategize") renderStrategize();
   if (tab === "targeted-action") renderTargetedAction();
+  if (tab === "thisweek") renderThisWeek();
   if (tab === "nextweek") renderNextWeek();
 }
 
@@ -2436,11 +2545,13 @@ function wireUI() {
   document.getElementById("tab-week").addEventListener("click", () => switchTab("week"));
   document.getElementById("tab-strategize").addEventListener("click", () => switchTab("strategize"));
   document.getElementById("tab-targeted-action").addEventListener("click", () => switchTab("targeted-action"));
+  document.getElementById("tab-thisweek").addEventListener("click", () => switchTab("thisweek"));
   document.getElementById("tab-nextweek").addEventListener("click", () => switchTab("nextweek"));
   document.getElementById("tab-wasters").addEventListener("click", () => switchTab("wasters"));
   document.getElementById("tab-insights").addEventListener("click", () => switchTab("insights"));
 
   document.getElementById("btn-save-nextweek").addEventListener("click", saveNextWeekPlan);
+  document.getElementById("btn-save-thisweek").addEventListener("click", saveThisWeekPlan);
 
   document.getElementById("btn-ta-generate").addEventListener("click", generateTargetedActionWeek);
 

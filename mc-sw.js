@@ -1,4 +1,4 @@
-const CACHE = 'mc-v20-guided-content-plan';
+const CACHE = 'mc-v19-this-week-prioritised';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {
