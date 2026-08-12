@@ -85,6 +85,44 @@ let pendingSlotIndex = null;   // which stone (0/1/2) the picker modal is fillin
 let pendingIso = null;         // which day's slot the picker modal is filling
 let pendingPickerActivity = null; // the activity chosen in the picker, awaiting the optional details step
 let pendingPickerDates = [];   // day(s) this task should land on, from the details step's multi-date list
+let pendingC8Handoff = null;   // pre-fill text waiting from a "Send to Do" link (Communic8), used once
+
+// Reads ?c8title=&c8desc=&c8strategic= from the URL -- the link Communic8's
+// "Send to Do" button opens. If present, stashes the combined text and
+// opens the picker on today's first empty slot so the person just needs
+// to pick a project; the details step pre-fills with what was sent over.
+function handleContentIdeaDeepLink() {
+  const params = new URLSearchParams(window.location.search);
+  const title = params.get("c8title");
+  const desc = params.get("c8desc");
+  const strategic = params.get("c8strategic");
+  if (!title && !desc) return;
+
+  const parts = [];
+  if (desc) parts.push(desc);
+  else if (title) parts.push(title);
+  if (strategic) parts.push("Strategic objective: " + strategic);
+  pendingC8Handoff = parts.join(" — ");
+
+  // Clean the URL so refreshing/sharing doesn't re-trigger it.
+  const url = new URL(window.location.href);
+  ["c8title", "c8desc", "c8strategic"].forEach((k) => url.searchParams.delete(k));
+  window.history.replaceState({}, "", url.toString());
+
+  if (typeof switchMasterTab === "function") switchMasterTab("do");
+  switchTab("today");
+
+  const today = todayISO();
+  ensureDay(today);
+  const emptyIdx = dayData(today).slots.findIndex((s) => s.status === "empty");
+  if (emptyIdx === -1) {
+    // No room today -- don't lose the handoff, just let them open a picker
+    // themselves (e.g. on Plan week) and it'll still pre-fill when they do.
+    alert("Today's three slots are already full. Pick an empty slot on Plan week to add this content idea — the description will still be ready to drop in.");
+    return;
+  }
+  openPicker(today, emptyIdx);
+}
 let pendingCancelSlot = null;  // which stone is being cancelled/substituted, awaiting a reason
 let pendingCancelIso = null;   // which day's stone is being cancelled/substituted
 let pendingSubstituteActivityId = null; // if cancelling-to-substitute, the new activity chosen
@@ -824,11 +862,12 @@ function showPickerDetailsStep(activity) {
   pendingPickerDates = [pendingIso];
   renderPickerDateChips();
   document.getElementById("picker-detail-day-input").value = "";
-  document.getElementById("picker-detail-text").value = "";
+  document.getElementById("picker-detail-text").value = pendingC8Handoff || "";
   document.getElementById("picker-detail-link").value = "";
   document.getElementById("picker-detail-time").value = "";
   document.getElementById("picker-day-status").textContent = "";
   document.getElementById("picker-detail-text").focus();
+  pendingC8Handoff = null; // one-time use, so re-opening the picker later starts blank again
 }
 
 function renderPickerDateChips() {
@@ -2651,6 +2690,7 @@ function init() {
   wireUI();
   boot();
   renderDo();
+  handleContentIdeaDeepLink();
 }
 
 if (document.readyState === "loading") {
