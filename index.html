@@ -5540,9 +5540,38 @@ function getDiscretionaryVentureNames() {
   return loadPortfolio().filter(p => p.status === 'active').map(p => p.name);
 }
 function getVentureAttentionLast7() {
-  const log = suggestionLogAll();
   const today = dateKey(new Date());
   const counts = {};
+
+  // Primary signal: Do's own completed slots + logged time, matched by
+  // activity label -- kept in sync with Portfolio venture names by
+  // syncPortfolioVenturesIntoActivities() in do-app.js. This is real
+  // execution data, richer than inferring attention from what the
+  // suggestion engine itself has previously recommended.
+  if (typeof STATE !== 'undefined' && STATE && STATE.days) {
+    for (let i = 1; i <= 7; i++) {
+      const d = addDaysKey(today, -i);
+      const day = STATE.days[d];
+      const labelsToday = new Set();
+      if (day) {
+        (day.slots || []).forEach(s => {
+          if (s.status === 'done' && s.activityId) {
+            const a = STATE.activities.find(x => x.id === s.activityId);
+            if (a) labelsToday.add(a.label);
+          }
+        });
+      }
+      (STATE.timeLogs || []).filter(l => l.date === d && l.itemType === 'activity' && l.minutes > 0)
+        .forEach(l => labelsToday.add(l.itemLabel));
+      labelsToday.forEach(name => { counts[name] = (counts[name] || 0) + 1; });
+    }
+    // If Do has any history at all in this window, trust it over the fallback.
+    if (Object.keys(counts).length) return counts;
+  }
+
+  // Fallback: no Do data yet for this window (e.g. brand new venture) --
+  // use the suggestion log's own accept/override history, as before.
+  const log = suggestionLogAll();
   for (let i = 1; i <= 7; i++) {
     const entry = log[addDaysKey(today, -i)];
     if (entry && entry.ventureName && entry.status !== 'skipped') {
@@ -5668,7 +5697,29 @@ function acceptSuggestion() {
   const log = suggestionLogAll();
   log[dateKey(new Date())] = Object.assign({}, _currentSuggestion, { status: 'pending' });
   saveSuggestionLogAll(log);
+  pushSuggestionIntoDo(_currentSuggestion);
   renderSuggestion();
+}
+
+// Do bridge: puts today's accepted push into one of Do's three daily slots,
+// so accepting the suggestion IS committing to today's Do slot, not a
+// second decision made separately in a different tab. Uses the same
+// name-matched activity Portfolio ventures already sync into (see
+// syncPortfolioVenturesIntoActivities in do-app.js). Silently no-ops if
+// Do hasn't loaded yet, if the venture's already sitting in a slot today,
+// or if all three slots are already spoken for.
+function pushSuggestionIntoDo(suggestion) {
+  if (typeof addVentureIfMissing !== 'function' || typeof dayData !== 'function' ||
+      typeof assignActivity !== 'function' || typeof todayISO !== 'function') return;
+  if (typeof ensureDay === 'function') ensureDay(todayISO());
+  const activity = addVentureIfMissing(suggestion.ventureName);
+  if (!activity) return;
+  const day = dayData(todayISO());
+  if (!day) return;
+  if (day.slots.some(s => s.activityId === activity.id)) return;
+  const emptyIdx = day.slots.findIndex(s => s.status === 'empty');
+  if (emptyIdx === -1) return;
+  assignActivity(todayISO(), emptyIdx, activity.id);
 }
 
 function markSuggestionComplete() {
@@ -5705,6 +5756,7 @@ function chooseOverrideVenture(ventureName) {
     overrideFromVenture: _currentSuggestion ? _currentSuggestion.ventureName : null
   };
   saveSuggestionLogAll(log);
+  pushSuggestionIntoDo(log[today]);
   renderSuggestion();
 }
 

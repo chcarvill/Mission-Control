@@ -1,4 +1,4 @@
-const CACHE = 'mc-v22-daily-suggestion';
+const CACHE = 'mc-v23-do-mc-bridge';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

@@ -792,9 +792,36 @@ function isSafeUrl(url) {
 
 function markDone(iso, slotIndex) {
   const day = dayData(iso);
-  day.slots[slotIndex].status = "done";
+  const slot = day.slots[slotIndex];
+  slot.status = "done";
   saveToStorage();
+  syncSlotCompletionToMission(slot);
   renderDo();
+}
+
+// Mission Control bridge: an activity created via syncPortfolioVenturesIntoActivities
+// shares its exact label with a Portfolio venture, which is the standing link between
+// the two apps. When a slot for that activity is completed here, mark that venture's
+// current next open mission task done in Mission Control too -- so a Do completion and
+// a mission task completion are the same event, not two states that can drift apart.
+// No-ops silently for freeform activities that don't match any venture.
+function syncSlotCompletionToMission(slot) {
+  if (typeof load !== "function" || typeof save !== "function" || typeof getNextTaskForVenture !== "function") return;
+  const activity = activityById(slot.activityId);
+  if (!activity) return;
+  const next = getNextTaskForVenture(activity.label);
+  if (!next || !next.missionId) return;
+  const ventures = load();
+  const mission = ventures.find((v) => v.id === next.missionId);
+  if (!mission) return;
+  if (next.taskLetter && Array.isArray(mission.tasks)) {
+    const task = mission.tasks.find((t) => t.letter === next.taskLetter);
+    if (task) task.done = true;
+  }
+  save(ventures);
+  if (typeof renderHomepage === "function") renderHomepage();
+  if (typeof renderSuggestion === "function") renderSuggestion();
+  if (typeof render === "function") render();
 }
 
 function assignActivity(iso, slotIndex, activityId) {
