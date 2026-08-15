@@ -1,4 +1,4 @@
-const CACHE = 'mc-v22-roadmap';
+const CACHE = 'mc-v23-roadmap-on-projects';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
 
 self.addEventListener('install', e => {

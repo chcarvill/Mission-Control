@@ -3260,6 +3260,14 @@
       <input class="modal-input" id="rm-add-input" placeholder="Next step to add…" onkeydown="if(event.key==='Enter'){event.preventDefault();addRoadmapStep();}" />
       <button class="modal-cancel" style="white-space:nowrap;" onclick="addRoadmapStep()">+ Add</button>
     </div>
+    <div style="margin-top:6px;">
+      <a href="#" onclick="event.preventDefault();toggleRoadmapSuggestions();" style="font-family:var(--mono);font-size:10.5px;color:var(--text-hint);text-decoration:none;letter-spacing:0.02em;">Use an existing Do task instead?</a>
+    </div>
+    <div id="rm-suggestions-row" style="display:none;margin-top:6px;">
+      <select class="modal-input" id="rm-suggestions-select" onchange="applyRoadmapSuggestion()">
+        <option value="">— pick a task already in Do —</option>
+      </select>
+    </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeRoadmapModal()">Done</button>
     </div>
@@ -4559,7 +4567,7 @@ function confirmAddProject() {
   const name = document.getElementById('proj-name').value.trim();
   if (!name) { document.getElementById('proj-name').focus(); return; }
   const projects = loadProjects();
-  projects.push({
+  const newProject = {
     id: Date.now(),
     name,
     business: document.getElementById('proj-business').value.trim(),
@@ -4567,10 +4575,15 @@ function confirmAddProject() {
     description: document.getElementById('proj-description').value.trim(),
     category: projCat,
     created: new Date().toISOString()
-  });
+  };
+  projects.push(newProject);
   saveProjects(projects);
   closeProjectModal();
   renderProjects();
+  // Projects don't have a status/active concept the way Portfolio does --
+  // "commences" here just means "was created" -- so offer to build the
+  // roadmap right away, once, at creation time.
+  openRoadmapModal(newProject.id);
 }
 function deleteProject(id) {
   if (!confirm('Delete this project? Missions linked to it will be unlinked but not deleted.')) return;
@@ -4601,6 +4614,9 @@ function renderProjects() {
     const cat = CATEGORIES[p.category] || CATEGORIES[''];
     const missionCount = ventures.filter(v => v.projectId === p.id).length;
     const activeMissions = ventures.filter(v => v.projectId === p.id && v.status === 'active').length;
+    const roadmapSteps = (p.roadmap && p.roadmap.length) ? p.roadmap : [];
+    const roadmapDone = roadmapSteps.filter(s => s.done).length;
+    const roadmapLabel = roadmapSteps.length ? `${roadmapDone}/${roadmapSteps.length} steps` : 'Build roadmap';
     return `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;position:relative;border-left:3px solid ${cat.color};">
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
@@ -4614,6 +4630,7 @@ function renderProjects() {
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px;">
         <span style="font-family:var(--mono);font-size:10px;color:${cat.color};background:${cat.bg};border:1px solid ${cat.color};border-radius:4px;padding:2px 8px;letter-spacing:0.06em;">${p.category || 'no category'}</span>
         <span style="font-family:var(--mono);font-size:10px;color:var(--text-hint);">${missionCount} mission${missionCount !== 1 ? 's' : ''} · ${activeMissions} active</span>
+        <span class="pf-roadmap-badge" onclick="openRoadmapModal(${p.id}, event)" title="View/build roadmap">🗺 ${roadmapLabel}</span>
       </div>
     </div>`;
   }).join('');
@@ -4709,30 +4726,15 @@ function confirmAddPortfolio() {
     notes: document.getElementById('pf-notes').value.trim(),
     status: pfStatus
   };
-  let savedId, priorStatus = null;
   if (pfEditId) {
     const idx = items.findIndex(p => p.id === pfEditId);
-    if (idx !== -1) {
-      priorStatus = items[idx].status;
-      items[idx] = { ...items[idx], ...data };
-      savedId = items[idx].id;
-    }
+    if (idx !== -1) items[idx] = { ...items[idx], ...data };
   } else {
-    const newItem = { id: Date.now(), ...data };
-    items.push(newItem);
-    savedId = newItem.id;
+    items.push({ id: Date.now(), ...data });
   }
   savePortfolio(items);
   closePortfolioModal();
   renderPortfolio();
-
-  // The first time a project becomes Active with no roadmap yet, offer to
-  // build one right away -- but never re-prompt on subsequent saves, and
-  // never touch a roadmap that already exists.
-  const saved = items.find(p => p.id === savedId);
-  if (saved && data.status === 'active' && priorStatus !== 'active' && (!saved.roadmap || !saved.roadmap.length)) {
-    openRoadmapModal(savedId);
-  }
 }
 function deletePortfolioItem(id, ev) {
   if (ev) ev.stopPropagation();
@@ -4800,32 +4802,75 @@ function closeValidationModal() {
   valEditId = null;
 }
 
+// Pulls a deduplicated list of existing Do tasks/projects to suggest as
+// roadmap steps -- both the activity/project names themselves and any
+// specific task descriptions already logged against them. STATE is
+// defined in do-app.js, loaded before this script has any chance to run
+// (it only executes in response to a later click), so it's safely
+// available here despite living in a different file.
+function getDoTaskSuggestions() {
+  if (typeof STATE === 'undefined') return [];
+  const seen = new Set();
+  const out = [];
+  (STATE.activities || []).forEach(a => {
+    const label = (a.label || '').trim();
+    if (label && !seen.has(label.toLowerCase())) { seen.add(label.toLowerCase()); out.push(label); }
+  });
+  Object.values(STATE.days || {}).forEach(day => {
+    (day.slots || []).forEach(s => {
+      const detail = (s.detail || '').trim();
+      if (detail && !seen.has(detail.toLowerCase())) { seen.add(detail.toLowerCase()); out.push(detail); }
+    });
+  });
+  return out.sort((a, b) => a.localeCompare(b));
+}
+function toggleRoadmapSuggestions() {
+  const row = document.getElementById('rm-suggestions-row');
+  const showing = row.style.display !== 'none';
+  if (showing) { row.style.display = 'none'; return; }
+  const suggestions = getDoTaskSuggestions();
+  const select = document.getElementById('rm-suggestions-select');
+  select.innerHTML = '<option value="">— pick a task already in Do —</option>' +
+    (suggestions.length
+      ? suggestions.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('')
+      : '<option value="" disabled>No tasks in Do yet</option>');
+  row.style.display = 'block';
+}
+function applyRoadmapSuggestion() {
+  const select = document.getElementById('rm-suggestions-select');
+  if (select.value) {
+    document.getElementById('rm-add-input').value = select.value;
+    document.getElementById('rm-add-input').focus();
+  }
+}
+
 // ── Roadmap (ordered steps + visual path) ─────────────────────
 let rmEditId = null;
 
 function openRoadmapModal(id, ev) {
   if (ev) ev.stopPropagation();
   rmEditId = id;
-  const item = loadPortfolio().find(p => p.id === id);
+  const item = loadProjects().find(p => p.id === id);
   if (!item) return;
   if (!item.roadmap) item.roadmap = [];
   document.getElementById('rm-modal-title').textContent = 'ROADMAP — ' + item.name.toUpperCase();
   document.getElementById('rm-add-input').value = '';
+  document.getElementById('rm-suggestions-row').style.display = 'none';
   renderRoadmapPath();
   document.getElementById('roadmap-modal').classList.add('visible');
 }
 function closeRoadmapModal() {
   document.getElementById('roadmap-modal').classList.remove('visible');
   rmEditId = null;
-  renderPortfolio(); // refresh the card's step-count badge
+  renderProjects(); // refresh the card's step-count badge
 }
 function getRoadmapProject() {
-  return loadPortfolio().find(p => p.id === rmEditId);
+  return loadProjects().find(p => p.id === rmEditId);
 }
 function saveRoadmapProject(item) {
-  const items = loadPortfolio();
+  const items = loadProjects();
   const idx = items.findIndex(p => p.id === rmEditId);
-  if (idx !== -1) { items[idx] = item; savePortfolio(items); }
+  if (idx !== -1) { items[idx] = item; saveProjects(items); }
 }
 function renderRoadmapPath() {
   const item = getRoadmapProject();
@@ -4936,9 +4981,6 @@ function renderPortfolio() {
   listEl.innerHTML = items.map(p => {
     const total = pfValidationTotal(p);
     const tier = pfValidationTier(total);
-    const roadmapSteps = (p.roadmap && p.roadmap.length) ? p.roadmap : [];
-    const roadmapDone = roadmapSteps.filter(s => s.done).length;
-    const roadmapLabel = roadmapSteps.length ? `${roadmapDone}/${roadmapSteps.length} steps` : 'Build roadmap';
     return `
     <div class="pf-card" onclick="openPortfolioModal(${p.id})">
       <div class="pf-card-top">
@@ -4951,7 +4993,6 @@ function renderPortfolio() {
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
         <span class="pf-val-badge ${tier.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${tier.label}</span>
-        <span class="pf-roadmap-badge" onclick="openRoadmapModal(${p.id}, event)" title="View/build roadmap">🗺 ${roadmapLabel}</span>
         <a href="#" onclick="event.stopPropagation();event.preventDefault();switchMasterTab('do');" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
       </div>
     </div>
