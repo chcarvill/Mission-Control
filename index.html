@@ -1139,6 +1139,27 @@
   .pf-val-badge.val-low { background:var(--hold-bg); color:var(--hold); border:0.5px solid var(--hold); }
   .pf-val-badge.val-mid { background:var(--planning-bg); color:var(--planning); border:0.5px solid var(--planning); }
   .pf-val-badge.val-high { background:var(--active-bg); color:var(--active); border:0.5px solid var(--active); }
+  .pf-roadmap-badge { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 9px; border-radius:20px; letter-spacing:0.03em; cursor:pointer; background:var(--surface2); color:var(--text-secondary); border:0.5px solid var(--border2); }
+  .pf-roadmap-badge:hover { border-color:var(--active); color:var(--active); }
+
+  /* ── Roadmap (visual step path) ── */
+  .rm-progress { font-family:var(--mono); font-size:12px; color:var(--text-secondary); margin-bottom:16px; letter-spacing:0.03em; }
+  .rm-path { display:flex; flex-direction:column; margin-bottom:18px; max-height:50vh; overflow-y:auto; }
+  .rm-step { display:flex; gap:12px; position:relative; }
+  .rm-step-rail { display:flex; flex-direction:column; align-items:center; width:24px; flex-shrink:0; }
+  .rm-node { width:20px; height:20px; border-radius:50%; border:2px solid var(--border2); background:var(--surface); display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:10px; color:var(--text-hint); flex-shrink:0; cursor:pointer; transition:all 0.15s; }
+  .rm-node.rm-done { background:var(--active); border-color:var(--active); color:#fff; }
+  .rm-line { width:2px; flex:1; min-height:22px; background:var(--border2); }
+  .rm-line.rm-done { background:var(--active); }
+  .rm-line.rm-dashed { background-image:linear-gradient(var(--border2) 60%, rgba(255,255,255,0) 0%); background-position:left; background-size:2px 8px; background-repeat:repeat-y; background-color:transparent; }
+  .rm-step-body { flex:1; padding-bottom:18px; display:flex; align-items:flex-start; gap:8px; }
+  .rm-step-text { flex:1; font-family:var(--sans); font-size:13px; color:var(--text); padding-top:1px; }
+  .rm-step.rm-done .rm-step-text { color:var(--text-hint); text-decoration:line-through; }
+  .rm-step-controls { display:flex; gap:2px; flex-shrink:0; }
+  .rm-step-controls button { background:none; border:none; cursor:pointer; color:var(--text-hint); font-size:12px; padding:2px 4px; }
+  .rm-step-controls button:hover { color:var(--text); }
+  .rm-add-row { display:flex; gap:8px; }
+  .rm-add-row input { flex:1; }
 
 
   /* ══════════ DO APP (scoped under #do-panel) ══════════ */
@@ -2450,60 +2471,6 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
 
   /* ══════════ END DO APP CSS ══════════ */
-
-  /* ══════════ SUGGESTION SCREEN (Homepage) ══════════ */
-  .suggestion-wrap {
-    max-width: 560px;
-    margin: 0 auto;
-    padding: 3rem 2.5rem 2rem;
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  .suggestion-label {
-    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em;
-    text-transform: uppercase; color: var(--text-hint);
-  }
-  .suggestion-venture {
-    font-family: var(--mono); font-size: 15px; color: var(--active);
-    letter-spacing: 0.03em;
-  }
-  .suggestion-task {
-    font-family: var(--sans); font-size: 22px; font-weight: 500;
-    color: var(--text); line-height: 1.35;
-  }
-  .suggestion-reason {
-    font-family: var(--sans); font-size: 13px; color: var(--text-secondary);
-    font-style: italic;
-  }
-  .suggestion-empty {
-    font-family: var(--sans); font-size: 14px; color: var(--text-secondary);
-    padding: 1rem 0;
-  }
-  .suggestion-btns {
-    display: flex; flex-direction: column; gap: 8px; margin-top: 10px;
-  }
-  .suggestion-btn {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
-    padding: 12px 16px; border-radius: var(--radius);
-    cursor: pointer; text-align: center; transition: opacity 0.15s;
-  }
-  .suggestion-btn:hover { opacity: 0.85; }
-  .suggestion-accept {
-    background: linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);
-    color: #000; border: none; font-weight: 500;
-  }
-  .suggestion-override, .suggestion-override-item {
-    background: var(--surface2); color: var(--text); border: 0.5px solid var(--border2);
-  }
-  .suggestion-skip {
-    background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border);
-  }
-  .suggestion-cancel {
-    background: transparent; color: var(--text-hint); border: 0.5px solid var(--border);
-    margin-top: 4px;
-  }
-  .suggestion-override-list {
-    display: flex; flex-direction: column; gap: 6px;
-  }
 </style>
 </head>
 <body>
@@ -2527,8 +2494,7 @@
 
 <!-- Master tab bar -->
 <div class="master-tab-bar">
-  <button class="master-tab master-active" id="mtab-home" onclick="switchMasterTab('home')">Homepage</button>
-  <button class="master-tab" id="mtab-schedule" onclick="switchMasterTab('schedule')">Schedule</button>
+  <button class="master-tab master-active" id="mtab-homepage" onclick="switchMasterTab('homepage')">Homepage</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
@@ -2536,15 +2502,8 @@
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
 </div>
 
-<!-- ══ HOMEPAGE PANEL (daily suggestion — the only thing shown on open) ══ -->
-<div id="suggestion-panel">
-  <div class="suggestion-wrap">
-    <div class="suggestion-label">Loading…</div>
-  </div>
-</div>
-
-<!-- ══ SCHEDULE PANEL (formerly Homepage — weekly calendar grid) ══ -->
-<div id="schedule-panel" style="display:none;">
+<!-- ══ HOMEPAGE PANEL ══ -->
+<div id="homepage-panel">
   <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0.5rem;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;">
     <div>
       <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">This week</div>
@@ -3287,6 +3246,22 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeValidationModal()">Close</button>
       <button class="modal-confirm" onclick="saveValidation()">Save validation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Roadmap modal -->
+<div class="modal-overlay" id="roadmap-modal">
+  <div class="modal" style="max-width:480px;">
+    <h2 id="rm-modal-title">ROADMAP</h2>
+    <div class="rm-progress" id="rm-progress"></div>
+    <div class="rm-path" id="rm-path"></div>
+    <div class="rm-add-row">
+      <input class="modal-input" id="rm-add-input" placeholder="Next step to add…" onkeydown="if(event.key==='Enter'){event.preventDefault();addRoadmapStep();}" />
+      <button class="modal-cancel" style="white-space:nowrap;" onclick="addRoadmapStep()">+ Add</button>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeRoadmapModal()">Done</button>
     </div>
   </div>
 </div>
@@ -4652,13 +4627,11 @@ function emailProjectsView() {
 }
 
 function switchMasterTab(tab) {
-  document.getElementById('suggestion-panel').style.display = tab === 'home' ? 'block' : 'none';
-  document.getElementById('schedule-panel').style.display = tab === 'schedule' ? 'block' : 'none';
+  document.getElementById('homepage-panel').style.display = tab === 'homepage' ? 'block' : 'none';
   document.getElementById('portfolio-panel').style.display = tab === 'portfolio' ? 'block' : 'none';
   document.getElementById('projects-panel').style.display = tab === 'projects' ? 'block' : 'none';
   document.getElementById('do-panel').style.display = tab === 'do' ? 'block' : 'none';
-  document.getElementById('mtab-home').classList.toggle('master-active', tab === 'home');
-  document.getElementById('mtab-schedule').classList.toggle('master-active', tab === 'schedule');
+  document.getElementById('mtab-homepage').classList.toggle('master-active', tab === 'homepage');
   document.getElementById('mtab-portfolio').classList.toggle('master-active', tab === 'portfolio');
   document.getElementById('mtab-projects').classList.toggle('master-active', tab === 'projects');
   document.getElementById('mtab-missions').classList.toggle('master-active', tab === 'missions');
@@ -4667,8 +4640,7 @@ function switchMasterTab(tab) {
   document.getElementById('missions-panel').classList.toggle('master-hidden', tab !== 'missions');
   document.getElementById('prod-panel').classList.toggle('master-visible', tab === 'prod');
   if (tab === 'prod') { pUpdateMetrics(); pRenderMissionActions(); }
-  if (tab === 'home') { renderSuggestion(); }
-  if (tab === 'schedule') { renderHomepage(); }
+  if (tab === 'homepage') { renderHomepage(); }
   if (tab === 'portfolio') { renderPortfolio(); }
   if (tab === 'do') { renderDo(); }
 }
@@ -4737,15 +4709,30 @@ function confirmAddPortfolio() {
     notes: document.getElementById('pf-notes').value.trim(),
     status: pfStatus
   };
+  let savedId, priorStatus = null;
   if (pfEditId) {
     const idx = items.findIndex(p => p.id === pfEditId);
-    if (idx !== -1) items[idx] = { ...items[idx], ...data };
+    if (idx !== -1) {
+      priorStatus = items[idx].status;
+      items[idx] = { ...items[idx], ...data };
+      savedId = items[idx].id;
+    }
   } else {
-    items.push({ id: Date.now(), ...data });
+    const newItem = { id: Date.now(), ...data };
+    items.push(newItem);
+    savedId = newItem.id;
   }
   savePortfolio(items);
   closePortfolioModal();
   renderPortfolio();
+
+  // The first time a project becomes Active with no roadmap yet, offer to
+  // build one right away -- but never re-prompt on subsequent saves, and
+  // never touch a roadmap that already exists.
+  const saved = items.find(p => p.id === savedId);
+  if (saved && data.status === 'active' && priorStatus !== 'active' && (!saved.roadmap || !saved.roadmap.length)) {
+    openRoadmapModal(savedId);
+  }
 }
 function deletePortfolioItem(id, ev) {
   if (ev) ev.stopPropagation();
@@ -4812,6 +4799,101 @@ function closeValidationModal() {
   document.getElementById('validation-modal').classList.remove('visible');
   valEditId = null;
 }
+
+// ── Roadmap (ordered steps + visual path) ─────────────────────
+let rmEditId = null;
+
+function openRoadmapModal(id, ev) {
+  if (ev) ev.stopPropagation();
+  rmEditId = id;
+  const item = loadPortfolio().find(p => p.id === id);
+  if (!item) return;
+  if (!item.roadmap) item.roadmap = [];
+  document.getElementById('rm-modal-title').textContent = 'ROADMAP — ' + item.name.toUpperCase();
+  document.getElementById('rm-add-input').value = '';
+  renderRoadmapPath();
+  document.getElementById('roadmap-modal').classList.add('visible');
+}
+function closeRoadmapModal() {
+  document.getElementById('roadmap-modal').classList.remove('visible');
+  rmEditId = null;
+  renderPortfolio(); // refresh the card's step-count badge
+}
+function getRoadmapProject() {
+  return loadPortfolio().find(p => p.id === rmEditId);
+}
+function saveRoadmapProject(item) {
+  const items = loadPortfolio();
+  const idx = items.findIndex(p => p.id === rmEditId);
+  if (idx !== -1) { items[idx] = item; savePortfolio(items); }
+}
+function renderRoadmapPath() {
+  const item = getRoadmapProject();
+  if (!item) return;
+  const steps = item.roadmap || [];
+  const doneCount = steps.filter(s => s.done).length;
+  document.getElementById('rm-progress').textContent = steps.length
+    ? `${doneCount} of ${steps.length} step${steps.length === 1 ? '' : 's'} complete`
+    : 'No steps yet — add what it takes to bring this to fruition, in order.';
+
+  const pathEl = document.getElementById('rm-path');
+  pathEl.innerHTML = steps.map((s, i) => {
+    const isLast = i === steps.length - 1;
+    const lineDone = s.done && steps[i + 1] && steps[i + 1].done;
+    return `
+    <div class="rm-step ${s.done ? 'rm-done' : ''}">
+      <div class="rm-step-rail">
+        <div class="rm-node ${s.done ? 'rm-done' : ''}" onclick="toggleRoadmapStepDone('${s.id}')" title="Mark ${s.done ? 'not done' : 'done'}">${s.done ? '✓' : i + 1}</div>
+        ${!isLast ? `<div class="rm-line ${lineDone ? 'rm-done' : 'rm-dashed'}"></div>` : ''}
+      </div>
+      <div class="rm-step-body">
+        <div class="rm-step-text">${esc(s.text)}</div>
+        <div class="rm-step-controls">
+          ${i > 0 ? `<button onclick="moveRoadmapStep('${s.id}',-1)" title="Move up">↑</button>` : ''}
+          ${!isLast ? `<button onclick="moveRoadmapStep('${s.id}',1)" title="Move down">↓</button>` : ''}
+          <button onclick="deleteRoadmapStep('${s.id}')" title="Remove">✕</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function addRoadmapStep() {
+  const input = document.getElementById('rm-add-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const item = getRoadmapProject();
+  if (!item) return;
+  if (!item.roadmap) item.roadmap = [];
+  item.roadmap.push({ id: 'rs' + Date.now() + Math.random().toString(36).slice(2, 6), text, done: false });
+  saveRoadmapProject(item);
+  input.value = '';
+  renderRoadmapPath();
+}
+function toggleRoadmapStepDone(stepId) {
+  const item = getRoadmapProject();
+  if (!item) return;
+  const step = item.roadmap.find(s => s.id === stepId);
+  if (step) step.done = !step.done;
+  saveRoadmapProject(item);
+  renderRoadmapPath();
+}
+function moveRoadmapStep(stepId, dir) {
+  const item = getRoadmapProject();
+  if (!item) return;
+  const i = item.roadmap.findIndex(s => s.id === stepId);
+  const j = i + dir;
+  if (i === -1 || j < 0 || j >= item.roadmap.length) return;
+  [item.roadmap[i], item.roadmap[j]] = [item.roadmap[j], item.roadmap[i]];
+  saveRoadmapProject(item);
+  renderRoadmapPath();
+}
+function deleteRoadmapStep(stepId) {
+  const item = getRoadmapProject();
+  if (!item) return;
+  item.roadmap = item.roadmap.filter(s => s.id !== stepId);
+  saveRoadmapProject(item);
+  renderRoadmapPath();
+}
 function selectValScore(btn) {
   const key = btn.dataset.key, score = parseInt(btn.dataset.score, 10);
   valScores[key] = score;
@@ -4854,6 +4936,9 @@ function renderPortfolio() {
   listEl.innerHTML = items.map(p => {
     const total = pfValidationTotal(p);
     const tier = pfValidationTier(total);
+    const roadmapSteps = (p.roadmap && p.roadmap.length) ? p.roadmap : [];
+    const roadmapDone = roadmapSteps.filter(s => s.done).length;
+    const roadmapLabel = roadmapSteps.length ? `${roadmapDone}/${roadmapSteps.length} steps` : 'Build roadmap';
     return `
     <div class="pf-card" onclick="openPortfolioModal(${p.id})">
       <div class="pf-card-top">
@@ -4866,6 +4951,7 @@ function renderPortfolio() {
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
         <span class="pf-val-badge ${tier.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${tier.label}</span>
+        <span class="pf-roadmap-badge" onclick="openRoadmapModal(${p.id}, event)" title="View/build roadmap">🗺 ${roadmapLabel}</span>
         <a href="#" onclick="event.stopPropagation();event.preventDefault();switchMasterTab('do');" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
       </div>
     </div>
@@ -5458,340 +5544,8 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ══════════════════════════════════════════════
-//  DAILY SUGGESTION ENGINE (Homepage)
-//  Waterfall: rollover > neglect > capacity trim.
-//  Persisted separately from mc_prod so it has its own history.
-// ══════════════════════════════════════════════
-function suggestionLogAll() {
-  try { return JSON.parse(localStorage.getItem('mc_suggestion_log') || '{}'); } catch { return {}; }
-}
-function saveSuggestionLogAll(log) {
-  localStorage.setItem('mc_suggestion_log', JSON.stringify(log));
-}
-function addDaysKey(dStr, delta) {
-  const d = new Date(dStr + 'T00:00:00');
-  d.setDate(d.getDate() + delta);
-  return dateKey(d);
-}
-
-// ── Stage 1: today's free time, reusing the Schedule tab's own data ──
-function getTodaysOccupiedBlocks() {
-  const today = dateKey(new Date());
-  const ventures = load();
-  const missionTimes = loadHomepageMissionTimes();
-  const manual = loadHomepageManual();
-  const blocks = [];
-  ventures.filter(v => v.status !== 'completed').forEach(v => {
-    const isDue = v.dueDate === today;
-    const isScheduled = (v.scheduledDays || []).includes(today);
-    if (!isDue && !isScheduled) return;
-    const t = missionTimes[v.id] || {};
-    blocks.push({ start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END });
-  });
-  manual.filter(m => m.date === today).forEach(m => {
-    blocks.push({ start: m.start || HP_DEFAULT_START, end: m.end || HP_DEFAULT_END });
-  });
-  return blocks;
-}
-function getLargestFreeWindow() {
-  const blocks = getTodaysOccupiedBlocks()
-    .map(b => ({
-      start: hpMinsFromMidnight(b.start) ?? HP_DAY_START_MIN,
-      end: hpMinsFromMidnight(b.end) ?? HP_DAY_START_MIN + 30
-    }))
-    .sort((a, b) => a.start - b.start);
-  let cursor = HP_DAY_START_MIN;
-  let best = { start: HP_DAY_START_MIN, end: HP_DAY_START_MIN };
-  blocks.forEach(b => {
-    const s = Math.max(b.start, HP_DAY_START_MIN);
-    if (s > cursor && (s - cursor) > (best.end - best.start)) best = { start: cursor, end: s };
-    cursor = Math.max(cursor, Math.min(b.end, HP_DAY_END_MIN));
-  });
-  if (HP_DAY_END_MIN - cursor > best.end - best.start) best = { start: cursor, end: HP_DAY_END_MIN };
-  return best; // minutes-from-midnight
-}
-function minsToHHMM(mins) {
-  return String(Math.floor(mins / 60)).padStart(2, '0') + ':' + String(mins % 60).padStart(2, '0');
-}
-
-// ── Stage 2: rollover — yesterday's unfinished push, or anything explicitly postponed to today ──
-function getRolloverCandidate() {
-  const log = suggestionLogAll();
-  const today = dateKey(new Date());
-  const yesterday = addDaysKey(today, -1);
-  const y = log[yesterday];
-  // "pending" left over from yesterday means it was never marked complete -- treat as incomplete.
-  if (y && y.status === 'pending') {
-    return { ventureName: y.ventureName, missionId: y.missionId, taskLetter: y.taskLetter, taskText: y.taskText, reason: 'continuing from yesterday (not marked complete)' };
-  }
-  // Explicit postponements aimed at today (either "tomorrow" set yesterday, or a specific date)
-  for (const [d, entry] of Object.entries(log)) {
-    if (entry.status !== 'skipped') continue;
-    if (entry.postponedTo === today || (entry.postponedTo === 'tomorrow' && d === yesterday)) {
-      return { ventureName: entry.ventureName, missionId: entry.missionId, taskLetter: entry.taskLetter, taskText: entry.taskText, reason: 'postponed to today' };
-    }
-  }
-  return null;
-}
-
-// ── Stage 3: neglect weighting across discretionary (active) portfolio ventures ──
-function getDiscretionaryVentureNames() {
-  return loadPortfolio().filter(p => p.status === 'active').map(p => p.name);
-}
-function getVentureAttentionLast7() {
-  const today = dateKey(new Date());
-  const counts = {};
-
-  // Primary signal: Do's own completed slots + logged time, matched by
-  // activity label -- kept in sync with Portfolio venture names by
-  // syncPortfolioVenturesIntoActivities() in do-app.js. This is real
-  // execution data, richer than inferring attention from what the
-  // suggestion engine itself has previously recommended.
-  if (typeof STATE !== 'undefined' && STATE && STATE.days) {
-    for (let i = 1; i <= 7; i++) {
-      const d = addDaysKey(today, -i);
-      const day = STATE.days[d];
-      const labelsToday = new Set();
-      if (day) {
-        (day.slots || []).forEach(s => {
-          if (s.status === 'done' && s.activityId) {
-            const a = STATE.activities.find(x => x.id === s.activityId);
-            if (a) labelsToday.add(a.label);
-          }
-        });
-      }
-      (STATE.timeLogs || []).filter(l => l.date === d && l.itemType === 'activity' && l.minutes > 0)
-        .forEach(l => labelsToday.add(l.itemLabel));
-      labelsToday.forEach(name => { counts[name] = (counts[name] || 0) + 1; });
-    }
-    // If Do has any history at all in this window, trust it over the fallback.
-    if (Object.keys(counts).length) return counts;
-  }
-
-  // Fallback: no Do data yet for this window (e.g. brand new venture) --
-  // use the suggestion log's own accept/override history, as before.
-  const log = suggestionLogAll();
-  for (let i = 1; i <= 7; i++) {
-    const entry = log[addDaysKey(today, -i)];
-    if (entry && entry.ventureName && entry.status !== 'skipped') {
-      counts[entry.ventureName] = (counts[entry.ventureName] || 0) + 1;
-    }
-  }
-  return counts;
-}
-function getMostNeglectedVenture() {
-  const names = getDiscretionaryVentureNames();
-  if (!names.length) return null;
-  const counts = getVentureAttentionLast7();
-  let best = names[0], bestCount = counts[best] || 0;
-  names.forEach(n => {
-    const c = counts[n] || 0;
-    if (c < bestCount) { best = n; bestCount = c; }
-  });
-  return { ventureName: best, daysAttended: bestCount };
-}
-
-// ── Sequencing: next incomplete task for a portfolio venture, using mc_ventures' letter badges ──
-function getNextTaskForVenture(ventureName) {
-  const ventures = load();
-  const missions = ventures.filter(v => v.venture === ventureName && (v.status === 'active' || v.status === 'on-hold'));
-  const candidates = [];
-  missions.forEach(v => {
-    const openTasks = (v.tasks || []).filter(t => !t.done).sort((a, b) => (a.letter || 'z').localeCompare(b.letter || 'z'));
-    if (openTasks.length) {
-      candidates.push({ missionId: v.id, taskLetter: openTasks[0].letter, taskText: openTasks[0].text });
-    } else if (!v.tasks || !v.tasks.length) {
-      // No sub-tasks logged yet -- the mission itself is the actionable unit
-      candidates.push({ missionId: v.id, taskLetter: v.letter, taskText: v.name });
-    }
-  });
-  candidates.sort((a, b) => (a.taskLetter || 'z').localeCompare(b.taskLetter || 'z'));
-  return candidates[0] || null;
-}
-
-// ── Full pipeline: Stage 2 > Stage 3 (Stage 4 capacity trim shown as context, not a hard filter -- no duration data exists yet) ──
-function computeTodaysSuggestion() {
-  const rollover = getRolloverCandidate();
-  if (rollover) return rollover;
-
-  const neglected = getMostNeglectedVenture();
-  if (!neglected) return null;
-
-  const next = getNextTaskForVenture(neglected.ventureName);
-  const reason = 'least attention this week (' + neglected.daysAttended + '/7 days)';
-  if (!next) {
-    return { ventureName: neglected.ventureName, missionId: null, taskLetter: null, taskText: 'No active tasks queued for this venture yet', reason };
-  }
-  return {
-    ventureName: neglected.ventureName,
-    missionId: next.missionId,
-    taskLetter: next.taskLetter,
-    taskText: (next.taskLetter ? next.taskLetter + '. ' : '') + next.taskText,
-    reason
-  };
-}
-
-// ── Rendering + Stage 5/6 (accept / override / skip) ──
-let _currentSuggestion = null;
-
-function suggestionAlreadyDecidedToday() {
-  const entry = suggestionLogAll()[dateKey(new Date())];
-  return !!(entry && (entry.status === 'pending' || entry.status === 'skipped' || entry.status === 'complete'));
-}
-
-function freeWindowLabel() {
-  const w = getLargestFreeWindow();
-  if ((w.end - w.start) < 15) return 'no significant free window today';
-  return hpFmtTime(minsToHHMM(w.start)) + '–' + hpFmtTime(minsToHHMM(w.end)) + ' free';
-}
-
-function renderSuggestion() {
-  const panel = document.getElementById('suggestion-panel');
-  const today = dateKey(new Date());
-  const existing = suggestionLogAll()[today];
-
-  if (existing && (existing.status === 'pending' || existing.status === 'skipped')) {
-    _currentSuggestion = existing;
-    const statusLabel = existing.status === 'skipped'
-      ? 'Skipped — postponed to ' + (existing.postponedTo === 'neglect-pool' ? 'no fixed date' : existing.postponedTo)
-      : 'Accepted for today';
-    panel.innerHTML = `
-      <div class="suggestion-wrap">
-        <div class="suggestion-label">Today's push</div>
-        <div class="suggestion-venture">${esc(existing.ventureName)}</div>
-        <div class="suggestion-task">${esc(existing.taskText)}</div>
-        <div class="suggestion-reason">${esc(statusLabel)}</div>
-        <div class="suggestion-btns">
-          ${existing.status === 'pending' ? `<button class="suggestion-btn suggestion-accept" onclick="markSuggestionComplete()">Mark complete</button>` : ''}
-          <button class="suggestion-btn suggestion-override" onclick="openOverridePicker()">Change venture</button>
-        </div>
-      </div>`;
-    return;
-  }
-
-  const s = computeTodaysSuggestion();
-  _currentSuggestion = s;
-
-  if (!s) {
-    panel.innerHTML = `<div class="suggestion-wrap"><div class="suggestion-empty">No active ventures in your Product Portfolio yet — add some under Portfolio to get daily suggestions.</div></div>`;
-    return;
-  }
-
-  panel.innerHTML = `
-    <div class="suggestion-wrap">
-      <div class="suggestion-label">Today's push</div>
-      <div class="suggestion-venture">${esc(s.ventureName)}</div>
-      <div class="suggestion-task">${esc(s.taskText)}</div>
-      <div class="suggestion-reason">${esc(s.reason)} · ${esc(freeWindowLabel())}</div>
-      <div class="suggestion-btns">
-        <button class="suggestion-btn suggestion-accept" onclick="acceptSuggestion()">Accept</button>
-        <button class="suggestion-btn suggestion-override" onclick="openOverridePicker()">Choose different venture</button>
-        <button class="suggestion-btn suggestion-skip" onclick="openSkipPicker()">Skip today</button>
-      </div>
-    </div>`;
-}
-
-function acceptSuggestion() {
-  if (!_currentSuggestion) return;
-  const log = suggestionLogAll();
-  log[dateKey(new Date())] = Object.assign({}, _currentSuggestion, { status: 'pending' });
-  saveSuggestionLogAll(log);
-  pushSuggestionIntoDo(_currentSuggestion);
-  renderSuggestion();
-}
-
-// Do bridge: puts today's accepted push into one of Do's three daily slots,
-// so accepting the suggestion IS committing to today's Do slot, not a
-// second decision made separately in a different tab. Uses the same
-// name-matched activity Portfolio ventures already sync into (see
-// syncPortfolioVenturesIntoActivities in do-app.js). Silently no-ops if
-// Do hasn't loaded yet, if the venture's already sitting in a slot today,
-// or if all three slots are already spoken for.
-function pushSuggestionIntoDo(suggestion) {
-  if (typeof addVentureIfMissing !== 'function' || typeof dayData !== 'function' ||
-      typeof assignActivity !== 'function' || typeof todayISO !== 'function') return;
-  if (typeof ensureDay === 'function') ensureDay(todayISO());
-  const activity = addVentureIfMissing(suggestion.ventureName);
-  if (!activity) return;
-  const day = dayData(todayISO());
-  if (!day) return;
-  if (day.slots.some(s => s.activityId === activity.id)) return;
-  const emptyIdx = day.slots.findIndex(s => s.status === 'empty');
-  if (emptyIdx === -1) return;
-  assignActivity(todayISO(), emptyIdx, activity.id);
-}
-
-function markSuggestionComplete() {
-  const today = dateKey(new Date());
-  const log = suggestionLogAll();
-  if (log[today]) { log[today].status = 'complete'; saveSuggestionLogAll(log); }
-  renderSuggestion();
-}
-
-function openOverridePicker() {
-  const names = getDiscretionaryVentureNames();
-  const panel = document.getElementById('suggestion-panel');
-  panel.innerHTML = `
-    <div class="suggestion-wrap">
-      <div class="suggestion-label">Choose a venture for today</div>
-      <div class="suggestion-override-list">
-        ${names.map(n => `<button class="suggestion-btn suggestion-override-item" onclick="chooseOverrideVenture('${n.replace(/'/g, "\\'")}')">${esc(n)}</button>`).join('') || '<div class="suggestion-empty">No active ventures in Portfolio.</div>'}
-      </div>
-      <button class="suggestion-btn suggestion-cancel" onclick="renderSuggestion()">Cancel</button>
-    </div>`;
-}
-
-function chooseOverrideVenture(ventureName) {
-  const next = getNextTaskForVenture(ventureName);
-  const today = dateKey(new Date());
-  const log = suggestionLogAll();
-  log[today] = {
-    ventureName,
-    missionId: next ? next.missionId : null,
-    taskLetter: next ? next.taskLetter : null,
-    taskText: next ? ((next.taskLetter ? next.taskLetter + '. ' : '') + next.taskText) : 'No active tasks queued for this venture yet',
-    reason: 'manually chosen',
-    status: 'pending',
-    overrideFromVenture: _currentSuggestion ? _currentSuggestion.ventureName : null
-  };
-  saveSuggestionLogAll(log);
-  pushSuggestionIntoDo(log[today]);
-  renderSuggestion();
-}
-
-function openSkipPicker() {
-  const panel = document.getElementById('suggestion-panel');
-  panel.innerHTML = `
-    <div class="suggestion-wrap">
-      <div class="suggestion-label">Postpone to…</div>
-      <div class="suggestion-override-list">
-        <button class="suggestion-btn suggestion-override-item" onclick="skipSuggestion('tomorrow')">Tomorrow</button>
-        <button class="suggestion-btn suggestion-override-item" onclick="skipSuggestionSpecificDate()">Specific date</button>
-        <button class="suggestion-btn suggestion-override-item" onclick="skipSuggestion('neglect-pool')">No fixed date — re-enter the neglect pool</button>
-      </div>
-      <button class="suggestion-btn suggestion-cancel" onclick="renderSuggestion()">Cancel</button>
-    </div>`;
-}
-
-function skipSuggestion(postponedTo) {
-  if (!_currentSuggestion) return;
-  const log = suggestionLogAll();
-  log[dateKey(new Date())] = Object.assign({}, _currentSuggestion, { status: 'skipped', postponedTo });
-  saveSuggestionLogAll(log);
-  renderSuggestion();
-}
-function skipSuggestionSpecificDate() {
-  const dateStr = prompt('Postpone to which date? (YYYY-MM-DD)');
-  if (!dateStr) return;
-  skipSuggestion(dateStr);
-}
-
-// Initial render of the homepage grid (Schedule tab, now hidden by default) and today's suggestion
+// Initial render of the homepage (must run after HP_* constants/functions above are defined)
 renderHomepage();
-renderSuggestion();
-// Land on Homepage (suggestion) only if today isn't decided yet; otherwise open straight to Schedule
-switchMasterTab(suggestionAlreadyDecidedToday() ? 'schedule' : 'home');
 
 </script>
 
