@@ -2525,6 +2525,7 @@ function switchTab(tab) {
   document.getElementById("tab-today-panel").style.display = tab === "today" ? "" : "none";
   document.getElementById("tab-week-panel").style.display = tab === "week" ? "" : "none";
   document.getElementById("tab-strategize-panel").style.display = tab === "strategize" ? "" : "none";
+  document.getElementById("tab-visualizer-panel").style.display = tab === "visualizer" ? "" : "none";
   document.getElementById("tab-targeted-action-panel").style.display = tab === "targeted-action" ? "" : "none";
   document.getElementById("tab-thisweek-panel").style.display = tab === "thisweek" ? "" : "none";
   document.getElementById("tab-nextweek-panel").style.display = tab === "nextweek" ? "" : "none";
@@ -2533,6 +2534,7 @@ function switchTab(tab) {
   document.getElementById("tab-today").classList.toggle("active", tab === "today");
   document.getElementById("tab-week").classList.toggle("active", tab === "week");
   document.getElementById("tab-strategize").classList.toggle("active", tab === "strategize");
+  document.getElementById("tab-visualizer").classList.toggle("active", tab === "visualizer");
   document.getElementById("tab-targeted-action").classList.toggle("active", tab === "targeted-action");
   document.getElementById("tab-thisweek").classList.toggle("active", tab === "thisweek");
   document.getElementById("tab-nextweek").classList.toggle("active", tab === "nextweek");
@@ -2610,6 +2612,7 @@ function wireUI() {
   document.getElementById("tab-today").addEventListener("click", () => switchTab("today"));
   document.getElementById("tab-week").addEventListener("click", () => switchTab("week"));
   document.getElementById("tab-strategize").addEventListener("click", () => switchTab("strategize"));
+  document.getElementById("tab-visualizer").addEventListener("click", () => switchTab("visualizer"));
   document.getElementById("tab-targeted-action").addEventListener("click", () => switchTab("targeted-action"));
   document.getElementById("tab-thisweek").addEventListener("click", () => switchTab("thisweek"));
   document.getElementById("tab-nextweek").addEventListener("click", () => switchTab("nextweek"));

@@ -2472,6 +2472,116 @@
 
   /* ══════════ END DO APP CSS ══════════ */
 </style>
+<style id="visualizer-styles">
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --cream:#F4F1EA;
+    --asc-sage:#8A9A7E;
+    --pine:#4E5D45;
+    --asc-clay:#C97B4A;
+    --dirt:#D8CBA8;
+    --gold:#EFAF4B;
+    --asc-ink:#3A362E;
+    --asc-line:rgba(58,54,46,0.12);
+  }#visualizer-scope * {box-sizing:border-box;-webkit-tap-highlight-color:transparent;}#visualizer-scope html, #visualizer-scope body {margin:0;padding:0;}#visualizer-scope body {
+    background:var(--cream);
+    color:var(--asc-ink);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    overscroll-behavior:none;
+  }#visualizer-scope header {
+    position:sticky; top:0; z-index:20;
+    background:linear-gradient(to bottom, var(--cream) 78%, rgba(244,241,234,0));
+    padding:18px 18px 26px;
+    display:flex; flex-direction:column; gap:10px;
+  }#visualizer-scope .goalDropdownWrap { position:relative; align-self:flex-start; }#visualizer-scope .goalDropdownBtn {
+    display:flex; align-items:center; gap:8px;
+    border:1px solid var(--asc-line); background:#fff;
+    padding:8px 14px; border-radius:10px; font-family:'Inter',sans-serif;
+    font-size:13px; font-weight:600; color:var(--asc-ink); cursor:pointer;
+  }#visualizer-scope .goalDropdownBtn .chevron { color:var(--asc-ink); opacity:.5; transition:transform .15s; }#visualizer-scope .goalDropdownBtn.open .chevron { transform:rotate(180deg); }#visualizer-scope .goalDropdownMenu {
+    position:absolute; top:calc(100% + 6px); left:0; min-width:220px;
+    background:#fff; border:1px solid var(--asc-line); border-radius:12px;
+    box-shadow:0 10px 28px rgba(58,54,46,0.15);
+    padding:6px; z-index:25; display:none; max-height:280px; overflow-y:auto;
+  }#visualizer-scope .goalDropdownMenu.open { display:block; }#visualizer-scope .goalOption {
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:9px 12px; border-radius:8px; font-size:13.5px; font-weight:600;
+    color:var(--asc-ink); cursor:pointer;
+  }#visualizer-scope .goalOption:active { background:var(--cream); }#visualizer-scope .goalOption.active { background:var(--pine); color:var(--cream); }#visualizer-scope .goalOptionName { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }#visualizer-scope .goalOptionRight { display:flex; align-items:center; gap:8px; flex:0 0 auto; }#visualizer-scope .goalOption .check { opacity:0; font-size:12px; }#visualizer-scope .goalOption.active .check { opacity:1; }#visualizer-scope .goalDeleteBtn {
+    border:none; background:transparent; cursor:pointer; font-size:13px;
+    opacity:.4; padding:2px 4px; border-radius:6px; line-height:1;
+  }#visualizer-scope .goalDeleteBtn:active { opacity:.9; background:rgba(0,0,0,0.06); }#visualizer-scope .goalOption.active .goalDeleteBtn { opacity:.7; }#visualizer-scope .goalOption.active .goalDeleteBtn:active { opacity:1; background:rgba(255,255,255,0.15); }#visualizer-scope .goalOptionDivider { height:1px; background:var(--asc-line); margin:6px 4px; }#visualizer-scope .goalOption.newGoal { color:var(--asc-clay); }#visualizer-scope h1 {
+    font-family:'Fraunces', serif; font-weight:600; font-size:26px; margin:0;
+    letter-spacing:-0.01em;
+  }#visualizer-scope .sub {font-size:13px; color:var(--asc-ink); opacity:0.55; margin:0;}#visualizer-scope .taskList {
+    margin:4px 18px 4px; background:#fff; border:1px solid var(--asc-line);
+    border-radius:14px; padding:6px 4px; overflow:hidden;
+  }#visualizer-scope .taskList.empty-list { padding:0; border:none; margin:0; }#visualizer-scope .taskListTitle {
+    font-family:'Fraunces',serif; font-weight:600; font-size:14px;
+    padding:12px 14px 6px; color:var(--pine);
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }#visualizer-scope .reorderTrailBtn {
+    font-family:'Inter',sans-serif; font-weight:700; font-size:11.5px;
+    color:var(--asc-clay); background:transparent; border:1px solid var(--asc-clay);
+    border-radius:999px; padding:5px 12px; cursor:pointer;
+  }#visualizer-scope .reorderTrailBtn:active { background:var(--asc-clay); color:#fff; }#visualizer-scope .reorderList {
+    display:flex; flex-direction:column; gap:6px; max-height:50vh; overflow-y:auto;
+    margin-bottom:4px;
+  }#visualizer-scope .reorderRow {
+    display:flex; align-items:center; gap:12px; padding:9px 12px;
+    border:1px solid var(--asc-line); border-radius:10px; background:#fff;
+  }#visualizer-scope .reorderRow input {
+    width:42px; flex:0 0 auto; text-align:center; border:1px solid var(--asc-line);
+    border-radius:8px; padding:6px 4px; font-family:'Inter',sans-serif;
+    font-weight:700; font-size:14px; color:var(--pine);
+  }#visualizer-scope .reorderRow span { font-size:13.5px; font-weight:600; flex:1; min-width:0; }#visualizer-scope .taskListDone {
+    padding:14px; font-size:13px; color:var(--pine); font-weight:600; text-align:center;
+  }#visualizer-scope .taskItem {
+    display:flex; align-items:flex-start; gap:8px; padding:9px 10px 9px 14px;
+    border-radius:10px; transition:background .12s, transform .05s;
+    touch-action:none;
+  }#visualizer-scope .taskItem.dragging { background:var(--cream); box-shadow:0 4px 14px rgba(58,54,46,0.12); z-index:5; position:relative; }#visualizer-scope .taskDot {
+    flex:0 0 auto; width:9px; height:9px; border-radius:50%; margin-top:6px;
+    background:#fff; border:2px solid #B9AE94;
+  }#visualizer-scope .taskItem.active .taskDot { background:var(--asc-clay); border-color:var(--asc-clay); width:12px; height:12px; margin-top:4.5px; }#visualizer-scope .taskNum { flex:0 0 auto; font-size:12px; font-weight:700; opacity:.4; margin-top:3px; min-width:16px; }#visualizer-scope .taskItem.active .taskNum { opacity:.7; }#visualizer-scope .taskText { flex:1; min-width:0; cursor:pointer; }#visualizer-scope .taskLabel { font-size:13.5px; font-weight:600; color:var(--asc-ink); }#visualizer-scope .taskItem.active .taskLabel { font-size:16px; font-weight:700; }#visualizer-scope .taskItem.locked .taskLabel { opacity:.65; }#visualizer-scope .taskBlocked { font-size:11.5px; color:var(--asc-ink); opacity:.5; margin-top:2px; }#visualizer-scope .taskNow { font-size:11.5px; color:var(--asc-clay); font-weight:700; margin-top:2px; text-transform:uppercase; letter-spacing:.03em; }#visualizer-scope .taskReorder { flex:0 0 auto; display:flex; align-items:center; gap:2px; }#visualizer-scope .reorderBtn {
+    border:none; background:transparent; color:var(--asc-ink); opacity:.55;
+    font-size:12px; padding:5px 6px; border-radius:6px; cursor:pointer; line-height:1;
+  }#visualizer-scope .reorderBtn:active { background:var(--cream); opacity:1; }#visualizer-scope .reorderBtn.disabled { opacity:.12; cursor:default; pointer-events:none; }#visualizer-scope .dragHandle {
+    font-size:13px; opacity:.35; padding:5px 4px; cursor:grab; touch-action:none;
+    letter-spacing:-3px; user-select:none;
+  }#visualizer-scope .dragHandle:active { cursor:grabbing; opacity:.7; }#visualizer-scope #trailWrap {
+    width:100%; overflow-x:hidden; padding-bottom:120px; position:relative;
+  }#visualizer-scope #trailSvg {display:block; width:100%; height:auto;}#visualizer-scope .stepLabel {font-family:'Inter',sans-serif; font-weight:600; font-size:12.5px; fill:var(--asc-ink);}#visualizer-scope .stepLabelCurrent {font-weight:700; font-size:15px; fill:var(--asc-ink);}#visualizer-scope .stepSub {font-family:'Inter',sans-serif; font-weight:400; font-size:10.5px; fill:var(--asc-ink); opacity:.6;}#visualizer-scope .summitLabel {font-family:'Fraunces',serif; font-weight:700; font-size:16px; fill:var(--pine);}#visualizer-scope .marker {cursor:pointer;}#visualizer-scope .marker.locked {cursor:default;}#visualizer-scope #fab {
+    position:fixed; right:18px; bottom:22px; z-index:30;
+    background:var(--asc-clay); color:#fff; border:none; border-radius:999px;
+    padding:14px 20px; font-family:'Inter',sans-serif; font-weight:700; font-size:14px;
+    box-shadow:0 6px 18px rgba(201,123,74,0.4); cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+  }#visualizer-scope #fab:active {transform:scale(0.97);}#visualizer-scope .sheetBg {
+    position:fixed; inset:0; background:rgba(58,54,46,0.35); z-index:40;
+    display:none; align-items:flex-end; justify-content:center;
+  }#visualizer-scope .sheetBg.open {display:flex;}#visualizer-scope .sheet {
+    background:var(--cream); width:100%; max-width:480px;
+    border-radius:20px 20px 0 0; padding:22px 20px calc(20px + env(safe-area-inset-bottom));
+    max-height:82vh; overflow-y:auto;
+    box-shadow:0 -8px 30px rgba(0,0,0,0.15);
+  }#visualizer-scope .sheet h2 {font-family:'Fraunces',serif; font-size:20px; margin:0 0 14px;}#visualizer-scope .field {margin-bottom:14px;}#visualizer-scope .field label {display:block; font-size:12px; font-weight:600; opacity:.65; margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em;}#visualizer-scope .field input[type=text], #visualizer-scope .field textarea {
+    width:100%; border:1px solid var(--asc-line); border-radius:10px; padding:10px 12px;
+    font-family:'Inter',sans-serif; font-size:14px; background:#fff; color:var(--asc-ink); resize:vertical;
+  }#visualizer-scope .predList {display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;}#visualizer-scope .predItem {display:flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--asc-line); border-radius:10px; background:#fff;}#visualizer-scope .predItem input {margin:0;}#visualizer-scope .predItem span {font-size:13px;}#visualizer-scope .sheetActions {display:flex; gap:10px; margin-top:18px;}#visualizer-scope .btn {
+    flex:1; border:none; border-radius:10px; padding:12px; font-family:'Inter',sans-serif;
+    font-weight:700; font-size:14px; cursor:pointer;
+  }#visualizer-scope .btn.primary {background:var(--pine); color:var(--cream);}#visualizer-scope .btn.ghost {background:transparent; color:var(--asc-ink); opacity:.6; border:1px solid var(--asc-line);}#visualizer-scope .btn.danger {background:#fff; color:#B14B3A; border:1px solid #B14B3A;}#visualizer-scope .hint {font-size:12px; opacity:.55; margin-top:-6px; margin-bottom:14px; line-height:1.4;}#visualizer-scope .reasonChips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }#visualizer-scope .reasonChip {
+    border:1px solid var(--asc-line); background:#fff; color:var(--asc-ink);
+    font-family:'Inter',sans-serif; font-size:12px; font-weight:600;
+    padding:6px 11px; border-radius:999px; cursor:pointer;
+  }#visualizer-scope .reasonChip:active { background:var(--cream); }#visualizer-scope .fieldError { color:#B14B3A; font-size:12px; margin-top:6px; font-weight:600; }#visualizer-scope .empty {
+    text-align:center; padding:60px 30px; opacity:.6; font-size:14px; line-height:1.6;
+  }
+
+</style>
 </head>
 <body>
 
@@ -2535,6 +2645,7 @@
       <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
       <button class="tab-btn" id="tab-week" data-tab="week">Plan week</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
+      <button class="tab-btn" id="tab-visualizer" data-tab="visualizer">Visualizer</button>
       <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
       <button class="tab-btn" id="tab-thisweek" data-tab="thisweek">This week, prioritised</button>
       <button class="tab-btn" id="tab-nextweek" data-tab="nextweek">Prioritise Next Week</button>
@@ -2631,6 +2742,116 @@
 
       <div id="commit-history"></div>
     </section>
+  </div>
+
+  <div id="tab-visualizer-panel" class="tab-panel" style="display:none;">
+    <div id="visualizer-scope">
+<header>
+  <div class="goalDropdownWrap">
+    <button class="goalDropdownBtn" id="goalDropdownBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+      <span id="goalDropdownLabel">Goal</span>
+      <svg class="chevron" width="12" height="8" viewBox="0 0 12 8"><path d="M1 1l5 5 5-5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="goalDropdownMenu" id="goalDropdownMenu" role="listbox"></div>
+  </div>
+  <div>
+    <h1 id="goalTitle">Ascent</h1>
+    <p class="sub" id="goalSub">A trail toward something worth reaching.</p>
+  </div>
+</header>
+
+<div id="taskList" class="taskList"></div>
+
+<div id="trailWrap">
+  <svg id="trailSvg" viewBox="0 0 400 800" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<button id="fab">+ Add step</button>
+
+<div class="sheetBg" id="stepSheetBg">
+  <div class="sheet">
+    <h2 id="sheetTitle">New step</h2>
+    <div class="field">
+      <label for="stepLabelInput">What is it</label>
+      <input type="text" id="stepLabelInput" placeholder="e.g. Finish first draft">
+    </div>
+    <div class="field">
+      <label for="stepNotesInput">Notes (optional)</label>
+      <textarea id="stepNotesInput" rows="2" placeholder="Any detail worth remembering"></textarea>
+    </div>
+    <div class="field" id="predFieldWrap">
+      <label>Comes after</label>
+      <div class="hint">Pick one step to continue the trail, or more than one to converge two paths into this step.</div>
+      <div class="predList" id="predList"></div>
+    </div>
+    <div class="sheetActions">
+      <button class="btn ghost" id="cancelStepBtn">Cancel</button>
+      <button class="btn primary" id="saveStepBtn">Add to trail</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheetBg" id="detailSheetBg">
+  <div class="sheet">
+    <h2 id="detailTitle">Step</h2>
+    <p class="sub" id="detailNotes" style="margin-bottom:18px;"></p>
+    <div class="sheetActions">
+      <button class="btn ghost" id="closeDetailBtn">Close</button>
+      <button class="btn primary" id="toggleDoneBtn">Mark done</button>
+    </div>
+    <div class="sheetActions" id="deleteRow">
+      <button class="btn danger" id="deleteStepBtn">Remove this step</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheetBg" id="goalSheetBg">
+  <div class="sheet">
+    <h2>New goal</h2>
+    <div class="field">
+      <label for="newGoalInput">What's the mountain?</label>
+      <input type="text" id="newGoalInput" placeholder="e.g. Launch the film">
+    </div>
+    <div class="sheetActions">
+      <button class="btn ghost" id="cancelGoalBtn">Cancel</button>
+      <button class="btn primary" id="saveGoalBtn">Start trail</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheetBg" id="deleteGoalSheetBg">
+  <div class="sheet">
+    <h2>Delete "<span id="deleteGoalName"></span>"?</h2>
+    <p class="hint" style="margin-top:-4px;">This removes the goal and every step on its trail. This can't be undone.</p>
+    <div class="field">
+      <label for="deleteGoalReason">Reason</label>
+      <div class="reasonChips">
+        <button type="button" class="reasonChip" data-reason="Made in error">Made in error</button>
+        <button type="button" class="reasonChip" data-reason="No longer relevant">No longer relevant</button>
+        <button type="button" class="reasonChip" data-reason="Completed elsewhere">Completed elsewhere</button>
+      </div>
+      <input type="text" id="deleteGoalReason" placeholder="Why is this goal being removed?">
+      <div class="fieldError" id="deleteGoalError" style="display:none;">A reason is required.</div>
+    </div>
+    <div class="sheetActions">
+      <button class="btn ghost" id="cancelDeleteGoalBtn">Cancel</button>
+      <button class="btn danger" id="confirmDeleteGoalBtn">Delete goal</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheetBg" id="reorderSheetBg">
+  <div class="sheet">
+    <h2>Reorder trail</h2>
+    <p class="hint" style="margin-top:-4px;">Give each step a number. Applying rebuilds the trail as one single path in that order — any forks or merges are replaced with a straight line.</p>
+    <div class="reorderList" id="reorderList"></div>
+    <div class="sheetActions">
+      <button class="btn ghost" id="cancelReorderBtn">Cancel</button>
+      <button class="btn primary" id="applyReorderBtn">Apply new order</button>
+    </div>
+  </div>
+</div>
+    </div>
   </div>
 
   <div id="tab-thisweek-panel" class="tab-panel" style="display:none;">
@@ -6083,5 +6304,6 @@ window.addEventListener('appinstalled', () => _banner.style.display = 'none');
 </script>
 
 <script src="do-app.js"></script>
+<script src="ascent-app.js"></script>
 </body>
 </html>
