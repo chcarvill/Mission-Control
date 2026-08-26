@@ -968,9 +968,23 @@
     });
     entries.sort((a, b) => (a.num - b.num) || (a.tiebreak - b.tiebreak));
 
-    for(let i = 0; i < entries.length; i++){
-      const step = byId[entries[i].id];
-      step.leadsTo = (i < entries.length - 1) ? [entries[i + 1].id] : [];
+    // Group entries sharing the same number into the same "rank" — these
+    // become parallel/simultaneous steps rather than being force-ordered.
+    const groups = [];
+    entries.forEach(e => {
+      const last = groups[groups.length - 1];
+      if(last && last.num === e.num){
+        last.ids.push(e.id);
+      } else {
+        groups.push({ num: e.num, ids: [e.id] });
+      }
+    });
+
+    for(let i = 0; i < groups.length; i++){
+      const nextIds = (i < groups.length - 1) ? groups[i + 1].ids : [];
+      groups[i].ids.forEach(id => {
+        byId[id].leadsTo = [...nextIds];
+      });
     }
 
     save(state);
