@@ -1,5 +1,5 @@
-const CACHE = 'mc-v23-roadmap-on-projects';
-const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js'];
+const CACHE = 'mc-v24-visualizer-integration';
+const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
