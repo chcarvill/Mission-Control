@@ -494,11 +494,16 @@ function computeStreak() {
 /* ---------------------------------------------------------- */
 
 function renderDo() {
-  const added = syncPortfolioVenturesIntoActivities();
+  const addedFromPortfolio = syncPortfolioVenturesIntoActivities();
+  const addedFromProjects = syncProjectsIntoActivities();
+  const added = addedFromPortfolio + addedFromProjects;
   const statusEl = document.getElementById("portfolio-sync-status");
   if (statusEl) {
+    const parts = [];
+    if (addedFromPortfolio) parts.push(`${addedFromPortfolio} from the Portfolio`);
+    if (addedFromProjects) parts.push(`${addedFromProjects} from Projects`);
     statusEl.textContent = added
-      ? `✓ ${added} new project${added === 1 ? "" : "s"} synced in from the Portfolio.`
+      ? `✓ ${added} new project${added === 1 ? "" : "s"} synced in (${parts.join(", ")}).`
       : "";
   }
   renderHeader();
@@ -1567,13 +1572,32 @@ function addVentureIfMissing(label) {
 // from the Portfolio, since a Do activity may already have logged history
 // (past days, time logs) attached to it that shouldn't disappear.
 function syncPortfolioVenturesIntoActivities() {
-  if (typeof loadPortfolio !== "function") return; // safety net if ever run standalone
+  if (typeof loadPortfolio !== "function") return 0; // safety net if ever run standalone
   const ventures = loadPortfolio();
   let added = 0;
   ventures.forEach((v) => {
     if (!v || !v.name) return;
     const before = STATE.activities.length;
     addVentureIfMissing(v.name);
+    if (STATE.activities.length > before) added++;
+  });
+  return added;
+}
+
+// Same one-way pattern as the Portfolio sync above, but for the Projects
+// tab (mc_projects). A project created there becomes selectable as an
+// activity in Today, and -- since Plan Week draws its slot options from
+// the same activity pool -- it's automatically available there too.
+// One-way for the same reason: doesn't remove activities that vanish from
+// Projects, since a Do activity may already have logged history attached.
+function syncProjectsIntoActivities() {
+  if (typeof loadProjects !== "function") return 0; // safety net if ever run standalone
+  const projects = loadProjects();
+  let added = 0;
+  projects.forEach((p) => {
+    if (!p || !p.name) return;
+    const before = STATE.activities.length;
+    addVentureIfMissing(p.name);
     if (STATE.activities.length > before) added++;
   });
   return added;
