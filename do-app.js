@@ -857,6 +857,35 @@ function openPicker(iso, slotIndex) {
 function renderActivityList() {
   const list = document.getElementById("activity-list");
   list.innerHTML = "";
+
+  // Special option, always first: creates a placeholder project in the
+  // Projects tab, opens Communic8 to fill it out, and assigns it to this
+  // slot right away. Linked by the project's id (not just its name), so
+  // if Communic8's reply later renames the placeholder (see
+  // handleCommunic8ReturnParams in the Projects tab code), this activity's
+  // label updates in place next time Do renders -- the slot keeps pointing
+  // at the same activity, it just displays the real title once it's in.
+  const marketingOpt = document.createElement("div");
+  marketingOpt.className = "activity-option";
+  marketingOpt.style.borderTop = "1px solid var(--border, #333)";
+  marketingOpt.style.paddingBottom = "8px";
+  marketingOpt.innerHTML = `<span class="dot" style="background:#f0964a;"></span> + New marketing project →`;
+  marketingOpt.addEventListener("click", () => {
+    if (typeof createMarketingProject !== "function") return;
+    const project = createMarketingProject();
+    const activity = addOrUpdateActivityForProjectId(project);
+    if (pendingCancelSlot !== null) {
+      pendingSubstituteActivityId = activity.id;
+      document.getElementById("picker-overlay").classList.remove("open");
+      openReasonModal(pendingCancelIso, pendingCancelSlot, "substituted", activity.id);
+    } else {
+      assignActivity(pendingIso, pendingSlotIndex, activity.id);
+      pendingPickerActivity = activity;
+      showPickerDetailsStep(activity);
+    }
+  });
+  list.appendChild(marketingOpt);
+
   STATE.activities.forEach((activity) => {
     const opt = document.createElement("div");
     opt.className = "activity-option";
@@ -1564,6 +1593,47 @@ function addVentureIfMissing(label) {
   return addActivity(trimmed);
 }
 
+// Like addVentureIfMissing, but keyed to a specific project's id rather
+// than matched by name. This is what makes a Do slot "follow" a project
+// if it gets renamed later (e.g. a marketing project's placeholder title
+// getting overwritten once Communic8 sends back the real one) -- the
+// activity is found again by sourceProjectId and its label updated in
+// place, instead of the old name-match approach creating a second,
+// disconnected activity that the already-assigned slot keeps pointing at.
+function addOrUpdateActivityForProjectId(project) {
+  if (!project || !project.id) return null;
+  const trimmed = (project.name || "").trim();
+  if (!trimmed) return null;
+
+  const existing = STATE.activities.find((a) => a.sourceProjectId === project.id);
+  if (existing) {
+    if (existing.label !== trimmed) {
+      existing.label = trimmed;
+      saveToStorage();
+    }
+    return existing;
+  }
+
+  // Migration path: a project synced before this linking existed may
+  // already have a same-named activity with no sourceProjectId tag --
+  // adopt that one instead of creating a duplicate.
+  const unclaimed = STATE.activities.find(
+    (a) => !a.sourceProjectId && a.label.toLowerCase() === trimmed.toLowerCase()
+  );
+  if (unclaimed) {
+    unclaimed.sourceProjectId = project.id;
+    saveToStorage();
+    return unclaimed;
+  }
+
+  const activity = addActivity(trimmed);
+  if (activity) {
+    activity.sourceProjectId = project.id;
+    saveToStorage();
+  }
+  return activity;
+}
+
 // Now that Mission Control and Do share one page and one localStorage,
 // there's no export/import or deep link needed -- this just reads the
 // Portfolio directly (loadPortfolio() is defined in Mission Control's own
@@ -1597,7 +1667,7 @@ function syncProjectsIntoActivities() {
   projects.forEach((p) => {
     if (!p || !p.name) return;
     const before = STATE.activities.length;
-    addVentureIfMissing(p.name);
+    addOrUpdateActivityForProjectId(p);
     if (STATE.activities.length > before) added++;
   });
   return added;

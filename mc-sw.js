@@ -1,4 +1,4 @@
-const CACHE = 'mc-v25-projects-sync';
+const CACHE = 'mc-v27-project-id-linking';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js'];
 
 self.addEventListener('install', e => {

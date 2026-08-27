@@ -3210,6 +3210,7 @@
 <div id="projects-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="openProjectModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
+    <button onclick="createMarketingProject()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#ffb066 0%,#f0964a 50%,#d97a30 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #8a4a12, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" title="Opens Communic8 to fill out the campaign — the title links back here once you save it there">+ New marketing project →</button>
     <button onclick="emailProjectsView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;" id="projects-grid">
@@ -4733,18 +4734,91 @@ renderPriority();
 renderArchive();
 renderFolders();
 renderProjects();
+handleCommunic8ReturnParams();
 
 // ── Master tab switching ──
 // ══════════════════════════════════════════════
 //  PROJECTS
 // ══════════════════════════════════════════════
 const PROJECTS_KEY = 'mc_projects';
+const COMMUNIC8_URL = 'https://chcarvill.github.io/Communic8-3/';
 
 function loadProjects() {
   try { return JSON.parse(localStorage.getItem(PROJECTS_KEY)) || []; } catch { return []; }
 }
 function saveProjects(projects) {
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(projects));
+}
+
+// Creates a placeholder project and immediately sends the user to
+// Communic8 to fill out the actual campaign. The placeholder's title
+// gets overwritten -- and a link back added -- once handleCommunic8ReturnParams()
+// picks up Communic8's reply (see below).
+function createMarketingProject() {
+  const projects = loadProjects();
+  const newProject = {
+    id: Date.now(),
+    name: 'New marketing project',
+    business: '',
+    department: '',
+    description: '',
+    category: '',
+    created: new Date().toISOString(),
+    communic8Pending: true
+  };
+  projects.push(newProject);
+  saveProjects(projects);
+  renderProjects();
+  openCommunic8ForProject(newProject.id);
+  return newProject;
+}
+
+function openCommunic8ForProject(projectId) {
+  // A real <a> click (rather than window.open()) -- same reasoning as
+  // Communic8's own "Send to Do" link: more reliable on mobile/installed
+  // app runtimes than window.open().
+  const returnUrl = window.location.origin + window.location.pathname;
+  const params = new URLSearchParams({
+    mcReturn: String(projectId),
+    mcReturnUrl: returnUrl
+  });
+  const link = document.createElement('a');
+  link.href = COMMUNIC8_URL + '?' + params.toString();
+  link.target = '_blank';
+  link.rel = 'noopener';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Reads ?c8ideaTitle=&c8ideaId=&c8forProject= from the URL -- the link
+// Communic8 opens once a marketing idea created via createMarketingProject()
+// gets saved there. Matches it back to the placeholder project by id,
+// overwrites the placeholder title with the real one, and stores a link
+// back into that specific Communic8 idea.
+function handleCommunic8ReturnParams() {
+  const params = new URLSearchParams(window.location.search);
+  const title = params.get('c8ideaTitle');
+  const ideaId = params.get('c8ideaId');
+  const forProject = params.get('c8forProject');
+  if (!title || !ideaId || !forProject) return;
+
+  const projects = loadProjects();
+  const project = projects.find(p => String(p.id) === String(forProject));
+  if (project) {
+    project.name = title;
+    project.communic8Link = COMMUNIC8_URL + '?openIdea=' + encodeURIComponent(ideaId);
+    delete project.communic8Pending;
+    saveProjects(projects);
+  }
+
+  // Clean the URL so refreshing/sharing doesn't re-trigger it.
+  const url = new URL(window.location.href);
+  ['c8ideaTitle', 'c8ideaId', 'c8forProject'].forEach(k => url.searchParams.delete(k));
+  window.history.replaceState({}, '', url.toString());
+
+  if (typeof switchMasterTab === 'function') switchMasterTab('projects');
+  renderProjects();
 }
 
 // ── Project modal state ──
@@ -4838,6 +4912,11 @@ function renderProjects() {
     const roadmapSteps = (p.roadmap && p.roadmap.length) ? p.roadmap : [];
     const roadmapDone = roadmapSteps.filter(s => s.done).length;
     const roadmapLabel = roadmapSteps.length ? `${roadmapDone}/${roadmapSteps.length} steps` : 'Build roadmap';
+    const communic8Badge = p.communic8Pending
+      ? `<span class="pf-roadmap-badge" onclick="openCommunic8ForProject(${p.id})" title="Finish filling this out in Communic8" style="color:#d97a30;border-color:#d97a30;">⏳ continue in Communic8</span>`
+      : (p.communic8Link
+        ? `<a href="${p.communic8Link}" target="_blank" rel="noopener" class="pf-roadmap-badge" style="text-decoration:none;">→ Communic8</a>`
+        : '');
     return `
     <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem;position:relative;border-left:3px solid ${cat.color};">
       <div style="display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;">
@@ -4852,6 +4931,7 @@ function renderProjects() {
         <span style="font-family:var(--mono);font-size:10px;color:${cat.color};background:${cat.bg};border:1px solid ${cat.color};border-radius:4px;padding:2px 8px;letter-spacing:0.06em;">${p.category || 'no category'}</span>
         <span style="font-family:var(--mono);font-size:10px;color:var(--text-hint);">${missionCount} mission${missionCount !== 1 ? 's' : ''} · ${activeMissions} active</span>
         <span class="pf-roadmap-badge" onclick="openRoadmapModal(${p.id}, event)" title="View/build roadmap">🗺 ${roadmapLabel}</span>
+        ${communic8Badge}
       </div>
     </div>`;
   }).join('');
