@@ -1,4 +1,4 @@
-const CACHE = 'mc-v28-icon-refresh';
+const CACHE = 'mc-v29-save-to-cal';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js'];
 
 self.addEventListener('install', e => {
