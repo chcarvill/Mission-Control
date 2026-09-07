@@ -984,7 +984,7 @@ function skipPickerDetails() {
 // even if not -- project + description is enough to be worth a calendar
 // entry), pushes a color-coded block onto the Homepage weekly calendar.
 // Runs once per date selected in the multi-date list.
-function savePickerDetails() {
+function savePickerDetails(force) {
   const text = document.getElementById("picker-detail-text").value.trim();
   const link = document.getElementById("picker-detail-link").value.trim();
   const time = document.getElementById("picker-detail-time").value; // "" if not set
@@ -992,7 +992,7 @@ function savePickerDetails() {
   const dates = pendingPickerDates.length ? pendingPickerDates : [pendingIso];
   const onlyOriginalDay = dates.length === 1 && dates[0] === pendingIso;
 
-  if (!text && !link && !time && onlyOriginalDay) {
+  if (!force && !text && !link && !time && onlyOriginalDay) {
     // Nothing entered and no extra dates -- same as Skip, no point creating an empty calendar entry.
     finishPickerDetailsStep();
     return;
@@ -2649,7 +2649,8 @@ function switchTab(tab) {
 function wireUI() {
   document.getElementById("btn-cancel-picker").addEventListener("click", closePicker);
   document.getElementById("btn-picker-skip").addEventListener("click", skipPickerDetails);
-  document.getElementById("btn-picker-save-detail").addEventListener("click", savePickerDetails);
+  document.getElementById("btn-picker-save-detail").addEventListener("click", () => savePickerDetails(false));
+  document.getElementById("btn-picker-save-calendar").addEventListener("click", () => savePickerDetails(true));
   document.getElementById("btn-add-picker-date").addEventListener("click", addPickerDate);
 
   document.getElementById("btn-add-activity").addEventListener("click", () => {
