@@ -2633,16 +2633,20 @@
 <div id="start-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0.5rem;">
     <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">Basic tasks — no matter what</div>
-    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">Up to 10. Each active task auto-appears every day this week on Homepage until you tick it done.</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">Up to 10. Pick a time for each — it auto-appears every day this week on Homepage at that time, until you tick it done.</div>
   </div>
   <div class="mc-mobile-pad" style="padding:0 2.5rem 1.5rem;">
     <div id="start-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
     <div id="start-add-row" style="display:flex;gap:8px;">
       <input id="start-new-input" type="text" placeholder="e.g. Drink 2L water" maxlength="140"
         style="flex:1;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:9px 12px;background:var(--surface);color:var(--text);outline:none;"
+        onkeydown="if(event.key==='Enter'){document.getElementById('start-new-time').focus();}" />
+      <input id="start-new-time" type="time" required
+        style="width:110px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:9px 8px;background:var(--surface);color:var(--text);outline:none;"
         onkeydown="if(event.key==='Enter'){addStartTask();}" />
       <button class="btn" id="start-add-btn" onclick="addStartTask()" style="font-family:'DM Mono',monospace;font-size:12px;padding:9px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;">+ Add</button>
     </div>
+    <div id="start-error-msg" style="display:none;font-family:var(--sans);font-size:11.5px;color:#ff6b6b;margin-top:8px;line-height:1.4;"></div>
     <div id="start-limit-msg" style="display:none;font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:8px;">Limit reached — tick one off to add another.</div>
   </div>
 </div>
@@ -3162,6 +3166,8 @@
     <p class="modal-sub">Nothing here is required. Leave any field blank.</p>
     <label class="do-detail-label">Day</label>
     <input id="detail-day" type="date" style="margin-bottom:10px;" />
+    <label class="do-detail-label">Time (if this goes on your calendar)</label>
+    <input id="detail-time" type="time" style="margin-bottom:10px;" />
     <div id="detail-day-status" style="font-family: var(--sans); font-size: 12px; color: var(--clay-dark); min-height: 14px; margin-bottom:8px;"></div>
     <label class="do-detail-label">Detail</label>
     <textarea id="detail-text" placeholder="Any specifics for this task…"></textarea>
@@ -5523,13 +5529,40 @@ function saveStartTasks(arr) {
 }
 function addStartTask() {
   const input = document.getElementById('start-new-input');
+  const timeInput = document.getElementById('start-new-time');
+  const errEl = document.getElementById('start-error-msg');
   const text = (input.value || '').trim();
-  if (!text) return;
+  const time = timeInput.value;
+  errEl.style.display = 'none';
+
+  if (!text) { input.focus(); return; }
+  if (!time) {
+    errEl.textContent = 'Please choose a time for this task.';
+    errEl.style.display = 'block';
+    timeInput.focus();
+    return;
+  }
   const tasks = loadStartTasks();
   if (tasks.length >= START_TASKS_MAX) { renderStartTab(); return; }
-  tasks.push({ id: 'st' + Date.now() + Math.floor(Math.random()*1000), text, done: false, createdAt: dateKey(new Date()) });
+
+  // Start tasks repeat on every remaining day of the current week (today onward) --
+  // check the chosen time against every one of those days before adding.
+  const end = hpAddMinutes(time, 30);
+  const todayKey = dateKey(new Date());
+  const weekKeys = getWeekDates(new Date()).map(dateKey).filter(k => k >= todayKey);
+  for (const k of weekKeys) {
+    const conflict = hpFindConflict(k, time, end);
+    if (conflict) {
+      errEl.textContent = hpConflictMessage(conflict, k);
+      errEl.style.display = 'block';
+      return;
+    }
+  }
+
+  tasks.push({ id: 'st' + Date.now() + Math.floor(Math.random()*1000), text, start: time, end, done: false, createdAt: todayKey });
   saveStartTasks(tasks);
   input.value = '';
+  timeInput.value = '';
   renderStartTab();
   if (typeof renderHomepage === 'function') renderHomepage();
 }
@@ -5557,6 +5590,7 @@ function renderStartTab() {
       <div style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;">
         <button class="p-check" id="start-cb-${t.id}" onclick="toggleStartTaskDone('${t.id}')" title="Mark done"></button>
         <span style="flex:1;font-family:var(--sans);font-size:13px;color:var(--text);">${esc(t.text)}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-hint);white-space:nowrap;">${hpFmtTime(t.start || HP_DEFAULT_START)}</span>
         <button onclick="deleteStartTask('${t.id}')" title="Remove" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:13px;padding:2px 6px;">✕</button>
       </div>`).join('')
     : `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-hint);letter-spacing:0.05em;padding:1.5rem 0;text-align:center;">no basic tasks yet — add one below</div>`;
@@ -5604,11 +5638,60 @@ const HP_TRACK_HEIGHT   = (HP_DAY_END_MIN - HP_DAY_START_MIN) * HP_PX_PER_MIN;
 const HP_DEFAULT_START  = '09:00';
 const HP_DEFAULT_END    = '09:30';
 
+// ── Shared time-conflict detection (used by Start tab, Do app, and Homepage's own add/edit) ──
+function hpGetDayItems(dateKeyStr) {
+  // Mirrors the per-day item gathering inside renderHomepage: missions + manual entries + start tasks.
+  const items = [];
+  const ventures = load();
+  const missionTimes = loadHomepageMissionTimes();
+  ventures.filter(v => v.status !== 'completed').forEach(v => {
+    const days = new Set();
+    if (v.dueDate === dateKeyStr) days.add(v.dueDate);
+    (v.scheduledDays || []).forEach(d => { if (d === dateKeyStr) days.add(d); });
+    if (!days.size) return;
+    const t = missionTimes[v.id] || {};
+    items.push({ kind: 'mission', id: v.id, text: v.name, start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END });
+  });
+  loadHomepageManual().forEach(item => {
+    if (item.date === dateKeyStr) {
+      items.push({ kind: 'manual', id: item.id, text: item.text, start: item.start || HP_DEFAULT_START, end: item.end || HP_DEFAULT_END });
+    }
+  });
+  if (typeof loadStartTasks === 'function') {
+    loadStartTasks().forEach(t => {
+      items.push({ kind: 'start', id: t.id, text: t.text, start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END });
+    });
+  }
+  return items;
+}
+// Returns the first conflicting item on that day, or null. Pass excludeKind/excludeId to ignore the item being edited.
+function hpFindConflict(dateKeyStr, start, end, excludeKind, excludeId) {
+  const s = hpMinsFromMidnight(start), e = hpMinsFromMidnight(end);
+  if (s == null || e == null) return null;
+  const items = hpGetDayItems(dateKeyStr).filter(it => !(excludeKind && it.kind === excludeKind && String(it.id) === String(excludeId)));
+  for (const it of items) {
+    const is = hpMinsFromMidnight(it.start), ie = hpMinsFromMidnight(it.end);
+    if (is == null || ie == null) continue;
+    if (s < ie && is < e) return it;
+  }
+  return null;
+}
+function hpConflictMessage(conflict, dateKeyStr) {
+  const d = new Date(dateKeyStr + 'T00:00:00');
+  const dayLabel = d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+  return `That time overlaps with "${conflict.text}" (${hpFmtTime(conflict.start)}–${hpFmtTime(conflict.end)}) on ${dayLabel}. Please choose another time.`;
+}
+
 function hpMinsFromMidnight(hhmm) {
   if (!hhmm) return null;
   const [h, m] = hhmm.split(':').map(Number);
   if (Number.isNaN(h) || Number.isNaN(m)) return null;
   return h * 60 + m;
+}
+function hpAddMinutes(hhmm, mins) {
+  const total = (hpMinsFromMidnight(hhmm) || 0) + mins;
+  const h = Math.floor((total % 1440) / 60), m = total % 60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
 }
 function hpFmtTime(hhmm) {
   if (!hhmm) return '';
@@ -5688,7 +5771,7 @@ function renderHomepage() {
       startTasks.forEach(t => {
         manualByDay[k].push({
           kind: 'start', id: t.id, text: t.text, color: START_TASK_COLOR, link: null,
-          start: HP_DEFAULT_START, end: HP_DEFAULT_END
+          start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END
         });
       });
     });
@@ -5872,6 +5955,7 @@ function emailEntireView() {
 
 // ── Add item popover ──
 let hpPopoverColor = VENTURE_COLORS[0];
+let hpEditingDayKey = null; // which day the time-edit popover is currently editing (for conflict checks)
 function closeHomepagePopovers() {
   document.querySelectorAll('.homepage-popover').forEach(el => el.remove());
 }
@@ -5912,6 +5996,18 @@ function saveHomepageManualItem(key) {
   if (!text) { input.focus(); return; }
   const start = document.getElementById('hp-add-start').value || HP_DEFAULT_START;
   let end = document.getElementById('hp-add-end').value || HP_DEFAULT_END;
+  const conflict = hpFindConflict(key, start, end);
+  if (conflict) {
+    let msgEl = document.getElementById('hp-add-conflict-msg');
+    if (!msgEl) {
+      msgEl = document.createElement('div');
+      msgEl.id = 'hp-add-conflict-msg';
+      msgEl.style.cssText = 'font-family:var(--sans);font-size:11px;color:#ff6b6b;margin-top:6px;line-height:1.4;';
+      document.getElementById('hp-add-end').closest('.homepage-popover')?.insertBefore(msgEl, document.getElementById('hp-add-swatches'));
+    }
+    msgEl.textContent = hpConflictMessage(conflict, key);
+    return;
+  }
   const manual = loadHomepageManual();
   manual.push({
     id: 'hp' + Date.now() + Math.random().toString(36).slice(2,6),
@@ -5932,6 +6028,7 @@ function deleteHomepageManualItem(id) {
 // ── Edit time popover (existing manual item or mission block) ──
 function openHomepageTimeEditor(kind, id, dayKey) {
   closeHomepagePopovers();
+  hpEditingDayKey = dayKey;
   let current = { start: HP_DEFAULT_START, end: HP_DEFAULT_END, text: '' };
   if (kind === 'manual') {
     const manual = loadHomepageManual();
@@ -5967,6 +6064,18 @@ function openHomepageTimeEditor(kind, id, dayKey) {
 function saveHomepageItemTime(kind, id) {
   const start = document.getElementById('hp-edit-start').value || HP_DEFAULT_START;
   const end = document.getElementById('hp-edit-end').value || HP_DEFAULT_END;
+  const conflict = hpFindConflict(hpEditingDayKey, start, end, kind, id);
+  if (conflict) {
+    let msgEl = document.getElementById('hp-edit-conflict-msg');
+    if (!msgEl) {
+      msgEl = document.createElement('div');
+      msgEl.id = 'hp-edit-conflict-msg';
+      msgEl.style.cssText = 'font-family:var(--sans);font-size:11px;color:#ff6b6b;margin-top:6px;line-height:1.4;max-width:200px;';
+      document.getElementById('hp-edit-end').closest('.homepage-popover')?.appendChild(msgEl);
+    }
+    msgEl.textContent = hpConflictMessage(conflict, hpEditingDayKey);
+    return;
+  }
   if (kind === 'manual') {
     const manual = loadHomepageManual();
     const item = manual.find(m => m.id === id);

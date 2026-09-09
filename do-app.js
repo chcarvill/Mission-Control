@@ -1021,6 +1021,17 @@ function savePickerDetails(force) {
   const endTotal = h * 60 + m + 30; // default 30-minute block
   const end = String(Math.floor(endTotal / 60) % 24).padStart(2, "0") + ":" + String(endTotal % 60).padStart(2, "0");
 
+  // Check every target day for a clash with something already scheduled there before saving anything.
+  if (manual && typeof hpFindConflict === "function") {
+    for (const iso of dates) {
+      const conflict = hpFindConflict(iso, start, end);
+      if (conflict) {
+        if (statusEl) statusEl.textContent = hpConflictMessage(conflict, iso);
+        return;
+      }
+    }
+  }
+
   dates.forEach((iso) => {
     let slotIndex;
     if (iso === pendingIso) {
@@ -1186,6 +1197,12 @@ function openDetailModal(iso, slotIndex) {
   document.getElementById("detail-activity-name").textContent = activity ? activity.label : "this task";
   document.getElementById("detail-day").value = iso;
   document.getElementById("detail-day-status").textContent = "";
+  let existingTime = "";
+  if (slot.homepageEventId && typeof loadHomepageManual === "function") {
+    const item = loadHomepageManual().find((m) => m.id === slot.homepageEventId);
+    if (item) existingTime = item.start || "";
+  }
+  document.getElementById("detail-time").value = existingTime;
   document.getElementById("detail-text").value = slot.detail || "";
   document.getElementById("detail-link").value = slot.link || "";
   document.getElementById("detail-note").value = slot.note || "";
@@ -1243,6 +1260,23 @@ function saveDetail() {
   slot.note = document.getElementById("detail-note").value.trim();
   slot.actionType = document.getElementById("detail-category").value || null;
 
+  const chosenTime = document.getElementById("detail-time").value;
+  const start = chosenTime || HP_DEFAULT_START_DO;
+  const [dh, dm] = start.split(":").map(Number);
+  const endTotal = dh * 60 + dm + 30;
+  const end = String(Math.floor(endTotal / 60) % 24).padStart(2, "0") + ":" + String(endTotal % 60).padStart(2, "0");
+
+  // Only bother checking for a clash if this is actually going to touch the calendar
+  // (i.e. it already has an entry, or a day/detail/link is present to create one).
+  const willTouchCalendar = !!slot.homepageEventId || dayChanged || slot.detail || slot.link;
+  if (willTouchCalendar && typeof hpFindConflict === "function") {
+    const conflict = hpFindConflict(targetIso, start, end, "manual", slot.homepageEventId);
+    if (conflict) {
+      if (statusEl) statusEl.textContent = hpConflictMessage(conflict, targetIso);
+      return;
+    }
+  }
+
   // Keep the linked Homepage calendar block in sync -- and if this task
   // never had one (created with Skip, or from before this link existed,
   // or just never had detail/link filled in), give it one now if there's
@@ -1257,6 +1291,8 @@ function saveDetail() {
         const activity = activityById(slot.activityId);
         item.text = slot.detail || (activity ? activity.label : item.text);
         item.link = slot.link || null;
+        item.start = start;
+        item.end = end;
         saveHomepageManual(manual);
       }
     } else if (dayChanged || slot.detail || slot.link) {
@@ -1266,12 +1302,8 @@ function saveDetail() {
         id: eventId,
         date: targetIso,
         text: slot.detail || (activity ? activity.label : "Task"),
-        start: HP_DEFAULT_START_DO,
-        end: (() => {
-          const [h, m] = HP_DEFAULT_START_DO.split(":").map(Number);
-          const t = h * 60 + m + 30;
-          return String(Math.floor(t / 60) % 24).padStart(2, "0") + ":" + String(t % 60).padStart(2, "0");
-        })(),
+        start,
+        end,
         color: activity ? colorHex(activity.color) : "var(--sage)",
         link: slot.link || null,
       });
