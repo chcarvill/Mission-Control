@@ -1,4 +1,4 @@
-const CACHE = 'mc-v30-time-conflicts';
+const CACHE = 'mc-v31-notion-links';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js'];
 
 self.addEventListener('install', e => {
