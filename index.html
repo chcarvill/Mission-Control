@@ -2606,6 +2606,7 @@
 <div class="master-tab-bar">
   <button class="master-tab master-active" id="mtab-homepage" onclick="switchMasterTab('homepage')">Homepage</button>
   <button class="master-tab" id="mtab-start" onclick="switchMasterTab('start')">Start</button>
+  <button class="master-tab" id="mtab-engine" onclick="switchMasterTab('engine')">Engine Room</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
@@ -2649,6 +2650,108 @@
     <div id="start-error-msg" style="display:none;font-family:var(--sans);font-size:11.5px;color:#ff6b6b;margin-top:8px;line-height:1.4;"></div>
     <div id="start-limit-msg" style="display:none;font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:8px;">Limit reached — tick one off to add another.</div>
   </div>
+</div>
+
+<!-- ══ ENGINE ROOM PANEL ══ -->
+<style>
+#engine-room-panel .er-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:0 2.5rem 1rem;}
+#engine-room-panel .er-stat{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px 16px;}
+#engine-room-panel .er-stat span{font-family:var(--mono);font-size:24px;font-weight:500;display:block;color:var(--active);}
+#engine-room-panel .er-stat small{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-hint);}
+#engine-room-panel .er-subnav{display:flex;gap:4px;padding:0 2.5rem;border-bottom:0.5px solid var(--border);overflow-x:auto;}
+#engine-room-panel .er-subtab{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;text-transform:uppercase;border:none;background:transparent;padding:10px 14px;cursor:pointer;color:var(--text-secondary);border-bottom:2px solid transparent;white-space:nowrap;}
+#engine-room-panel .er-subtab:hover{color:var(--text);}
+#engine-room-panel .er-subtab.er-subtab-active{color:var(--active);border-bottom-color:var(--active);}
+#engine-room-panel .er-main{padding:1.5rem 2.5rem 3rem;}
+#engine-room-panel .er-section{display:none;}
+#engine-room-panel .er-section.er-section-active{display:block;}
+#engine-room-panel .er-panel-two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+#engine-room-panel .er-panel{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:20px;}
+#engine-room-panel .er-panel h3{font-family:var(--mono);font-size:12px;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-hint);margin-bottom:10px;}
+#engine-room-panel .er-panel p{font-size:13px;color:var(--text-secondary);line-height:1.5;margin:6px 0;}
+#engine-room-panel .er-muted{color:var(--text-hint)!important;}
+#engine-room-panel .er-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;}
+#engine-room-panel .er-heading h2{margin:0 0 4px;font-family:var(--mono);font-size:18px;letter-spacing:0.04em;color:var(--text);}
+#engine-room-panel .er-heading p{margin:0;font-size:12px;color:var(--text-hint);}
+#engine-room-panel .er-primary-btn{font-family:var(--mono);font-size:11px;letter-spacing:0.04em;border:none;background:var(--active);color:#000;padding:8px 16px;border-radius:20px;cursor:pointer;font-weight:500;}
+#engine-room-panel .er-primary-btn:hover{opacity:0.85;}
+#engine-room-panel .er-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;}
+#engine-room-panel .er-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px;}
+#engine-room-panel .er-card h3{margin:0 0 8px;font-size:14px;color:var(--text);font-weight:500;}
+#engine-room-panel .er-card p{font-size:12px;color:var(--text-secondary);line-height:1.5;margin:6px 0;}
+#engine-room-panel .er-tag{display:inline-block;padding:3px 9px;background:var(--active-bg);color:var(--active);border-radius:20px;font-family:var(--mono);font-size:10px;margin:2px 4px 0 0;letter-spacing:0.03em;}
+#engine-room-panel .er-empty{text-align:center;padding:40px;border:1px dashed var(--border2);border-radius:var(--radius);color:var(--text-hint);font-family:var(--mono);font-size:12px;grid-column:1/-1;}
+#engine-room-panel .er-remove-btn{margin-top:10px;font-family:var(--mono);font-size:10px;padding:5px 12px;border:0.5px solid var(--border2);background:transparent;color:var(--text-hint);border-radius:20px;cursor:pointer;}
+#engine-room-panel .er-remove-btn:hover{color:#ef4444;border-color:#ef4444;}
+.er-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;z-index:400;backdrop-filter:blur(4px);}
+.er-modal.hidden{display:none;}
+.er-modalbox{background:var(--surface);border:0.5px solid var(--border2);width:min(500px,100%);border-radius:var(--radius);padding:24px;position:relative;}
+.er-modalbox h2{font-family:var(--mono);font-size:14px;letter-spacing:0.05em;color:var(--text);margin-bottom:6px;}
+.er-close{position:absolute;right:14px;top:10px;border:none;background:none;font-size:22px;color:var(--text-hint);cursor:pointer;}
+.er-close:hover{color:var(--text);}
+.er-form label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-hint);margin:14px 0 6px;}
+.er-form input,.er-form textarea,.er-form select{width:100%;padding:9px 11px;background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius-sm);font-family:var(--sans);font-size:13px;color:var(--text);outline:none;}
+.er-form textarea{min-height:80px;resize:vertical;}
+.er-form-actions{margin-top:20px;display:flex;justify-content:flex-end;gap:8px;}
+.er-secondary-btn{padding:8px 16px;border:0.5px solid var(--border2);background:transparent;color:var(--text-secondary);border-radius:20px;cursor:pointer;font-family:var(--mono);font-size:11px;}
+@media (max-width:700px){
+  #engine-room-panel .er-stats{grid-template-columns:1fr 1fr;padding:0 1rem 1rem;}
+  #engine-room-panel .er-panel-two{grid-template-columns:1fr;}
+  #engine-room-panel .er-main{padding:1rem 1rem 2rem;}
+  #engine-room-panel .er-subnav{padding:0 1rem;}
+  #engine-room-panel .er-heading{flex-direction:column;align-items:flex-start;}
+}
+</style>
+<div id="engine-room-panel" style="display:none;">
+  <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0.5rem;">
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">Personal development system</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">Build capabilities. Run experiments. Discover where they can take you.</div>
+  </div>
+
+  <div class="er-stats">
+    <div class="er-stat"><span id="er-nSkills">0</span><small>Skills</small></div>
+    <div class="er-stat"><span id="er-nCaps">0</span><small>Capabilities</small></div>
+    <div class="er-stat"><span id="er-nExps">0</span><small>Experiments</small></div>
+    <div class="er-stat"><span id="er-nOpps">0</span><small>Opportunities</small></div>
+  </div>
+
+  <div class="er-subnav">
+    <button class="er-subtab er-subtab-active" id="er-tab-overview" onclick="EngineRoom.show('overview',this)">Overview</button>
+    <button class="er-subtab" id="er-tab-skills" onclick="EngineRoom.show('skills',this)">Skills</button>
+    <button class="er-subtab" id="er-tab-capabilities" onclick="EngineRoom.show('capabilities',this)">Capabilities</button>
+    <button class="er-subtab" id="er-tab-experiments" onclick="EngineRoom.show('experiments',this)">Experiments</button>
+    <button class="er-subtab" id="er-tab-opportunities" onclick="EngineRoom.show('opportunities',this)">Opportunities</button>
+  </div>
+
+  <div class="er-main">
+    <section id="er-overview" class="er-section er-section-active">
+      <div class="er-panel-two">
+        <div class="er-panel"><h3>The engine-room idea</h3><p><strong>Skill → Capability → Application → Market → Opportunity</strong></p><p class="er-muted">The direction can also run backwards: an opportunity can reveal a skill worth developing.</p></div>
+        <div class="er-panel"><h3>Start small</h3><p>Add one thing to each section. Don't worry about whether the categories are perfect yet.</p></div>
+      </div>
+    </section>
+
+    <section id="er-skills" class="er-section">
+      <div class="er-heading"><div><h2>Skills</h2><p>Things you are learning or developing.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('skills')">+ Add skill</button></div>
+      <div id="er-skillsList" class="er-cards"></div>
+    </section>
+    <section id="er-capabilities" class="er-section">
+      <div class="er-heading"><div><h2>Capabilities</h2><p>Things you can actually do — not merely things you have studied.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('capabilities')">+ Add capability</button></div>
+      <div id="er-capabilitiesList" class="er-cards"></div>
+    </section>
+    <section id="er-experiments" class="er-section">
+      <div class="er-heading"><div><h2>Experiments</h2><p>Projects and attempts that turn skills into evidence.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('experiments')">+ Add experiment</button></div>
+      <div id="er-experimentsList" class="er-cards"></div>
+    </section>
+    <section id="er-opportunities" class="er-section">
+      <div class="er-heading"><div><h2>Opportunities</h2><p>Problems, markets, products or services that catch your attention.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('opportunities')">+ Add opportunity</button></div>
+      <div id="er-opportunitiesList" class="er-cards"></div>
+    </section>
+  </div>
+</div>
+
+<div id="er-modal" class="er-modal hidden">
+  <div class="er-modalbox"><button class="er-close" onclick="EngineRoom.closeForm()">×</button><h2 id="er-formTitle">Add</h2><form id="er-form" class="er-form"></form></div>
 </div>
 
 <!-- ══ DO PANEL ══ -->
@@ -5011,6 +5114,8 @@ function switchMasterTab(tab) {
   document.getElementById('mtab-missions').classList.toggle('master-active', tab === 'missions');
   document.getElementById('mtab-prod').classList.toggle('master-active', tab === 'prod');
   document.getElementById('mtab-do').classList.toggle('master-active', tab === 'do');
+  document.getElementById('engine-room-panel').style.display = tab === 'engine' ? 'block' : 'none';
+  document.getElementById('mtab-engine').classList.toggle('master-active', tab === 'engine');
   document.getElementById('missions-panel').classList.toggle('master-hidden', tab !== 'missions');
   document.getElementById('prod-panel').classList.toggle('master-visible', tab === 'prod');
   if (tab === 'prod') { pUpdateMetrics(); pRenderMissionActions(); }
@@ -5018,6 +5123,7 @@ function switchMasterTab(tab) {
   if (tab === 'start') { renderStartTab(); }
   if (tab === 'portfolio') { renderPortfolio(); }
   if (tab === 'do') { renderDo(); }
+  if (tab === 'engine') { EngineRoom.render(); }
 }
 
 // ══════════════════════════════════════════════
@@ -6668,6 +6774,88 @@ document.getElementById('mc-install-btn').addEventListener('click', async () => 
 });
 document.getElementById('mc-dismiss-btn').addEventListener('click', () => _banner.style.display = 'none');
 window.addEventListener('appinstalled', () => _banner.style.display = 'none');
+</script>
+
+<script>
+// ══════════════════════════════════════════════
+//  ENGINE ROOM (namespaced to avoid clashing with Mission Control globals)
+// ══════════════════════════════════════════════
+const EngineRoom = (function () {
+  const KEY = "engineRoomData";
+  const labels = { skills: "Skill", capabilities: "Capability", experiments: "Experiment", opportunities: "Opportunity" };
+  let data = JSON.parse(localStorage.getItem(KEY) || 'null') || {
+    skills: [
+      { title: "Coding / web development", level: "Developing", notes: "Learning to build useful applications." },
+      { title: "AI", level: "Developing", notes: "Exploring practical AI integration." },
+      { title: "Sales / customer discovery", level: "Developing", notes: "Learning to identify problems and test offers." }
+    ],
+    capabilities: [], experiments: [], opportunities: []
+  };
+  let currentType = "";
+
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+
+  function show(id, btn) {
+    document.querySelectorAll('#engine-room-panel .er-section').forEach(x => x.classList.remove('er-section-active'));
+    document.getElementById('er-' + id).classList.add('er-section-active');
+    document.querySelectorAll('#engine-room-panel .er-subtab').forEach(x => x.classList.remove('er-subtab-active'));
+    (btn || document.getElementById('er-tab-' + id)).classList.add('er-subtab-active');
+  }
+
+  function openForm(type) {
+    currentType = type;
+    document.getElementById('er-formTitle').textContent = "Add " + labels[type].toLowerCase();
+    let fields = '<label>Name / title</label><input id="er-title" required>';
+    if (type === "skills") fields += '<label>Current level</label><select id="er-level"><option>Exploring</option><option>Developing</option><option>Functional</option><option>Strong</option></select>';
+    fields += '<label>Notes</label><textarea id="er-notes" placeholder="What does this mean to you?"></textarea>';
+    if (type === "capabilities") fields += '<label>Related skill(s)</label><input id="er-related" placeholder="e.g. JavaScript, AI">';
+    if (type === "experiments") fields += '<label>Skills/capabilities being exercised</label><input id="er-related" placeholder="e.g. JavaScript + AI">';
+    if (type === "opportunities") fields += '<label>Market / problem / customer</label><input id="er-related" placeholder="What caught your attention?">';
+    fields += '<div class="er-form-actions"><button type="button" class="er-secondary-btn" onclick="EngineRoom.closeForm()">Cancel</button><button class="er-primary-btn">Save</button></div>';
+    document.getElementById('er-form').innerHTML = fields;
+    document.getElementById('er-form').onsubmit = e => {
+      e.preventDefault();
+      data[type].push({
+        title: document.getElementById('er-title').value,
+        level: document.getElementById('er-level')?.value || '',
+        notes: document.getElementById('er-notes').value,
+        related: document.getElementById('er-related')?.value || ''
+      });
+      save();
+      closeForm();
+    };
+    document.getElementById('er-modal').classList.remove('hidden');
+  }
+
+  function closeForm() { document.getElementById('er-modal').classList.add('hidden'); }
+
+  function renderList(type) {
+    const el = document.getElementById('er-' + type + 'List');
+    if (!el) return;
+    if (!data[type].length) { el.innerHTML = '<div class="er-empty">Nothing here yet.<br><br>Add your first ' + labels[type].toLowerCase() + '.</div>'; return; }
+    el.innerHTML = data[type].map((x, i) => '<article class="er-card"><h3>' + esc(x.title) + '</h3>' +
+      (x.level ? '<span class="er-tag">' + esc(x.level) + '</span>' : '') +
+      (x.related ? '<p><strong>Connection:</strong> ' + esc(x.related) + '</p>' : '') +
+      (x.notes ? '<p>' + esc(x.notes) + '</p>' : '') +
+      '<button class="er-remove-btn" onclick="EngineRoom.removeItem(\'' + type + '\',' + i + ')">Remove</button></article>').join('');
+  }
+
+  function removeItem(type, i) { if (confirm("Remove this item?")) { data[type].splice(i, 1); save(); } }
+
+  function render() {
+    const nSkills = document.getElementById('er-nSkills');
+    if (!nSkills) return; // panel not in DOM yet
+    nSkills.textContent = data.skills.length;
+    document.getElementById('er-nCaps').textContent = data.capabilities.length;
+    document.getElementById('er-nExps').textContent = data.experiments.length;
+    document.getElementById('er-nOpps').textContent = data.opportunities.length;
+    ["skills", "capabilities", "experiments", "opportunities"].forEach(renderList);
+  }
+
+  return { show, openForm, closeForm, removeItem, render };
+})();
 </script>
 
 <script src="do-app.js"></script>
