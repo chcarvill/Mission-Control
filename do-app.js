@@ -3,6 +3,7 @@
    Vanilla JS. No build step. No frameworks.
    Data persists to localStorage. Seed activities on first run.
    ============================================================ */
+(function () {
 
 const STORAGE_KEY = "do_three_a_day_v1";
 
@@ -2861,3 +2862,22 @@ if (document.readyState === "loading") {
 /* file now runs as part of the merged Mission Control app,    */
 /* which registers its own single service worker (mc-sw.js).   */
 /* ---------------------------------------------------------- */
+
+/* ------------------------------------------------------------
+   Everything above is now private to this file -- it can no
+   longer leak into or collide with any other tab's code.
+   Only the two things index.html actually reaches into are
+   exposed below:
+     - renderDo(): called when the Do master tab is opened
+     - STATE: read (never written) by getDoTaskSuggestions() in
+       index.html, to suggest existing Do tasks as roadmap steps.
+       A live getter is used (not a one-time copy) because STATE
+       gets reassigned on load from storage -- this way
+       window.STATE always reflects the current value.
+   ------------------------------------------------------------ */
+window.renderDo = renderDo;
+Object.defineProperty(window, "STATE", {
+  get: function () { return STATE; },
+  configurable: true,
+});
+})();
