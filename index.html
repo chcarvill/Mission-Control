@@ -2683,6 +2683,28 @@
 #engine-room-panel .er-empty{text-align:center;padding:40px;border:1px dashed var(--border2);border-radius:var(--radius);color:var(--text-hint);font-family:var(--mono);font-size:12px;grid-column:1/-1;}
 #engine-room-panel .er-remove-btn{margin-top:10px;font-family:var(--mono);font-size:10px;padding:5px 12px;border:0.5px solid var(--border2);background:transparent;color:var(--text-hint);border-radius:20px;cursor:pointer;}
 #engine-room-panel .er-remove-btn:hover{color:#ef4444;border-color:#ef4444;}
+
+/* idea → execution pipeline (persistent, sits beneath the subtabbed sections) */
+#engine-room-panel .er-pipeline{padding:0.5rem 2.5rem 3rem;border-top:0.5px solid var(--border);margin-top:0.5rem;}
+#engine-room-panel .er-pipeline .er-heading{margin:1.5rem 0 16px;}
+#engine-room-panel .er-pipe-list{display:flex;flex-direction:column;gap:14px;}
+#engine-room-panel .er-pipe-card{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;}
+#engine-room-panel .er-pipe-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+#engine-room-panel .er-pipe-head h3{margin:0;font-size:15px;color:var(--text);font-weight:500;}
+#engine-room-panel .er-pipe-type{font-family:var(--mono);font-size:10px;letter-spacing:0.03em;padding:5px 8px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text-secondary);}
+#engine-room-panel .er-pipe-rail{display:flex;gap:4px;margin-bottom:12px;}
+#engine-room-panel .er-pipe-seg{flex:1;font-family:var(--mono);font-size:10px;height:28px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text-hint);cursor:pointer;}
+#engine-room-panel .er-pipe-seg.done{background:var(--active-bg);color:var(--active);border-color:var(--active);}
+#engine-room-panel .er-pipe-seg.current{background:var(--active);color:#000;border-color:var(--active);font-weight:600;}
+#engine-room-panel .er-pipe-seg:hover{opacity:0.85;}
+#engine-room-panel .er-pipe-current strong{font-size:13px;color:var(--text);}
+#engine-room-panel .er-pipe-current p{margin:4px 0 8px;}
+#engine-room-panel .er-pipe-current textarea{width:100%;min-height:56px;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);resize:vertical;}
+#engine-room-panel .er-pipe-promote{margin-top:14px;font-family:var(--mono);font-size:10px;letter-spacing:0.04em;padding:7px 16px;border-radius:20px;border:0.5px solid var(--active);background:transparent;color:var(--active);cursor:pointer;}
+#engine-room-panel .er-pipe-promote:hover{background:var(--active-bg);}
+#engine-room-panel .er-pipe-promoted{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+#engine-room-panel .er-pipe-promoted button{font-family:var(--mono);font-size:10px;letter-spacing:0.04em;padding:6px 14px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text-secondary);cursor:pointer;}
+#engine-room-panel .er-pipe-promoted button:hover{border-color:var(--active);color:var(--active);}
 .er-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;z-index:400;backdrop-filter:blur(4px);}
 .er-modal.hidden{display:none;}
 .er-modalbox{background:var(--surface);border:0.5px solid var(--border2);width:min(500px,100%);border-radius:var(--radius);padding:24px;position:relative;}
@@ -2700,6 +2722,7 @@
   #engine-room-panel .er-main{padding:1rem 1rem 2rem;}
   #engine-room-panel .er-subnav{padding:0 1rem;}
   #engine-room-panel .er-heading{flex-direction:column;align-items:flex-start;}
+  #engine-room-panel .er-pipeline{padding:0.5rem 1rem 2rem;}
 }
 </style>
 <div id="engine-room-panel" style="display:none;">
@@ -2747,6 +2770,11 @@
       <div class="er-heading"><div><h2>Opportunities</h2><p>Problems, markets, products or services that catch your attention.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('opportunities')">+ Add opportunity</button></div>
       <div id="er-opportunitiesList" class="er-cards"></div>
     </section>
+  </div>
+
+  <div class="er-pipeline">
+    <div class="er-heading"><div><h2>Idea → Execution Pipeline</h2><p>Every opportunity above, tracked from problem to launch. Add opportunities in the tab above — they show up here automatically.</p></div></div>
+    <div id="er-pipelineList" class="er-pipe-list"></div>
   </div>
 </div>
 
@@ -6793,7 +6821,128 @@ const EngineRoom = (function () {
   };
   let currentType = "";
 
+  // Idea → execution pipeline: 7 stages, one (Production) conditional on venture type.
+  const PIPELINE_STAGES = [
+    { key: "problem", label: "Problem & Audience", desc: "The pain point, who has it, which venture/dept it sits under (or: affiliate — sell someone else's)." },
+    { key: "validation", label: "Validation", desc: "Competitor research, 5–10 real customer conversations, unit economics checked." },
+    { key: "design", label: "Design & Requirements", desc: "Features/specs drafted, mockups made." },
+    { key: "prototype", label: "Prototype & Test", desc: "MVP built, stress-tested, user feedback collected." },
+    { key: "production", label: "Production", desc: "Manufacturer sourced, QA checks defined against the approved prototype.", physicalOnly: true },
+    { key: "gotomarket", label: "Go-to-Market", desc: "Brand identity set, sales channel decided (D2C, wholesale, marketplace)." },
+    { key: "launch", label: "Launch & Acquisition", desc: "Marketing live, fulfilment running, sales/review data tracked." }
+  ];
+  const VENTURE_TYPE_LABELS = { digital: "Digital product / service", physical: "Physical product", affiliate: "Affiliate" };
+
   function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+  function getVisibleStages(item) {
+    return PIPELINE_STAGES.filter(s => !s.physicalOnly || item.ventureType === "physical");
+  }
+
+  function setVentureType(i, val) {
+    const item = data.opportunities[i];
+    if (!item) return;
+    item.ventureType = val;
+    const stages = getVisibleStages(item);
+    if ((item.stage || 0) >= stages.length) item.stage = stages.length - 1;
+    save();
+  }
+
+  function setStage(i, stageIndex) {
+    const item = data.opportunities[i];
+    if (!item) return;
+    item.stage = stageIndex;
+    save();
+  }
+
+  function setStageNote(i, key, val) {
+    const item = data.opportunities[i];
+    if (!item) return;
+    item.stageNotes = item.stageNotes || {};
+    item.stageNotes[key] = val;
+    save();
+  }
+
+  // Converts a fleshed-out opportunity into a real Project (Projects tab),
+  // carrying its stage history over as an initial roadmap. The opportunity
+  // itself is kept (not deleted) but marked promoted, so its origin story
+  // isn't lost -- same "unlink, don't delete" convention the app already
+  // uses for Missions <-> Projects.
+  function promoteToProject(i) {
+    const item = data.opportunities[i];
+    if (!item || item.promotedProjectId) return;
+    const stages = getVisibleStages(item);
+    const projects = (typeof loadProjects === 'function') ? loadProjects() : [];
+    const newProject = {
+      id: Date.now(),
+      name: item.title,
+      business: '',
+      department: '',
+      description: item.notes || item.related || '',
+      category: '',
+      created: new Date().toISOString(),
+      fromOpportunity: item.title,
+      roadmap: stages.map((s, idx) => ({
+        id: 'rs' + Date.now() + idx + Math.random().toString(36).slice(2, 6),
+        text: s.label + (item.stageNotes && item.stageNotes[s.key] ? ': ' + item.stageNotes[s.key] : ''),
+        done: idx < item.stage
+      }))
+    };
+    projects.push(newProject);
+    if (typeof saveProjects === 'function') saveProjects(projects);
+    item.promotedProjectId = newProject.id;
+    save();
+    if (typeof switchMasterTab === 'function') switchMasterTab('projects');
+    if (typeof renderProjects === 'function') renderProjects();
+    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(newProject.id), 60);
+  }
+
+  function openPromotedProject(i) {
+    const item = data.opportunities[i];
+    if (!item || !item.promotedProjectId) return;
+    if (typeof switchMasterTab === 'function') switchMasterTab('projects');
+    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(item.promotedProjectId), 60);
+  }
+
+  function renderPipeline() {
+    const el = document.getElementById('er-pipelineList');
+    if (!el) return;
+    if (!data.opportunities.length) {
+      el.innerHTML = '<div class="er-empty">No opportunities yet.<br><br>Add one above — every opportunity gets tracked here from problem to launch.</div>';
+      return;
+    }
+    el.innerHTML = data.opportunities.map((item, i) => {
+      item.ventureType = item.ventureType || "digital";
+      item.stage = item.stage || 0;
+      item.stageNotes = item.stageNotes || {};
+      if (item.promotedProjectId) {
+        return '<article class="er-pipe-card">' +
+          '<div class="er-pipe-head"><h3>' + esc(item.title) + '</h3>' +
+          '<span class="er-tag" style="background:var(--active-bg);color:var(--active);">✓ Promoted</span></div>' +
+          '<div class="er-pipe-promoted"><span class="er-muted">Now tracked as a project, roadmap seeded from its pipeline stages.</span>' +
+          '<button type="button" onclick="EngineRoom.openPromotedProject(' + i + ')">→ Open in Projects</button></div>' +
+          '</article>';
+      }
+      const stages = getVisibleStages(item);
+      if (item.stage >= stages.length) item.stage = stages.length - 1;
+      const current = stages[item.stage];
+      const rail = stages.map((s, idx) => {
+        const cls = idx < item.stage ? "er-pipe-seg done" : (idx === item.stage ? "er-pipe-seg current" : "er-pipe-seg upcoming");
+        return '<button type="button" class="' + cls + '" onclick="EngineRoom.setStage(' + i + ',' + idx + ')" title="' + esc(s.label) + '">' + (idx + 1) + '</button>';
+      }).join('');
+      const typeOptions = ["digital", "physical", "affiliate"].map(t =>
+        '<option value="' + t + '"' + (item.ventureType === t ? ' selected' : '') + '>' + esc(VENTURE_TYPE_LABELS[t]) + '</option>'
+      ).join('');
+      return '<article class="er-pipe-card">' +
+        '<div class="er-pipe-head"><h3>' + esc(item.title) + '</h3>' +
+        '<select class="er-pipe-type" onchange="EngineRoom.setVentureType(' + i + ',this.value)">' + typeOptions + '</select></div>' +
+        '<div class="er-pipe-rail">' + rail + '</div>' +
+        '<div class="er-pipe-current"><strong>' + esc(current.label) + '</strong><p class="er-muted">' + esc(current.desc) + '</p>' +
+        '<textarea placeholder="What\'s true right now for this stage?" onchange="EngineRoom.setStageNote(' + i + ',\'' + current.key + '\',this.value)">' + esc(item.stageNotes[current.key] || '') + '</textarea></div>' +
+        '<button type="button" class="er-pipe-promote" onclick="EngineRoom.promoteToProject(' + i + ')">↗ Promote to Project</button>' +
+        '</article>';
+    }).join('');
+  }
 
   function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
 
@@ -6813,16 +6962,23 @@ const EngineRoom = (function () {
     if (type === "capabilities") fields += '<label>Related skill(s)</label><input id="er-related" placeholder="e.g. JavaScript, AI">';
     if (type === "experiments") fields += '<label>Skills/capabilities being exercised</label><input id="er-related" placeholder="e.g. JavaScript + AI">';
     if (type === "opportunities") fields += '<label>Market / problem / customer</label><input id="er-related" placeholder="What caught your attention?">';
+    if (type === "opportunities") fields += '<label>Venture type</label><select id="er-venturetype"><option value="digital">Digital product / service</option><option value="physical">Physical product</option><option value="affiliate">Affiliate (selling someone else\'s)</option></select>';
     fields += '<div class="er-form-actions"><button type="button" class="er-secondary-btn" onclick="EngineRoom.closeForm()">Cancel</button><button class="er-primary-btn">Save</button></div>';
     document.getElementById('er-form').innerHTML = fields;
     document.getElementById('er-form').onsubmit = e => {
       e.preventDefault();
-      data[type].push({
+      const item = {
         title: document.getElementById('er-title').value,
         level: document.getElementById('er-level')?.value || '',
         notes: document.getElementById('er-notes').value,
         related: document.getElementById('er-related')?.value || ''
-      });
+      };
+      if (type === "opportunities") {
+        item.ventureType = document.getElementById('er-venturetype')?.value || 'digital';
+        item.stage = 0;
+        item.stageNotes = {};
+      }
+      data[type].push(item);
       save();
       closeForm();
     };
@@ -6852,9 +7008,10 @@ const EngineRoom = (function () {
     document.getElementById('er-nExps').textContent = data.experiments.length;
     document.getElementById('er-nOpps').textContent = data.opportunities.length;
     ["skills", "capabilities", "experiments", "opportunities"].forEach(renderList);
+    renderPipeline();
   }
 
-  return { show, openForm, closeForm, removeItem, render };
+  return { show, openForm, closeForm, removeItem, render, setVentureType, setStage, setStageNote, promoteToProject, openPromotedProject };
 })();
 </script>
 
