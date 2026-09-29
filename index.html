@@ -3347,43 +3347,29 @@
 
 <!-- ══ PORTFOLIO PANEL ══ -->
 <div id="portfolio-panel" style="display:none;">
-  <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 1rem;border-bottom:0.5px solid var(--border);background:var(--bg);">
-    <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);margin-bottom:10px;">Notion databases</div>
-    <div id="notion-links-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <input id="notion-link-label" type="text" placeholder="Name (e.g. Ideas DB)" maxlength="60"
-        style="flex:1;min-width:120px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--surface);color:var(--text);outline:none;" />
-      <input id="notion-link-url" type="url" placeholder="https://notion.so/..."
-        style="flex:2;min-width:180px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--surface);color:var(--text);outline:none;"
-        onkeydown="if(event.key==='Enter'){addNotionLink();}" />
-      <button class="btn" onclick="addNotionLink()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;">+ Add</button>
-    </div>
-    <div id="notion-link-error" style="display:none;font-family:var(--sans);font-size:11.5px;color:#ff6b6b;margin-top:6px;"></div>
-  </div>
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
     <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export backup</button>
     <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
     <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
+    <button id="notion-refer-btn" onclick="toggleNotionPanel()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">🔗 Refer to Notion</button>
     <button onclick="emailPortfolioView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
   <div class="mc-mobile-pad" style="padding:0 2.5rem;">
     <div id="notion-import-status" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;padding-top:10px;min-height:14px;"></div>
-  </div>
-  <div class="mc-mobile-pad" style="padding:1rem 2.5rem 0;">
-    <div style="border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;">
-      <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);margin-bottom:10px;">Notion databases</div>
-      <div id="notion-links-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px;"></div>
+    <div id="notion-links-panel" style="display:none;margin-top:10px;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;background:var(--surface);">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);margin-bottom:8px;">Paste a link to your Notion database</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;">
-        <input id="notion-link-name" type="text" placeholder="Database name (e.g. Clients)" maxlength="60"
-          style="flex:1;min-width:140px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--surface);color:var(--text);outline:none;" />
+        <input id="notion-link-label" type="text" placeholder="Name (optional)" maxlength="60"
+          style="flex:1;min-width:120px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--bg);color:var(--text);outline:none;" />
         <input id="notion-link-url" type="url" placeholder="https://notion.so/..."
-          style="flex:2;min-width:180px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--surface);color:var(--text);outline:none;"
+          style="flex:2;min-width:180px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--bg);color:var(--text);outline:none;"
           onkeydown="if(event.key==='Enter'){addNotionLink();}" />
-        <button class="btn" onclick="addNotionLink()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 16px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;">+ Add</button>
+        <button class="btn" onclick="addNotionLink()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;">Save</button>
       </div>
       <div id="notion-link-error" style="display:none;font-family:var(--sans);font-size:11.5px;color:#ff6b6b;margin-top:8px;"></div>
     </div>
+    <div id="notion-links-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
   </div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
@@ -5472,11 +5458,10 @@ function addNotionLink() {
   const labelEl = document.getElementById('notion-link-label');
   const urlEl = document.getElementById('notion-link-url');
   const errEl = document.getElementById('notion-link-error');
-  const label = labelEl.value.trim();
+  const labelRaw = labelEl.value.trim();
   let url = urlEl.value.trim();
   errEl.style.display = 'none';
 
-  if (!label) { labelEl.focus(); return; }
   if (!url) { urlEl.focus(); return; }
   if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
   try { new URL(url); } catch {
@@ -5486,12 +5471,22 @@ function addNotionLink() {
     return;
   }
 
+  const label = labelRaw || 'Notion database';
   const links = loadNotionLinks();
   links.push({ id: 'nl' + Date.now() + Math.floor(Math.random()*1000), label, url });
   saveNotionLinks(links);
   labelEl.value = '';
   urlEl.value = '';
   renderNotionLinks();
+  const panel = document.getElementById('notion-links-panel');
+  if (panel) panel.style.display = 'none';
+}
+function toggleNotionPanel() {
+  const panel = document.getElementById('notion-links-panel');
+  if (!panel) return;
+  const show = panel.style.display === 'none';
+  panel.style.display = show ? 'block' : 'none';
+  if (show) document.getElementById('notion-link-url').focus();
 }
 function deleteNotionLink(id) {
   saveNotionLinks(loadNotionLinks().filter(l => l.id !== id));
@@ -5501,13 +5496,11 @@ function renderNotionLinks() {
   const list = document.getElementById('notion-links-list');
   if (!list) return;
   const links = loadNotionLinks();
-  list.innerHTML = links.length
-    ? links.map(l => `
-      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border:0.5px solid var(--border);border-radius:8px;">
-        <a href="${esc(l.url)}" target="_blank" rel="noopener" style="flex:1;font-family:var(--sans);font-size:13px;color:var(--active);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🔗 ${esc(l.label)}</a>
-        <button onclick="deleteNotionLink('${l.id}')" title="Remove" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:13px;padding:2px 6px;">✕</button>
-      </div>`).join('')
-    : `<div style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-hint);letter-spacing:0.05em;padding:0.5rem 0;">no databases linked yet</div>`;
+  list.innerHTML = links.map(l => `
+    <div style="display:flex;align-items:center;gap:6px;padding:6px 6px 6px 12px;background:var(--surface);border:0.5px solid var(--border2);border-radius:20px;max-width:100%;">
+      <a href="${esc(l.url)}" target="_blank" rel="noopener" style="font-family:var(--mono);font-size:12px;color:var(--active);text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:0.03em;">🔗 ${esc(l.label)}</a>
+      <button onclick="deleteNotionLink('${l.id}')" title="Remove" style="background:none;border:none;color:var(--text-hint);cursor:pointer;font-size:11px;padding:2px 6px;">✕</button>
+    </div>`).join('');
 }
 
 function renderPortfolio() {
