@@ -2754,13 +2754,17 @@
       <div id="er-ideasList" class="er-pipe-list"></div>
     </section>
     <section id="er-skills" class="er-section">
-      <div class="er-heading"><div><h2>My skills</h2><p>Skills are what you can do. Capabilities and experiments are your evidence.</p></div>
-        <div><button class="er-primary-btn" onclick="EngineRoom.openForm('skills')">+ Skill</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('capabilities')">+ Capability</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('experiments')">+ Experiment</button></div></div>
+      <div class="er-heading"><div><h2>My skills</h2><p>Skills are what you can do. Capabilities, experiments, background and passions are your evidence and advantage.</p></div>
+        <div><button class="er-primary-btn" onclick="EngineRoom.openForm('skills')">+ Skill</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('capabilities')">+ Capability</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('experiments')">+ Experiment</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('background')">+ Background</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('passions')">+ Passion</button></div></div>
       <div id="er-skillsList" class="er-cards"></div>
       <div class="er-sub">Capabilities: things you can actually do</div>
       <div id="er-capabilitiesList" class="er-cards"></div>
       <div class="er-sub">Experiments: attempts that turn skills into evidence</div>
       <div id="er-experimentsList" class="er-cards"></div>
+      <div class="er-sub">Background: qualifications and experience</div>
+      <div id="er-backgroundList" class="er-cards"></div>
+      <div class="er-sub">Passions: what you care about and pursue wholeheartedly</div>
+      <div id="er-passionsList" class="er-cards"></div>
     </section>
     <section id="er-gaps" class="er-section">
       <div class="er-heading"><div><h2>Skill gaps</h2><p>Skills your upcoming steps rely on that you don't yet have, or rate below Functional.</p></div></div>
@@ -6795,7 +6799,7 @@ window.addEventListener('appinstalled', () => _banner.style.display = 'none');
 const EngineRoom = (function () {
   const KEY = "engineRoomData";
   const LEVELS = ["Exploring", "Developing", "Functional", "Strong"], NEED = 2;
-  const LABELS = { skills: "skill", capabilities: "capability", experiments: "experiment", idea: "idea" };
+  const LABELS = { skills: "skill", capabilities: "capability", experiments: "experiment", background: "background item", passions: "passion", idea: "idea" };
   const VT = { digital: "Digital product / service", physical: "Physical product", affiliate: "Affiliate" };
   const ALIASES = {
     "Interviewing": ["interview", "customer discovery", "discovery", "listening"], "Research": ["research", "analy"],
@@ -6852,6 +6856,8 @@ const EngineRoom = (function () {
     capabilities: [], experiments: [], opportunities: []
   };
   data.practice = data.practice || {};
+  data.background = data.background || [];
+  data.passions = data.passions || [];
   data.opportunities.forEach(migrate);
 
   function migrate(it) {
@@ -6917,6 +6923,18 @@ const EngineRoom = (function () {
     return Object.values(out);
   }
 
+  function fitOf(it) {
+    const need = new Set();
+    STAGES.forEach(st => stepsOf(st, it).forEach(x => x.s.forEach(k => need.add(k))));
+    let have = 0; need.forEach(k => { const m = match(k); if (m && LEVELS.indexOf(m.level) >= NEED) have++; });
+    return { have, total: need.size };
+  }
+  function edgeOptions() {
+    return data.skills.map(x => 'skills:' + x.title).concat(data.capabilities.map(x => 'capabilities:' + x.title), data.background.map(x => 'background:' + x.title), data.passions.map(x => 'passions:' + x.title));
+  }
+  function toggleEdge(i, key) { const e = data.opportunities[i].edge, n = e.picks.indexOf(key); if (n < 0) e.picks.push(key); else e.picks.splice(n, 1); save(); }
+  function setEdgeText(i, v) { data.opportunities[i].edge.text = v; localStorage.setItem(KEY, JSON.stringify(data)); }
+
   // ── Idea actions ──
   function setStage(i, n) { data.opportunities[i].stage = n; save(); }
   function nextStage(i) { const it = data.opportunities[i]; if (it.stage < STAGES.length - 1) it.stage++; save(); }
@@ -6935,7 +6953,7 @@ const EngineRoom = (function () {
   function promoteToProject(i) {
     const it = data.opportunities[i]; if (!it || it.promotedProjectId) return;
     const projects = (typeof loadProjects === 'function') ? loadProjects() : [];
-    const p = { id: Date.now(), name: it.title, business: '', department: '', description: (it.stageNotes.idea || ''), category: '', created: new Date().toISOString(), fromOpportunity: it.title,
+    const p = { id: Date.now(), name: it.title, business: '', department: '', description: ((it.stageNotes.idea || '') + (it.edge && it.edge.text ? '\nMy edge: ' + it.edge.text : '')).trim(), category: '', created: new Date().toISOString(), fromOpportunity: it.title,
       roadmap: STAGES.map((s, idx) => ({ id: 'rs' + Date.now() + idx + Math.random().toString(36).slice(2, 6), text: s.label + (it.stageNotes[s.key] ? ': ' + it.stageNotes[s.key] : ''), done: idx < it.stage })) };
     projects.push(p); if (typeof saveProjects === 'function') saveProjects(projects);
     it.promotedProjectId = p.id; save();
@@ -6956,7 +6974,10 @@ const EngineRoom = (function () {
     el.innerHTML = data.opportunities.map((it, i) => {
       it.ventureType = it.ventureType || 'digital'; it.stage = Math.min(it.stage || 0, STAGES.length - 1);
       if (it.promotedProjectId) return '<article class="er-pipe-card"><div class="er-pipe-head"><h3>' + esc(it.title) + '</h3><span class="er-tag">✓ Now a project</span></div><div class="er-pipe-promoted"><span class="er-muted">Tracked in Projects, with its roadmap built from these stages.</span><button type="button" onclick="EngineRoom.openPromotedProject(' + i + ')">Open in Projects</button></div></article>';
-      const st = STAGES[it.stage], gaps = gapsFor(it), gapNames = gaps.map(g => g.name);
+      it.edge = it.edge || { picks: [], text: '' };
+      const st = STAGES[it.stage], gaps = gapsFor(it), gapNames = gaps.map(g => g.name), fit = fitOf(it);
+      const fitHtml = fit.total ? '<p class="er-gapbar" style="margin-bottom:8px;">Your fit: you already cover <strong>' + fit.have + ' of ' + fit.total + '</strong> skills this idea needs.' + (it.edge.picks.length ? ' Your edge: ' + it.edge.picks.length + ' picked.' : '') + '</p><div style="height:4px;border-radius:2px;background:var(--border);margin-bottom:12px;"><div style="height:4px;border-radius:2px;background:var(--active);width:' + Math.round(fit.have / fit.total * 100) + '%;"></div></div>' : '';
+      const opts = edgeOptions(), edgeHtml = it.stage === 0 ? '<div style="margin:6px 0 14px;"><strong style="font-size:13px;">Why you? What gives you an edge on this idea?</strong><p class="er-muted" style="margin:4px 0 8px;font-size:12px;">Pick the skills, capabilities, background or passions that give you an advantage. It is fine to have none yet: the Skill gaps tab will show what to build.</p><div>' + (opts.length ? opts.map(o => { const on = it.edge.picks.includes(o), ttl = o.slice(o.indexOf(':') + 1); return '<button type="button" class="er-tag" style="cursor:pointer;border:0.5px solid var(--active);' + (on ? 'background:var(--active);color:#000;' : 'background:transparent;') + '" data-k="' + esc(o) + '" onclick="EngineRoom.toggleEdge(' + i + ',this.dataset.k)">' + esc(ttl) + '</button>'; }).join('') : '<span class="er-muted">Add skills, background or passions first, on the My skills tab.</span>') + '</div><textarea style="margin-top:8px;width:100%;min-height:44px;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);" placeholder="In your own words: why are you well placed to do this?" onchange="EngineRoom.setEdgeText(' + i + ',this.value)">' + esc(it.edge.text) + '</textarea></div>' : '';
       const rail = STAGES.map((s, idx) => '<button type="button" class="er-pipe-seg ' + (idx < it.stage ? 'done' : idx === it.stage ? 'current' : '') + '" title="' + esc(s.label) + '" onclick="EngineRoom.setStage(' + i + ',' + idx + ')">' + (idx + 1) + '</button>').join('');
       const rows = stepsOf(st, it).map(x => {
         const e = entry(it.sched[x.k]); if (it.sched[x.k] && !e) delete it.sched[x.k];
@@ -6965,7 +6986,7 @@ const EngineRoom = (function () {
         return '<div class="er-step"><input type="checkbox" ' + (it.done[x.k] ? 'checked ' : '') + 'onchange="EngineRoom.toggleStep(' + i + ',\'' + x.k + '\')"><div class="er-step-main"><span class="' + (it.done[x.k] ? 'er-done' : '') + '">' + esc(x.t) + '</span><div>' + tags + '</div></div><div>' + when + '</div></div>';
       }).join('');
       return '<article class="er-pipe-card"><div class="er-pipe-head"><h3>' + esc(it.title) + '</h3><select class="er-pipe-type" onchange="EngineRoom.setType(' + i + ',this.value)">' + Object.keys(VT).map(t => '<option value="' + t + '"' + (it.ventureType === t ? ' selected' : '') + '>' + VT[t] + '</option>').join('') + '</select></div>' +
-        '<div class="er-pipe-rail">' + rail + '</div><strong style="font-size:13px;">Stage ' + (it.stage + 1) + ' of 8: ' + esc(st.label) + '</strong>' +
+        '<div class="er-pipe-rail">' + rail + '</div>' + fitHtml + '<strong style="font-size:13px;">Stage ' + (it.stage + 1) + ' of 8: ' + esc(st.label) + '</strong>' + edgeHtml +
         (gaps.length ? '<p class="er-gapbar">Skill gaps ahead: ' + gaps.map(g => esc(g.name)).join(', ') + '. See the Skill gaps tab.</p>' : '') +
         '<div>' + rows + '</div><textarea style="margin-top:10px;width:100%;min-height:50px;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);" placeholder="Notes for this stage" onchange="EngineRoom.setNote(' + i + ',\'' + st.key + '\',this.value)">' + esc(it.stageNotes[st.key] || '') + '</textarea>' +
         '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' + (it.stage < STAGES.length - 1 ? '<button class="er-primary-btn" onclick="EngineRoom.nextStage(' + i + ')">Next stage</button>' : '') + '<button type="button" class="er-pipe-promote" style="margin-top:0" onclick="EngineRoom.promoteToProject(' + i + ')">Promote to Project</button><button class="er-remove-btn" style="margin-top:0" onclick="EngineRoom.removeIdea(' + i + ')">Remove</button></div></article>';
@@ -6992,7 +7013,7 @@ const EngineRoom = (function () {
         '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + (r.m ? '' : '<button class="er-remove-btn" style="margin:0" onclick="EngineRoom.addSkillFromGap(\'' + r.name.replace(/'/g, "\\'") + '\')">Add to my skills</button>') + '<button class="er-remove-btn" style="margin:0" onclick="EngineRoom.scheduleSkill(\'' + r.name.replace(/'/g, "\\'") + '\')">Schedule practice</button></div></article>';
     }).join('');
   }
-  function render() { if (!document.getElementById('er-ideasList')) return; renderIdeas(); ["skills", "capabilities", "experiments"].forEach(renderList); renderGaps(); }
+  function render() { if (!document.getElementById('er-ideasList')) return; renderIdeas(); ["skills", "capabilities", "experiments", "background", "passions"].forEach(renderList); renderGaps(); }
 
   function show(id, btn) {
     document.querySelectorAll('#engine-room-panel .er-section').forEach(x => x.classList.remove('er-section-active'));
@@ -7020,7 +7041,7 @@ const EngineRoom = (function () {
   }
   function closeForm() { document.getElementById('er-modal').classList.add('hidden'); }
 
-  return { show, openForm, closeForm, removeItem, render, setStage, nextStage, setType, setNote, toggleStep, scheduleStep, unschedule, scheduleSkill, setLevel, addSkillFromGap, removeIdea, promoteToProject, openPromotedProject };
+  return { show, openForm, closeForm, removeItem, render, setStage, nextStage, setType, setNote, toggleStep, scheduleStep, unschedule, scheduleSkill, setLevel, addSkillFromGap, removeIdea, toggleEdge, setEdgeText, promoteToProject, openPromotedProject };
 })();
 </script>
 
