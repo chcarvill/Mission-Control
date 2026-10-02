@@ -2725,56 +2725,47 @@
   #engine-room-panel .er-pipeline{padding:0.5rem 1rem 2rem;}
 }
 </style>
+<style>
+#engine-room-panel .er-step{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:0.5px solid var(--border);font-size:13px;color:var(--text);}
+#engine-room-panel .er-step:last-child{border-bottom:none;}
+#engine-room-panel .er-step input{margin-top:3px;}
+#engine-room-panel .er-step .er-done{text-decoration:line-through;color:var(--text-hint);}
+#engine-room-panel .er-step-main{flex:1;min-width:0;}
+#engine-room-panel .er-gap{background:rgba(239,68,68,0.12);color:#ef4444;}
+#engine-room-panel .er-link{font-family:var(--mono);font-size:10px;border:none;background:none;color:var(--active);cursor:pointer;padding:2px 4px;}
+#engine-room-panel .er-when{font-family:var(--mono);font-size:10px;color:var(--text-secondary);}
+#engine-room-panel .er-gapbar{font-size:12px;color:var(--text-secondary);margin:0 0 12px;}
+#engine-room-panel .er-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;}
+#engine-room-panel .er-sub{font-family:var(--mono);font-size:11px;letter-spacing:0.05em;color:var(--text-hint);margin:22px 0 10px;}
+#engine-room-panel .er-card select{font-family:var(--mono);font-size:10px;padding:4px 8px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text-secondary);}
+</style>
 <div id="engine-room-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0.5rem;">
-    <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">Personal development system</div>
-    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">Build capabilities. Run experiments. Discover where they can take you.</div>
+    <div style="font-family:var(--sans);font-size:12px;color:var(--text-hint);">Take an idea from first thought to launch. See which of your skills help, and where there are gaps.</div>
   </div>
-
-  <div class="er-stats">
-    <div class="er-stat"><span id="er-nSkills">0</span><small>Skills</small></div>
-    <div class="er-stat"><span id="er-nCaps">0</span><small>Capabilities</small></div>
-    <div class="er-stat"><span id="er-nExps">0</span><small>Experiments</small></div>
-    <div class="er-stat"><span id="er-nOpps">0</span><small>Opportunities</small></div>
-  </div>
-
   <div class="er-subnav">
-    <button class="er-subtab er-subtab-active" id="er-tab-overview" onclick="EngineRoom.show('overview',this)">Overview</button>
-    <button class="er-subtab" id="er-tab-skills" onclick="EngineRoom.show('skills',this)">Skills</button>
-    <button class="er-subtab" id="er-tab-capabilities" onclick="EngineRoom.show('capabilities',this)">Capabilities</button>
-    <button class="er-subtab" id="er-tab-experiments" onclick="EngineRoom.show('experiments',this)">Experiments</button>
-    <button class="er-subtab" id="er-tab-opportunities" onclick="EngineRoom.show('opportunities',this)">Opportunities</button>
+    <button class="er-subtab er-subtab-active" id="er-tab-ideas" onclick="EngineRoom.show('ideas',this)">Ideas</button>
+    <button class="er-subtab" id="er-tab-skills" onclick="EngineRoom.show('skills',this)">My skills</button>
+    <button class="er-subtab" id="er-tab-gaps" onclick="EngineRoom.show('gaps',this)">Skill gaps</button>
   </div>
-
   <div class="er-main">
-    <section id="er-overview" class="er-section er-section-active">
-      <div class="er-panel-two">
-        <div class="er-panel"><h3>The engine-room idea</h3><p><strong>Skill → Capability → Application → Market → Opportunity</strong></p><p class="er-muted">The direction can also run backwards: an opportunity can reveal a skill worth developing.</p></div>
-        <div class="er-panel"><h3>Start small</h3><p>Add one thing to each section. Don't worry about whether the categories are perfect yet.</p></div>
-      </div>
+    <section id="er-ideas" class="er-section er-section-active">
+      <div class="er-heading"><div><h2>Ideas</h2><p>Every idea follows the same 8 stages. Tick off steps and schedule them on your Homepage calendar.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('idea')">+ Add idea</button></div>
+      <div id="er-ideasList" class="er-pipe-list"></div>
     </section>
-
     <section id="er-skills" class="er-section">
-      <div class="er-heading"><div><h2>Skills</h2><p>Things you are learning or developing.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('skills')">+ Add skill</button></div>
+      <div class="er-heading"><div><h2>My skills</h2><p>Skills are what you can do. Capabilities and experiments are your evidence.</p></div>
+        <div><button class="er-primary-btn" onclick="EngineRoom.openForm('skills')">+ Skill</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('capabilities')">+ Capability</button> <button class="er-primary-btn" onclick="EngineRoom.openForm('experiments')">+ Experiment</button></div></div>
       <div id="er-skillsList" class="er-cards"></div>
-    </section>
-    <section id="er-capabilities" class="er-section">
-      <div class="er-heading"><div><h2>Capabilities</h2><p>Things you can actually do — not merely things you have studied.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('capabilities')">+ Add capability</button></div>
+      <div class="er-sub">Capabilities: things you can actually do</div>
       <div id="er-capabilitiesList" class="er-cards"></div>
-    </section>
-    <section id="er-experiments" class="er-section">
-      <div class="er-heading"><div><h2>Experiments</h2><p>Projects and attempts that turn skills into evidence.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('experiments')">+ Add experiment</button></div>
+      <div class="er-sub">Experiments: attempts that turn skills into evidence</div>
       <div id="er-experimentsList" class="er-cards"></div>
     </section>
-    <section id="er-opportunities" class="er-section">
-      <div class="er-heading"><div><h2>Opportunities</h2><p>Problems, markets, products or services that catch your attention.</p></div><button class="er-primary-btn" onclick="EngineRoom.openForm('opportunities')">+ Add opportunity</button></div>
-      <div id="er-opportunitiesList" class="er-cards"></div>
+    <section id="er-gaps" class="er-section">
+      <div class="er-heading"><div><h2>Skill gaps</h2><p>Skills your upcoming steps rely on that you don't yet have, or rate below Functional.</p></div></div>
+      <div id="er-gapsList" class="er-cards"></div>
     </section>
-  </div>
-
-  <div class="er-pipeline">
-    <div class="er-heading"><div><h2>Idea → Execution Pipeline</h2><p>Every opportunity above, tracked from problem to launch. Add opportunities in the tab above — they show up here automatically.</p></div></div>
-    <div id="er-pipelineList" class="er-pipe-list"></div>
   </div>
 </div>
 
@@ -6799,145 +6790,209 @@ window.addEventListener('appinstalled', () => _banner.style.display = 'none');
 
 <script>
 // ══════════════════════════════════════════════
-//  ENGINE ROOM (namespaced to avoid clashing with Mission Control globals)
+//  ENGINE ROOM v2: ideas -> 8 stages, skills library, skill gaps, Homepage calendar link
 // ══════════════════════════════════════════════
 const EngineRoom = (function () {
   const KEY = "engineRoomData";
-  const labels = { skills: "Skill", capabilities: "Capability", experiments: "Experiment", opportunities: "Opportunity" };
+  const LEVELS = ["Exploring", "Developing", "Functional", "Strong"], NEED = 2;
+  const LABELS = { skills: "skill", capabilities: "capability", experiments: "experiment", idea: "idea" };
+  const VT = { digital: "Digital product / service", physical: "Physical product", affiliate: "Affiliate" };
+  const ALIASES = {
+    "Interviewing": ["interview", "customer discovery", "discovery", "listening"], "Research": ["research", "analy"],
+    "Financial modelling": ["financ", "commerce", "econom", "account"], "Design": ["design"],
+    "Project management": ["project", "planning"], "Legal & compliance": ["legal", "compliance"],
+    "Prototyping": ["prototyp", "making"], "Coding": ["coding", "programming", "web dev", "development"],
+    "Negotiation": ["negotiat", "sourcing"], "Quality control": ["quality"], "Writing": ["writing", "copy", "content"],
+    "Web setup": ["web", "coding", "store"], "Operations": ["operations", "logistics", "fulfil"],
+    "Customer service": ["customer service", "support"], "Sales": ["sales", "selling"], "Data analysis": ["data", "analy"]
+  };
+  const STAGES = [
+    { key: "idea", label: "Idea", steps: [
+      { k: "problem", t: "Describe the problem and who has it", s: [] },
+      { k: "now", t: "Note what people do about it today", s: [] }] },
+    { key: "validate", label: "Validate", steps: [
+      { k: "comp", t: "Research competitors", s: ["Research"] },
+      { k: "talk", t: "Talk to 5-10 potential customers", s: ["Interviewing"] },
+      { k: "econ", t: "Check rough costs against price", s: ["Financial modelling"] }] },
+    { key: "plan", label: "Plan", steps: [
+      { k: "spec", t: "Write the spec or feature list", s: ["Design"] },
+      { k: "budget", t: "Set budget and timeline", s: ["Project management"] },
+      { k: "legal", t: "Check legal and compliance (ABN, safety, consumer law)", s: ["Legal & compliance"] }] },
+    { key: "build", label: "Build / Make", steps: [
+      { k: "bd", t: "Build the first working version", s: ["Coding"], only: ["digital"] },
+      { k: "bp", t: "Make a prototype", s: ["Prototyping", "Design"], only: ["physical"] },
+      { k: "sup", t: "Find a supplier or manufacturer", s: ["Negotiation"], only: ["physical"] },
+      { k: "qa", t: "Approve samples and set quality checks", s: ["Quality control"], only: ["physical"] },
+      { k: "test", t: "Test it and gather feedback", s: ["Interviewing"], not: ["affiliate"] }] },
+    { key: "brand", label: "Brand & marketing", steps: [
+      { k: "name", t: "Choose name and branding", s: ["Design"] },
+      { k: "content", t: "Create photos, demo or content", s: ["Writing"] },
+      { k: "site", t: "Set up the website or store", s: ["Web setup"] }] },
+    { key: "sell", label: "Sell & distribute", steps: [
+      { k: "chan", t: "Choose sales channel and payments", s: [] },
+      { k: "price", t: "Set final pricing", s: ["Financial modelling"] },
+      { k: "ship", t: "Plan shipping, stock and returns", s: ["Operations"], only: ["physical"] },
+      { k: "deliv", t: "Plan delivery and customer support", s: ["Customer service"], not: ["physical"] }] },
+    { key: "launch", label: "Launch", steps: [
+      { k: "go", t: "Go live and announce", s: ["Sales"] },
+      { k: "first", t: "Get first sales or sign-ups", s: ["Sales"] },
+      { k: "fb", t: "Collect feedback and reviews", s: ["Customer service"] }] },
+    { key: "review", label: "Review", steps: [
+      { k: "rev", t: "Review results against your goal", s: ["Data analysis"] },
+      { k: "dec", t: "Decide: improve, scale, pause or stop", s: [] }] }
+  ];
+  const OLD_KEYS = { digital: ["problem", "validation", "design", "prototype", "gotomarket", "launch"], physical: ["problem", "validation", "design", "prototype", "production", "gotomarket", "launch"] };
+  const OLD_TO_NEW = { problem: "idea", validation: "validate", design: "plan", prototype: "build", production: "build", gotomarket: "brand", launch: "launch" };
+
   let data = JSON.parse(localStorage.getItem(KEY) || 'null') || {
     skills: [
       { title: "Coding / web development", level: "Developing", notes: "Learning to build useful applications." },
       { title: "AI", level: "Developing", notes: "Exploring practical AI integration." },
-      { title: "Sales / customer discovery", level: "Developing", notes: "Learning to identify problems and test offers." }
-    ],
+      { title: "Sales / customer discovery", level: "Developing", notes: "Learning to identify problems and test offers." }],
     capabilities: [], experiments: [], opportunities: []
   };
-  let currentType = "";
+  data.practice = data.practice || {};
+  data.opportunities.forEach(migrate);
 
-  // Idea → execution pipeline: 7 stages, one (Production) conditional on venture type.
-  const PIPELINE_STAGES = [
-    { key: "problem", label: "Problem & Audience", desc: "The pain point, who has it, which venture/dept it sits under (or: affiliate — sell someone else's)." },
-    { key: "validation", label: "Validation", desc: "Competitor research, 5–10 real customer conversations, unit economics checked." },
-    { key: "design", label: "Design & Requirements", desc: "Features/specs drafted, mockups made." },
-    { key: "prototype", label: "Prototype & Test", desc: "MVP built, stress-tested, user feedback collected." },
-    { key: "production", label: "Production", desc: "Manufacturer sourced, QA checks defined against the approved prototype.", physicalOnly: true },
-    { key: "gotomarket", label: "Go-to-Market", desc: "Brand identity set, sales channel decided (D2C, wholesale, marketplace)." },
-    { key: "launch", label: "Launch & Acquisition", desc: "Marketing live, fulfilment running, sales/review data tracked." }
-  ];
-  const VENTURE_TYPE_LABELS = { digital: "Digital product / service", physical: "Physical product", affiliate: "Affiliate" };
-
-  function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-
-  function getVisibleStages(item) {
-    return PIPELINE_STAGES.filter(s => !s.physicalOnly || item.ventureType === "physical");
+  function migrate(it) {
+    if (it.v2) return;
+    const vt = it.ventureType === "physical" ? "physical" : "digital";
+    const oldKeys = OLD_KEYS[vt], oldKey = oldKeys[Math.min(it.stage || 0, oldKeys.length - 1)];
+    const notes = {};
+    Object.keys(it.stageNotes || {}).forEach(k => { const n = OLD_TO_NEW[k]; if (n && it.stageNotes[k]) notes[n] = notes[n] ? notes[n] + "\n" + it.stageNotes[k] : it.stageNotes[k]; });
+    it.stage = STAGES.findIndex(s => s.key === OLD_TO_NEW[oldKey]);
+    it.stageNotes = notes; it.done = {}; it.sched = {}; it.v2 = true;
   }
 
-  function setVentureType(i, val) {
-    const item = data.opportunities[i];
-    if (!item) return;
-    item.ventureType = val;
-    const stages = getVisibleStages(item);
-    if ((item.stage || 0) >= stages.length) item.stage = stages.length - 1;
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+  function today() { return typeof dateKey === 'function' ? dateKey(new Date()) : new Date().toISOString().slice(0, 10); }
+  function fmtDate(d) { return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }); }
+  function stepsOf(st, it) { return st.steps.filter(x => (!x.only || x.only.includes(it.ventureType)) && (!x.not || !x.not.includes(it.ventureType))); }
+  function stepText(k) { for (const s of STAGES) { const x = s.steps.find(y => y.k === k); if (x) return x.t; } return k; }
+
+  // ── Homepage calendar link ──
+  function refreshTimeline() { try { if (typeof renderHomepage === 'function') renderHomepage(); } catch (e) { } }
+  function entry(id) { return id ? loadHomepageManual().find(x => x.id === id) : null; }
+  function removeEntry(id) { if (id) { saveHomepageManual(loadHomepageManual().filter(x => x.id !== id)); refreshTimeline(); } }
+  function addEntry(text, date, start, mins) {
+    const [h, m] = start.split(':').map(Number), t = h * 60 + m + mins;
+    const end = String(Math.floor(t / 60) % 24).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+    if (typeof hpFindConflict === 'function') {
+      const c = hpFindConflict(date, start, end);
+      if (c) return { error: typeof hpConflictMessage === 'function' ? hpConflictMessage(c, date) : 'That time is already taken.' };
+    }
+    const id = 'er' + Date.now() + Math.random().toString(36).slice(2, 5), list = loadHomepageManual();
+    list.push({ id, date, text, start, end, color: (typeof VENTURE_COLORS !== 'undefined' && VENTURE_COLORS[0]) || '#7aa7a0' });
+    saveHomepageManual(list); refreshTimeline();
+    return { id };
+  }
+  function openSchedule(label, cb) {
+    document.getElementById('er-formTitle').textContent = 'Schedule: ' + label;
+    const f = document.getElementById('er-form');
+    f.innerHTML = '<label>Date</label><input type="date" id="er-sd" value="' + today() + '" required><label>Start time</label><input type="time" id="er-st" value="09:00" required><label>Length</label><select id="er-sl"><option value="30">30 minutes</option><option value="60" selected>1 hour</option><option value="90">1.5 hours</option><option value="120">2 hours</option></select><div id="er-err" style="color:#ef4444;font-size:12px;margin-top:10px;"></div><div class="er-form-actions"><button type="button" class="er-secondary-btn" onclick="EngineRoom.closeForm()">Cancel</button><button class="er-primary-btn">Add to Homepage calendar</button></div>';
+    f.onsubmit = e => { e.preventDefault(); const err = cb(document.getElementById('er-sd').value, document.getElementById('er-st').value, +document.getElementById('er-sl').value); if (err) document.getElementById('er-err').textContent = err; else closeForm(); };
+    document.getElementById('er-modal').classList.remove('hidden');
+  }
+  function scheduleStep(i, k) {
+    const it = data.opportunities[i]; if (!it) return;
+    openSchedule(stepText(k), (d, s, m) => { const r = addEntry(it.title + ': ' + stepText(k), d, s, m); if (r.error) return r.error; it.sched[k] = r.id; save(); });
+  }
+  function unschedule(i, k) { const it = data.opportunities[i]; removeEntry(it.sched[k]); delete it.sched[k]; save(); }
+  function scheduleSkill(name) {
+    openSchedule('practise ' + name, (d, s, m) => { const r = addEntry('Practise: ' + name, d, s, m); if (r.error) return r.error; data.practice[name] = r.id; save(); });
+  }
+
+  // ── Skill gaps ──
+  function match(name) {
+    const al = ALIASES[name] || [name.toLowerCase()];
+    return data.skills.find(s => al.some(a => new RegExp('\\b' + a, 'i').test(s.title)));
+  }
+  function gapsFor(it) {
+    const out = {};
+    STAGES.forEach((st, idx) => {
+      if (idx < it.stage) return;
+      stepsOf(st, it).forEach(x => { if (it.done[x.k]) return; x.s.forEach(sk => { const m = match(sk); if (m && LEVELS.indexOf(m.level) >= NEED) return; (out[sk] = out[sk] || { name: sk, m, steps: [] }).steps.push(x.t); }); });
+    });
+    return Object.values(out);
+  }
+
+  // ── Idea actions ──
+  function setStage(i, n) { data.opportunities[i].stage = n; save(); }
+  function nextStage(i) { const it = data.opportunities[i]; if (it.stage < STAGES.length - 1) it.stage++; save(); }
+  function setType(i, v) { data.opportunities[i].ventureType = v; save(); }
+  function setNote(i, key, v) { const it = data.opportunities[i]; it.stageNotes[key] = v; localStorage.setItem(KEY, JSON.stringify(data)); }
+  function toggleStep(i, k) {
+    const it = data.opportunities[i]; it.done[k] = !it.done[k];
+    if (it.done[k] && it.sched[k]) { removeEntry(it.sched[k]); delete it.sched[k]; }
     save();
   }
+  function removeIdea(i) { if (confirm("Remove this idea?")) { Object.values(data.opportunities[i].sched || {}).forEach(removeEntry); data.opportunities.splice(i, 1); save(); } }
+  function setLevel(i, v) { data.skills[i].level = v; save(); }
+  function addSkillFromGap(name) { data.skills.push({ title: name, level: "Exploring", notes: "Added from a skill gap." }); save(); }
+  function removeItem(type, i) { if (confirm("Remove this item?")) { data[type].splice(i, 1); save(); } }
 
-  function setStage(i, stageIndex) {
-    const item = data.opportunities[i];
-    if (!item) return;
-    item.stage = stageIndex;
-    save();
-  }
-
-  function setStageNote(i, key, val) {
-    const item = data.opportunities[i];
-    if (!item) return;
-    item.stageNotes = item.stageNotes || {};
-    item.stageNotes[key] = val;
-    save();
-  }
-
-  // Converts a fleshed-out opportunity into a real Project (Projects tab),
-  // carrying its stage history over as an initial roadmap. The opportunity
-  // itself is kept (not deleted) but marked promoted, so its origin story
-  // isn't lost -- same "unlink, don't delete" convention the app already
-  // uses for Missions <-> Projects.
   function promoteToProject(i) {
-    const item = data.opportunities[i];
-    if (!item || item.promotedProjectId) return;
-    const stages = getVisibleStages(item);
+    const it = data.opportunities[i]; if (!it || it.promotedProjectId) return;
     const projects = (typeof loadProjects === 'function') ? loadProjects() : [];
-    const newProject = {
-      id: Date.now(),
-      name: item.title,
-      business: '',
-      department: '',
-      description: item.notes || item.related || '',
-      category: '',
-      created: new Date().toISOString(),
-      fromOpportunity: item.title,
-      roadmap: stages.map((s, idx) => ({
-        id: 'rs' + Date.now() + idx + Math.random().toString(36).slice(2, 6),
-        text: s.label + (item.stageNotes && item.stageNotes[s.key] ? ': ' + item.stageNotes[s.key] : ''),
-        done: idx < item.stage
-      }))
-    };
-    projects.push(newProject);
-    if (typeof saveProjects === 'function') saveProjects(projects);
-    item.promotedProjectId = newProject.id;
-    save();
+    const p = { id: Date.now(), name: it.title, business: '', department: '', description: (it.stageNotes.idea || ''), category: '', created: new Date().toISOString(), fromOpportunity: it.title,
+      roadmap: STAGES.map((s, idx) => ({ id: 'rs' + Date.now() + idx + Math.random().toString(36).slice(2, 6), text: s.label + (it.stageNotes[s.key] ? ': ' + it.stageNotes[s.key] : ''), done: idx < it.stage })) };
+    projects.push(p); if (typeof saveProjects === 'function') saveProjects(projects);
+    it.promotedProjectId = p.id; save();
     if (typeof switchMasterTab === 'function') switchMasterTab('projects');
     if (typeof renderProjects === 'function') renderProjects();
-    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(newProject.id), 60);
+    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(p.id), 60);
   }
-
   function openPromotedProject(i) {
-    const item = data.opportunities[i];
-    if (!item || !item.promotedProjectId) return;
+    const it = data.opportunities[i]; if (!it || !it.promotedProjectId) return;
     if (typeof switchMasterTab === 'function') switchMasterTab('projects');
-    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(item.promotedProjectId), 60);
+    if (typeof openRoadmapModal === 'function') setTimeout(() => openRoadmapModal(it.promotedProjectId), 60);
   }
 
-  function renderPipeline() {
-    const el = document.getElementById('er-pipelineList');
-    if (!el) return;
-    if (!data.opportunities.length) {
-      el.innerHTML = '<div class="er-empty">No opportunities yet.<br><br>Add one above — every opportunity gets tracked here from problem to launch.</div>';
-      return;
-    }
-    el.innerHTML = data.opportunities.map((item, i) => {
-      item.ventureType = item.ventureType || "digital";
-      item.stage = item.stage || 0;
-      item.stageNotes = item.stageNotes || {};
-      if (item.promotedProjectId) {
-        return '<article class="er-pipe-card">' +
-          '<div class="er-pipe-head"><h3>' + esc(item.title) + '</h3>' +
-          '<span class="er-tag" style="background:var(--active-bg);color:var(--active);">✓ Promoted</span></div>' +
-          '<div class="er-pipe-promoted"><span class="er-muted">Now tracked as a project, roadmap seeded from its pipeline stages.</span>' +
-          '<button type="button" onclick="EngineRoom.openPromotedProject(' + i + ')">→ Open in Projects</button></div>' +
-          '</article>';
-      }
-      const stages = getVisibleStages(item);
-      if (item.stage >= stages.length) item.stage = stages.length - 1;
-      const current = stages[item.stage];
-      const rail = stages.map((s, idx) => {
-        const cls = idx < item.stage ? "er-pipe-seg done" : (idx === item.stage ? "er-pipe-seg current" : "er-pipe-seg upcoming");
-        return '<button type="button" class="' + cls + '" onclick="EngineRoom.setStage(' + i + ',' + idx + ')" title="' + esc(s.label) + '">' + (idx + 1) + '</button>';
+  // ── Rendering ──
+  function renderIdeas() {
+    const el = document.getElementById('er-ideasList'); if (!el) return;
+    if (!data.opportunities.length) { el.innerHTML = '<div class="er-empty">No ideas yet.<br><br>Add one and the app will guide it from first thought to launch.</div>'; return; }
+    el.innerHTML = data.opportunities.map((it, i) => {
+      it.ventureType = it.ventureType || 'digital'; it.stage = Math.min(it.stage || 0, STAGES.length - 1);
+      if (it.promotedProjectId) return '<article class="er-pipe-card"><div class="er-pipe-head"><h3>' + esc(it.title) + '</h3><span class="er-tag">✓ Now a project</span></div><div class="er-pipe-promoted"><span class="er-muted">Tracked in Projects, with its roadmap built from these stages.</span><button type="button" onclick="EngineRoom.openPromotedProject(' + i + ')">Open in Projects</button></div></article>';
+      const st = STAGES[it.stage], gaps = gapsFor(it), gapNames = gaps.map(g => g.name);
+      const rail = STAGES.map((s, idx) => '<button type="button" class="er-pipe-seg ' + (idx < it.stage ? 'done' : idx === it.stage ? 'current' : '') + '" title="' + esc(s.label) + '" onclick="EngineRoom.setStage(' + i + ',' + idx + ')">' + (idx + 1) + '</button>').join('');
+      const rows = stepsOf(st, it).map(x => {
+        const e = entry(it.sched[x.k]); if (it.sched[x.k] && !e) delete it.sched[x.k];
+        const when = it.done[x.k] ? '' : e ? '<span class="er-when">📅 ' + fmtDate(e.date) + ' ' + e.start + '</span><button class="er-link" title="Remove from calendar" onclick="EngineRoom.unschedule(' + i + ',\'' + x.k + '\')">✕</button>' : '<button class="er-link" onclick="EngineRoom.scheduleStep(' + i + ',\'' + x.k + '\')">+ Schedule</button>';
+        const tags = x.s.map(s => '<span class="er-tag' + (gapNames.includes(s) ? ' er-gap' : '') + '">' + esc(s) + '</span>').join('');
+        return '<div class="er-step"><input type="checkbox" ' + (it.done[x.k] ? 'checked ' : '') + 'onchange="EngineRoom.toggleStep(' + i + ',\'' + x.k + '\')"><div class="er-step-main"><span class="' + (it.done[x.k] ? 'er-done' : '') + '">' + esc(x.t) + '</span><div>' + tags + '</div></div><div>' + when + '</div></div>';
       }).join('');
-      const typeOptions = ["digital", "physical", "affiliate"].map(t =>
-        '<option value="' + t + '"' + (item.ventureType === t ? ' selected' : '') + '>' + esc(VENTURE_TYPE_LABELS[t]) + '</option>'
-      ).join('');
-      return '<article class="er-pipe-card">' +
-        '<div class="er-pipe-head"><h3>' + esc(item.title) + '</h3>' +
-        '<select class="er-pipe-type" onchange="EngineRoom.setVentureType(' + i + ',this.value)">' + typeOptions + '</select></div>' +
-        '<div class="er-pipe-rail">' + rail + '</div>' +
-        '<div class="er-pipe-current"><strong>' + esc(current.label) + '</strong><p class="er-muted">' + esc(current.desc) + '</p>' +
-        '<textarea placeholder="What\'s true right now for this stage?" onchange="EngineRoom.setStageNote(' + i + ',\'' + current.key + '\',this.value)">' + esc(item.stageNotes[current.key] || '') + '</textarea></div>' +
-        '<button type="button" class="er-pipe-promote" onclick="EngineRoom.promoteToProject(' + i + ')">↗ Promote to Project</button>' +
-        '</article>';
+      return '<article class="er-pipe-card"><div class="er-pipe-head"><h3>' + esc(it.title) + '</h3><select class="er-pipe-type" onchange="EngineRoom.setType(' + i + ',this.value)">' + Object.keys(VT).map(t => '<option value="' + t + '"' + (it.ventureType === t ? ' selected' : '') + '>' + VT[t] + '</option>').join('') + '</select></div>' +
+        '<div class="er-pipe-rail">' + rail + '</div><strong style="font-size:13px;">Stage ' + (it.stage + 1) + ' of 8: ' + esc(st.label) + '</strong>' +
+        (gaps.length ? '<p class="er-gapbar">Skill gaps ahead: ' + gaps.map(g => esc(g.name)).join(', ') + '. See the Skill gaps tab.</p>' : '') +
+        '<div>' + rows + '</div><textarea style="margin-top:10px;width:100%;min-height:50px;font-family:var(--sans);font-size:13px;padding:8px 10px;border-radius:6px;border:0.5px solid var(--border2);background:transparent;color:var(--text);" placeholder="Notes for this stage" onchange="EngineRoom.setNote(' + i + ',\'' + st.key + '\',this.value)">' + esc(it.stageNotes[st.key] || '') + '</textarea>' +
+        '<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">' + (it.stage < STAGES.length - 1 ? '<button class="er-primary-btn" onclick="EngineRoom.nextStage(' + i + ')">Next stage</button>' : '') + '<button type="button" class="er-pipe-promote" style="margin-top:0" onclick="EngineRoom.promoteToProject(' + i + ')">Promote to Project</button><button class="er-remove-btn" style="margin-top:0" onclick="EngineRoom.removeIdea(' + i + ')">Remove</button></div></article>';
     }).join('');
   }
-
-  function save() { localStorage.setItem(KEY, JSON.stringify(data)); render(); }
+  function renderList(type) {
+    const el = document.getElementById('er-' + type + 'List'); if (!el) return;
+    if (!data[type].length) { el.innerHTML = '<div class="er-empty">Nothing here yet.<br><br>Add your first ' + LABELS[type] + '.</div>'; return; }
+    el.innerHTML = data[type].map((x, i) => '<article class="er-card"><h3>' + esc(x.title) + '</h3>' +
+      (type === 'skills' ? '<select onchange="EngineRoom.setLevel(' + i + ',this.value)">' + LEVELS.map(l => '<option' + (x.level === l ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>' : '') +
+      (x.related ? '<p><strong>Skill:</strong> ' + esc(x.related) + '</p>' : '') + (x.notes ? '<p>' + esc(x.notes) + '</p>' : '') +
+      '<button class="er-remove-btn" onclick="EngineRoom.removeItem(\'' + type + '\',' + i + ')">Remove</button></article>').join('');
+  }
+  function renderGaps() {
+    const el = document.getElementById('er-gapsList'); if (!el) return;
+    const agg = {};
+    data.opportunities.filter(it => !it.promotedProjectId).forEach(it => gapsFor(it).forEach(g => { const a = agg[g.name] = agg[g.name] || { name: g.name, m: g.m, ideas: [] }; if (!a.ideas.includes(it.title)) a.ideas.push(it.title); }));
+    const rows = Object.values(agg).sort((a, b) => b.ideas.length - a.ideas.length);
+    if (!rows.length) { el.innerHTML = '<div class="er-empty">' + (data.opportunities.length ? 'No gaps. Your skills cover the steps ahead.' : 'Add an idea to see which skills its steps need.') + '</div>'; return; }
+    el.innerHTML = rows.map(r => {
+      const e = entry(data.practice[r.name]);
+      return '<article class="er-card"><h3>' + esc(r.name) + '</h3><span class="er-tag er-gap">' + (r.m ? esc(r.m.level) + ', needs Functional' : 'Not in your skills yet') + '</span><p>Needed for: ' + r.ideas.map(esc).join(', ') + '</p>' +
+        (e ? '<p class="er-when">📅 Practice ' + fmtDate(e.date) + ' ' + e.start + '</p>' : '') +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;">' + (r.m ? '' : '<button class="er-remove-btn" style="margin:0" onclick="EngineRoom.addSkillFromGap(\'' + r.name.replace(/'/g, "\\'") + '\')">Add to my skills</button>') + '<button class="er-remove-btn" style="margin:0" onclick="EngineRoom.scheduleSkill(\'' + r.name.replace(/'/g, "\\'") + '\')">Schedule practice</button></div></article>';
+    }).join('');
+  }
+  function render() { if (!document.getElementById('er-ideasList')) return; renderIdeas(); ["skills", "capabilities", "experiments"].forEach(renderList); renderGaps(); }
 
   function show(id, btn) {
     document.querySelectorAll('#engine-room-panel .er-section').forEach(x => x.classList.remove('er-section-active'));
@@ -6945,66 +7000,27 @@ const EngineRoom = (function () {
     document.querySelectorAll('#engine-room-panel .er-subtab').forEach(x => x.classList.remove('er-subtab-active'));
     (btn || document.getElementById('er-tab-' + id)).classList.add('er-subtab-active');
   }
-
   function openForm(type) {
-    currentType = type;
-    document.getElementById('er-formTitle').textContent = "Add " + labels[type].toLowerCase();
-    let fields = '<label>Name / title</label><input id="er-title" required>';
-    if (type === "skills") fields += '<label>Current level</label><select id="er-level"><option>Exploring</option><option>Developing</option><option>Functional</option><option>Strong</option></select>';
-    fields += '<label>Notes</label><textarea id="er-notes" placeholder="What does this mean to you?"></textarea>';
-    if (type === "capabilities") fields += '<label>Related skill(s)</label><input id="er-related" placeholder="e.g. JavaScript, AI">';
-    if (type === "experiments") fields += '<label>Skills/capabilities being exercised</label><input id="er-related" placeholder="e.g. JavaScript + AI">';
-    if (type === "opportunities") fields += '<label>Market / problem / customer</label><input id="er-related" placeholder="What caught your attention?">';
-    if (type === "opportunities") fields += '<label>Venture type</label><select id="er-venturetype"><option value="digital">Digital product / service</option><option value="physical">Physical product</option><option value="affiliate">Affiliate (selling someone else\'s)</option></select>';
-    fields += '<div class="er-form-actions"><button type="button" class="er-secondary-btn" onclick="EngineRoom.closeForm()">Cancel</button><button class="er-primary-btn">Save</button></div>';
-    document.getElementById('er-form').innerHTML = fields;
-    document.getElementById('er-form').onsubmit = e => {
+    document.getElementById('er-formTitle').textContent = "Add " + LABELS[type];
+    let f = '<label>Name</label><input id="er-title" required>';
+    if (type === "skills") f += '<label>Current level</label><select id="er-level">' + LEVELS.map(l => '<option' + (l === 'Developing' ? ' selected' : '') + '>' + l + '</option>').join('') + '</select>';
+    if (type === "capabilities" || type === "experiments") f += '<label>Skill used</label><input id="er-related" list="er-skilllist" placeholder="Pick or type a skill"><datalist id="er-skilllist">' + data.skills.map(s => '<option value="' + esc(s.title) + '">').join('') + '</datalist>';
+    if (type === "idea") f += '<label>Type</label><select id="er-vt">' + Object.keys(VT).map(t => '<option value="' + t + '">' + VT[t] + '</option>').join('') + '</select>';
+    f += '<label>' + (type === "idea" ? 'The problem and who has it' : 'Notes') + '</label><textarea id="er-notes"></textarea>';
+    f += '<div class="er-form-actions"><button type="button" class="er-secondary-btn" onclick="EngineRoom.closeForm()">Cancel</button><button class="er-primary-btn">Save</button></div>';
+    const form = document.getElementById('er-form'); form.innerHTML = f;
+    form.onsubmit = e => {
       e.preventDefault();
-      const item = {
-        title: document.getElementById('er-title').value,
-        level: document.getElementById('er-level')?.value || '',
-        notes: document.getElementById('er-notes').value,
-        related: document.getElementById('er-related')?.value || ''
-      };
-      if (type === "opportunities") {
-        item.ventureType = document.getElementById('er-venturetype')?.value || 'digital';
-        item.stage = 0;
-        item.stageNotes = {};
-      }
-      data[type].push(item);
-      save();
-      closeForm();
+      const title = document.getElementById('er-title').value, notes = document.getElementById('er-notes').value;
+      if (type === "idea") data.opportunities.push({ title, ventureType: document.getElementById('er-vt').value, stage: 0, stageNotes: notes ? { idea: notes } : {}, done: {}, sched: {}, v2: true });
+      else data[type].push({ title, notes, level: document.getElementById('er-level')?.value || '', related: document.getElementById('er-related')?.value || '' });
+      save(); closeForm();
     };
     document.getElementById('er-modal').classList.remove('hidden');
   }
-
   function closeForm() { document.getElementById('er-modal').classList.add('hidden'); }
 
-  function renderList(type) {
-    const el = document.getElementById('er-' + type + 'List');
-    if (!el) return;
-    if (!data[type].length) { el.innerHTML = '<div class="er-empty">Nothing here yet.<br><br>Add your first ' + labels[type].toLowerCase() + '.</div>'; return; }
-    el.innerHTML = data[type].map((x, i) => '<article class="er-card"><h3>' + esc(x.title) + '</h3>' +
-      (x.level ? '<span class="er-tag">' + esc(x.level) + '</span>' : '') +
-      (x.related ? '<p><strong>Connection:</strong> ' + esc(x.related) + '</p>' : '') +
-      (x.notes ? '<p>' + esc(x.notes) + '</p>' : '') +
-      '<button class="er-remove-btn" onclick="EngineRoom.removeItem(\'' + type + '\',' + i + ')">Remove</button></article>').join('');
-  }
-
-  function removeItem(type, i) { if (confirm("Remove this item?")) { data[type].splice(i, 1); save(); } }
-
-  function render() {
-    const nSkills = document.getElementById('er-nSkills');
-    if (!nSkills) return; // panel not in DOM yet
-    nSkills.textContent = data.skills.length;
-    document.getElementById('er-nCaps').textContent = data.capabilities.length;
-    document.getElementById('er-nExps').textContent = data.experiments.length;
-    document.getElementById('er-nOpps').textContent = data.opportunities.length;
-    ["skills", "capabilities", "experiments", "opportunities"].forEach(renderList);
-    renderPipeline();
-  }
-
-  return { show, openForm, closeForm, removeItem, render, setVentureType, setStage, setStageNote, promoteToProject, openPromotedProject };
+  return { show, openForm, closeForm, removeItem, render, setStage, nextStage, setType, setNote, toggleStep, scheduleStep, unschedule, scheduleSkill, setLevel, addSkillFromGap, removeIdea, promoteToProject, openPromotedProject };
 })();
 </script>
 
