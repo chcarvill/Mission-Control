@@ -1139,6 +1139,61 @@
   .pf-val-badge.val-low { background:var(--hold-bg); color:var(--hold); border:0.5px solid var(--hold); }
   .pf-val-badge.val-mid { background:var(--planning-bg); color:var(--planning); border:0.5px solid var(--planning); }
   .pf-val-badge.val-high { background:var(--active-bg); color:var(--active); border:0.5px solid var(--active); }
+
+  /* ── Portfolio tiers table / Projects next actions / Weekly review ── */
+  .pf-viewbar { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:1rem; }
+  .pf-viewbtn { font-family:var(--mono); font-size:11px; padding:6px 14px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text-secondary); cursor:pointer; letter-spacing:0.04em; }
+  .pf-viewbtn.on { background:var(--active-bg); color:var(--active); border-color:var(--active); }
+  .pf-tier { margin-bottom:1.6rem; }
+  .pf-tier-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .pf-tier-title { font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text); font-weight:500; }
+  .pf-tier-count { font-family:var(--mono); font-size:11px; color:var(--text-hint); }
+  .pf-tier-count.over { color:var(--hold); }
+  .pf-tier-hint { font-family:var(--sans); font-size:12px; color:var(--text-hint); }
+  .pf-tier-empty { font-family:var(--mono); font-size:11px; color:var(--text-hint); padding:12px 14px; border:0.5px dashed var(--border2); border-radius:var(--radius); line-height:1.5; }
+  .pf-tablewrap { overflow-x:auto; border:0.5px solid var(--border); border-radius:var(--radius); background:var(--surface); }
+  table.pf-table { width:100%; border-collapse:collapse; min-width:760px; }
+  .pf-table th { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-hint); text-align:left; padding:9px 12px; border-bottom:0.5px solid var(--border); font-weight:400; white-space:nowrap; }
+  .pf-table td { padding:9px 12px; border-bottom:0.5px solid var(--border); vertical-align:top; font-family:var(--sans); font-size:13px; color:var(--text); }
+  .pf-table tr:last-child td { border-bottom:none; }
+  .pf-nm { font-family:var(--mono); font-size:13px; font-weight:500; letter-spacing:0.02em; cursor:pointer; color:var(--text); }
+  .pf-nm:hover { color:var(--active); }
+  .pf-sub { font-family:var(--sans); font-size:11.5px; color:var(--text-secondary); margin-top:3px; line-height:1.4; }
+  .pf-sel, .pf-in { font-family:var(--mono); font-size:11.5px; background:var(--bg); color:var(--text); border:0.5px solid var(--border2); border-radius:8px; padding:6px 8px; outline:none; }
+  .pf-in { flex:1; width:100%; min-width:180px; font-family:var(--sans); font-size:13px; padding:7px 10px; }
+  .pf-in:focus, .pf-sel:focus { border-color:var(--active); }
+  .pf-in.need { border-color:var(--hold); background:var(--hold-bg); }
+  .pf-actrow { display:flex; gap:6px; align-items:center; }
+  .pf-iconbtn { background:none; border:0.5px solid var(--border2); color:var(--text-secondary); border-radius:8px; cursor:pointer; font-size:11px; padding:6px 10px; font-family:var(--mono); white-space:nowrap; letter-spacing:0.03em; }
+  .pf-iconbtn:hover { color:var(--active); border-color:var(--active); }
+  .pf-iconbtn.danger:hover { color:#f87171; border-color:#f87171; }
+  .pf-iconbtn[hidden] { display:none; }
+  .pf-chip { font-family:var(--mono); font-size:10px; padding:5px 12px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text-secondary); cursor:pointer; letter-spacing:0.04em; transition:all 0.15s; }
+  .pf-chip.on { background:var(--active-bg); color:var(--active); border-color:var(--active); }
+  .pf-pill { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 9px; border-radius:20px; letter-spacing:0.05em; border:0.5px solid var(--border2); color:var(--text-secondary); white-space:nowrap; }
+  .pf-pill.focus { background:var(--active-bg); color:var(--active); border-color:var(--active); }
+  .pf-pill.maintain { background:var(--planning-bg); color:var(--planning); border-color:var(--planning); }
+  .pf-pill.parked { background:var(--completed-bg); color:var(--completed); }
+  .pf-na-title { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-hint); margin-bottom:10px; }
+  .pf-na-list { display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem; }
+  .pf-na-card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:12px 16px; margin-bottom:8px; }
+  .pf-na-list .pf-na-card { margin-bottom:0; }
+  .pf-na-top { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  .rv-step h4 { font-family:var(--mono); font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--active); font-weight:500; margin-bottom:10px; }
+  .rv-warn { font-family:var(--sans); font-size:12.5px; color:var(--hold); margin-bottom:6px; line-height:1.45; }
+  .rv-note { width:100%; min-height:90px; resize:vertical; font-family:var(--sans); font-size:13px; line-height:1.5; background:var(--bg); color:var(--text); border:0.5px solid var(--border2); border-radius:8px; padding:10px 12px; outline:none; }
+  .rv-note:focus { border-color:var(--active); }
+  @media (max-width:700px) {
+    .pf-tablewrap { overflow-x:visible; }
+    table.pf-table { min-width:0; }
+    .pf-table thead { display:none; }
+    .pf-table, .pf-table tbody, .pf-table tr, .pf-table td { display:block; width:100%; }
+    .pf-table tr { padding:10px 12px; border-bottom:0.5px solid var(--border); }
+    .pf-table tr:last-child { border-bottom:none; }
+    .pf-table td { border:none; padding:4px 0; }
+    .pf-table td[data-l]::before { content:attr(data-l); display:block; font-family:var(--mono); font-size:9px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-hint); margin-bottom:3px; }
+    .pf-in { min-width:0; }
+  }
   .pf-roadmap-badge { display:inline-block; font-family:var(--mono); font-size:10px; padding:2px 9px; border-radius:20px; letter-spacing:0.03em; cursor:pointer; background:var(--surface2); color:var(--text-secondary); border:0.5px solid var(--border2); }
   .pf-roadmap-badge:hover { border-color:var(--active); color:var(--active); }
 
@@ -3367,8 +3422,15 @@
     <div id="notion-links-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
   </div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;">
+    <div class="pf-viewbar">
+      <button class="pf-viewbtn" id="pf-view-table" onclick="setPfView('table')">▤ Tiers table</button>
+      <button class="pf-viewbtn" id="pf-view-cards" onclick="setPfView('cards')">▦ Cards</button>
+    </div>
+    <div id="portfolio-table-view"></div>
+    <div id="portfolio-cards-view">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div class="pf-grid" id="portfolio-list"></div>
+    </div>
   </div>
 </div>
 
@@ -3379,6 +3441,7 @@
     <button onclick="createMarketingProject()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#ffb066 0%,#f0964a 50%,#d97a30 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #8a4a12, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" title="Opens Communic8 to fill out the campaign — the title links back here once you save it there">+ New marketing project →</button>
     <button onclick="emailProjectsView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 0;" id="projects-next-actions"></div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;" id="projects-grid">
     <div id="projects-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1rem;" id="projects-list"></div>
@@ -3610,6 +3673,29 @@
     <input class="modal-input" id="pf-target" placeholder="e.g. Unfulfilled careerists and professionals" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Notes (optional)</div>
     <input class="modal-input" id="pf-notes" placeholder="Anything else worth keeping on hand" />
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Stage — set by you; decides the order within each tier</div>
+    <div class="modal-status-row" id="pf-stage-row">
+      <button type="button" class="pf-chip" data-stage="idea" onclick="selectPfStage(this)">Idea</button>
+      <button type="button" class="pf-chip" data-stage="building" onclick="selectPfStage(this)">Building</button>
+      <button type="button" class="pf-chip" data-stage="launched" onclick="selectPfStage(this)">Launched</button>
+      <button type="button" class="pf-chip" data-stage="earning" onclick="selectPfStage(this)">Earning</button>
+    </div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Tier — where your time goes</div>
+    <div class="modal-status-row" id="pf-tier-row">
+      <button type="button" class="pf-chip" data-tier="focus" onclick="selectPfTier(this)">Focus ON (1)</button>
+      <button type="button" class="pf-chip" data-tier="maintain" onclick="selectPfTier(this)">Maintain (2–3)</button>
+      <button type="button" class="pf-chip" data-tier="parked" onclick="selectPfTier(this)">Parked</button>
+    </div>
+    <div id="pf-next-wrap">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:6px;">Next concrete action (required for Focus ON / Maintain)</div>
+      <input class="modal-input" id="pf-next" placeholder="The very next thing you'll do, in a line" />
+    </div>
+    <div id="pf-trigger-wrap" style="display:none;">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:6px;">Restart trigger</div>
+      <input class="modal-input" id="pf-trigger" placeholder='e.g. "when I have 5 people interested" or "after the focus project ships"' />
+    </div>
+    <div id="pf-modal-err" style="display:none;font-family:var(--sans);font-size:12px;color:#f87171;"></div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Status</div>
     <div class="modal-status-row" id="pf-status-row">
       <button class="modal-status-btn sel-active" data-status="active" onclick="selectPfStatus(this)">Active</button>
       <button class="modal-status-btn" data-status="on-hold" onclick="selectPfStatus(this)">On hold</button>
@@ -3721,6 +3807,34 @@
 
 <script>
 // ── State ──
+// ══════════════════════════════════════════════
+//  PORTFOLIO TIERS / STAGES / WEEKLY REVIEW — shared helpers
+//  Kept at the very top of this script so an early render call can never hit an uninitialised const.
+// ══════════════════════════════════════════════
+const PF_STAGE_FLOW = ['idea', 'building', 'launched', 'earning']; // later in this list = higher up each tier's list
+const PF_STAGE_LABEL = { idea: 'Idea', building: 'Building', launched: 'Launched', earning: 'Earning' };
+const PF_TIER_META = {
+  focus:    { label: 'Focus ON', hint: '1 project · gets your biggest blocks each week', limit: 1 },
+  maintain: { label: 'Maintain', hint: '2–3 projects · a small fixed slot each', limit: 3 },
+  parked:   { label: 'Parked',   hint: "zero time · written down with a restart trigger — parking isn't abandoning" },
+  unsorted: { label: 'Unsorted', hint: 'not placed yet — choose a tier for each' }
+};
+const HP_REVIEW_START = '09:00'; // Saturday weekly-review block on the Homepage calendar (20 min)
+let pfJustDoneId = null;
+
+function pfStageOf(p) { return PF_STAGE_FLOW.includes(p.stage) ? p.stage : 'idea'; }
+function pfTierOf(p) { return (p.tier === 'focus' || p.tier === 'maintain' || p.tier === 'parked') ? p.tier : 'unsorted'; }
+// Within a tier: furthest-along stage first (earning → launched → building → idea), then A–Z
+function pfSortByStage(a, b) {
+  return (PF_STAGE_FLOW.indexOf(pfStageOf(b)) - PF_STAGE_FLOW.indexOf(pfStageOf(a)))
+    || String(a.name).localeCompare(String(b.name));
+}
+function loadWeeklyReviews() {
+  try { return JSON.parse(localStorage.getItem('mc_weekly_reviews')) || {}; } catch (e) { return {}; }
+}
+function saveWeeklyReviews(o) { localStorage.setItem('mc_weekly_reviews', JSON.stringify(o)); }
+function openWeeklyReview() { switchMasterTab('prod'); showProdSub('review'); }
+
 function load() {
   return JSON.parse(localStorage.getItem('mc_ventures') || '[]');
 }
@@ -5059,6 +5173,7 @@ function deleteProject(id) {
 }
 
 function renderProjects() {
+  renderProjectNextActions();
   const projects = loadProjects();
   const listEl = document.getElementById('projects-list');
   const emptyEl = document.getElementById('projects-empty');
@@ -5131,6 +5246,7 @@ function switchMasterTab(tab) {
   if (tab === 'homepage') { renderHomepage(); }
   if (tab === 'start') { renderStartTab(); }
   if (tab === 'portfolio') { renderPortfolio(); }
+  if (tab === 'projects') { renderProjects(); }
   if (tab === 'do') { renderDo(); }
   if (tab === 'engine') { EngineRoom.render(); }
 }
@@ -5163,6 +5279,18 @@ function seedPortfolioIfEmpty() {
 let pfStatus = 'active';
 let pfEditId = null;
 
+let pfModalStage = 'idea';
+let pfModalTier = 'parked';
+function pfSyncModalChips() {
+  document.querySelectorAll('#pf-stage-row .pf-chip').forEach(b => b.classList.toggle('on', b.dataset.stage === pfModalStage));
+  document.querySelectorAll('#pf-tier-row .pf-chip').forEach(b => b.classList.toggle('on', b.dataset.tier === pfModalTier));
+  const parked = pfModalTier === 'parked';
+  document.getElementById('pf-next-wrap').style.display = parked ? 'none' : 'block';
+  document.getElementById('pf-trigger-wrap').style.display = parked ? 'block' : 'none';
+}
+function selectPfStage(btn) { pfModalStage = btn.dataset.stage; pfSyncModalChips(); }
+function selectPfTier(btn) { pfModalTier = btn.dataset.tier; pfSyncModalChips(); }
+
 function openPortfolioModal(editId) {
   pfEditId = editId || null;
   const item = editId ? loadPortfolio().find(p => p.id === editId) : null;
@@ -5170,6 +5298,12 @@ function openPortfolioModal(editId) {
   document.getElementById('pf-offering').value = item ? item.offering : '';
   document.getElementById('pf-target').value = item ? item.target : '';
   document.getElementById('pf-notes').value = item ? item.notes : '';
+  document.getElementById('pf-next').value = item ? (item.nextAction || '') : '';
+  document.getElementById('pf-trigger').value = item ? (item.parkTrigger || '') : '';
+  document.getElementById('pf-modal-err').style.display = 'none';
+  pfModalStage = item ? pfStageOf(item) : 'idea';
+  pfModalTier = item ? (item.tier || '') : 'parked';
+  pfSyncModalChips();
   document.getElementById('pf-modal-title').textContent = item ? 'EDIT PROJECT' : 'NEW PROJECT';
   document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add project';
   pfStatus = item ? item.status : 'active';
@@ -5191,13 +5325,34 @@ function selectPfStatus(btn) {
 function confirmAddPortfolio() {
   const name = document.getElementById('pf-name').value.trim();
   if (!name) { document.getElementById('pf-name').focus(); return; }
+  const nextAction = document.getElementById('pf-next').value.trim();
+  const parkTrigger = document.getElementById('pf-trigger').value.trim();
+  const errEl = document.getElementById('pf-modal-err');
+  errEl.style.display = 'none';
+  if ((pfModalTier === 'focus' || pfModalTier === 'maintain') && !nextAction) {
+    errEl.textContent = 'What is the next concrete action? Focus ON and Maintain both need one.';
+    errEl.style.display = 'block';
+    document.getElementById('pf-next').focus();
+    return;
+  }
   const items = loadPortfolio();
+  if (pfModalTier === 'focus') {
+    const cur = items.find(x => x.tier === 'focus' && x.id !== pfEditId);
+    if (cur) {
+      if (!confirm(`"${cur.name}" is your Focus ON project right now. Move it to Maintain and make "${name}" the focus?`)) return;
+      cur.tier = 'maintain';
+    }
+  }
   const data = {
     name,
     offering: document.getElementById('pf-offering').value.trim(),
     target: document.getElementById('pf-target').value.trim(),
     notes: document.getElementById('pf-notes').value.trim(),
-    status: pfStatus
+    status: pfStatus,
+    stage: pfModalStage,
+    tier: pfModalTier,
+    nextAction,
+    parkTrigger
   };
   if (pfEditId) {
     const idx = items.findIndex(p => p.id === pfEditId);
@@ -5207,7 +5362,263 @@ function confirmAddPortfolio() {
   }
   savePortfolio(items);
   closePortfolioModal();
+  pfRefreshViews();
+}
+// ── Tiers table (Portfolio tab) ──────────────────────────────
+function getPfView() { return localStorage.getItem('mc_pf_view') === 'cards' ? 'cards' : 'table'; }
+function setPfView(v) { localStorage.setItem('mc_pf_view', v === 'cards' ? 'cards' : 'table'); renderPortfolio(); }
+
+function pfStageSelect(p) {
+  const s = pfStageOf(p);
+  return `<select class="pf-sel" onchange="pfSetStage(${p.id}, this.value)">` +
+    PF_STAGE_FLOW.map(k => `<option value="${k}"${k === s ? ' selected' : ''}>${PF_STAGE_LABEL[k]}</option>`).join('') + '</select>';
+}
+function pfTierSelect(p) {
+  const t = pfTierOf(p);
+  return `<select class="pf-sel" onchange="pfSetTier(${p.id}, this.value)">` +
+    (t === 'unsorted' ? '<option value="" selected disabled>— choose —</option>' : '') +
+    ['focus', 'maintain', 'parked'].map(k => `<option value="${k}"${k === t ? ' selected' : ''}>${PF_TIER_META[k].label}</option>`).join('') + '</select>';
+}
+// Next action (Focus/Maintain/Unsorted) or restart trigger (Parked) — one input + a Done button
+function pfNextActionField(p, tier) {
+  const isParked = tier === 'parked';
+  const field = isParked ? 'parkTrigger' : 'nextAction';
+  const val = p[field] || '';
+  const needs = !val && !isParked && tier !== 'unsorted';
+  let ph;
+  if (isParked) ph = 'Restart trigger — e.g. "when 5 people ask" or "after the focus project ships"';
+  else if (pfJustDoneId === p.id && !val) ph = 'Done ✓ — what is the next concrete action?';
+  else ph = needs ? 'Next concrete action (required)' : 'Next concrete action';
+  const doneBtn = isParked ? '' :
+    `<button class="pf-iconbtn pf-done" title="Mark done, then set the next one" onclick="pfCompleteAction(${p.id})"${val ? '' : ' hidden'}>✓ Done</button>`;
+  return `<div class="pf-actrow"><input class="pf-in${needs ? ' need' : ''}" data-pf-id="${p.id}" data-pf-field="${field}" value="${esc(val)}" placeholder="${esc(ph)}" onblur="pfSaveField(${p.id}, '${field}', this)" onkeydown="if(event.key==='Enter'){this.blur();}" />${doneBtn}</div>`;
+}
+function pfRowHtml(p, tier) {
+  const isParked = tier === 'parked';
+  const total = pfValidationTotal(p);
+  const vt = pfValidationTier(total);
+  return `<tr>
+    <td data-l="Endeavour"><div class="pf-nm" onclick="openPortfolioModal(${p.id})" title="Edit">${esc(p.name)}</div>${p.offering ? `<div class="pf-sub">${esc(p.offering)}</div>` : ''}</td>
+    <td data-l="Stage">${pfStageSelect(p)}</td>
+    <td data-l="Tier">${pfTierSelect(p)}</td>
+    <td data-l="${isParked ? 'Restart trigger' : 'Next action'}">${pfNextActionField(p, tier)}</td>
+    <td data-l="Validation"><span class="pf-val-badge ${vt.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${vt.label}</span></td>
+    <td><div class="pf-actrow"><button class="pf-iconbtn" onclick="switchMasterTab('do')">Do →</button><button class="pf-iconbtn danger" onclick="deletePortfolioItem(${p.id}, event)" title="Remove">×</button></div></td>
+  </tr>`;
+}
+function renderPortfolioTable(items) {
+  const host = document.getElementById('portfolio-table-view');
+  if (!host) return;
+  if (!items.length) {
+    host.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>`;
+    return;
+  }
+  host.innerHTML = ['focus', 'maintain', 'parked', 'unsorted'].map(tier => {
+    const rows = items.filter(p => pfTierOf(p) === tier).sort(pfSortByStage);
+    if (tier === 'unsorted' && !rows.length) return '';
+    const meta = PF_TIER_META[tier];
+    const over = meta.limit && rows.length > meta.limit;
+    const count = meta.limit ? `${rows.length}/${meta.limit}` : String(rows.length);
+    const emptyMsg = tier === 'focus' ? 'Nothing in Focus ON yet. Pick the one endeavour that gets your biggest blocks each week.'
+      : tier === 'maintain' ? 'Nothing in Maintain yet. Choose 2–3 that each get a small fixed slot.'
+      : 'Nothing parked.';
+    const lastCol = tier === 'parked' ? 'Restart trigger' : 'Next action';
+    return `<div class="pf-tier">
+      <div class="pf-tier-head">
+        <span class="pf-tier-title">${meta.label}</span>
+        <span class="pf-tier-count${over ? ' over' : ''}">${count}${over ? ' · over the limit' : ''}</span>
+        <span class="pf-tier-hint">${esc(meta.hint)}</span>
+      </div>
+      ${rows.length ? `<div class="pf-tablewrap"><table class="pf-table"><thead><tr><th>Endeavour</th><th>Stage</th><th>Tier</th><th>${lastCol}</th><th>Validation</th><th></th></tr></thead><tbody>${rows.map(p => pfRowHtml(p, tier)).join('')}</tbody></table></div>`
+        : `<div class="pf-tier-empty">${emptyMsg}</div>`}
+    </div>`;
+  }).join('');
+}
+
+// ── Inline edits (shared by Portfolio table, Projects tab and Weekly review) ──
+function pfRefreshViews() {
   renderPortfolio();
+  renderProjectNextActions();
+  if (typeof pRenderReview === 'function') pRenderReview();
+}
+function pfFocusField(id, field) {
+  setTimeout(() => {
+    const els = document.querySelectorAll(`input[data-pf-id="${id}"][data-pf-field="${field}"]`);
+    for (const el of els) { if (el.offsetParent !== null) { el.focus(); break; } }
+  }, 30);
+}
+function pfSetStage(id, stage) {
+  if (!PF_STAGE_FLOW.includes(stage)) return;
+  const items = loadPortfolio();
+  const p = items.find(x => x.id === id);
+  if (!p) return;
+  p.stage = stage;
+  savePortfolio(items);
+  pfRefreshViews();
+}
+function pfSetTier(id, tier) {
+  if (!['focus', 'maintain', 'parked'].includes(tier)) return;
+  const items = loadPortfolio();
+  const p = items.find(x => x.id === id);
+  if (!p) return;
+  if (tier === 'focus') {
+    const cur = items.find(x => x.id !== id && x.tier === 'focus');
+    if (cur) {
+      if (!confirm(`"${cur.name}" is your Focus ON project right now. Move it to Maintain and make "${p.name}" the focus?`)) { pfRefreshViews(); return; }
+      cur.tier = 'maintain';
+    }
+  }
+  p.tier = tier;
+  savePortfolio(items);
+  pfRefreshViews();
+  // The app asks for what that tier needs
+  if (tier === 'parked') pfFocusField(id, 'parkTrigger');
+  else if (!p.nextAction) pfFocusField(id, 'nextAction');
+}
+function pfSaveField(id, field, el) {
+  if (field !== 'nextAction' && field !== 'parkTrigger') return;
+  const items = loadPortfolio();
+  const p = items.find(x => x.id === id);
+  if (!p) return;
+  const v = el.value.trim();
+  if ((p[field] || '') !== v) { p[field] = v; savePortfolio(items); }
+  if (field === 'nextAction') {
+    if (v && pfJustDoneId === id) pfJustDoneId = null;
+    const t = pfTierOf(p);
+    el.classList.toggle('need', !v && (t === 'focus' || t === 'maintain'));
+    const btn = el.parentNode && el.parentNode.querySelector('.pf-done');
+    if (btn) btn.hidden = !v;
+  }
+}
+function pfCompleteAction(id) {
+  const items = loadPortfolio();
+  const p = items.find(x => x.id === id);
+  if (!p) return;
+  const text = (p.nextAction || '').trim();
+  if (!text) return;
+  p.actionsDone = (p.actionsDone || []).concat([{ text, at: new Date().toISOString() }]).slice(-30);
+  p.nextAction = '';
+  savePortfolio(items);
+  pfJustDoneId = id;
+  pfRefreshViews();
+  pfFocusField(id, 'nextAction'); // ask for the next one straight away
+}
+
+// ── Projects tab: next action of every Focus / Maintain endeavour ──
+function renderProjectNextActions() {
+  const el = document.getElementById('projects-next-actions');
+  if (!el) return;
+  let items = [];
+  try { items = loadPortfolio(); } catch (e) {}
+  const live = items.filter(p => p.tier === 'focus' || p.tier === 'maintain')
+    .sort((a, b) => (a.tier === b.tier ? 0 : (a.tier === 'focus' ? -1 : 1)) || pfSortByStage(a, b));
+  const head = '<div class="pf-na-title">Next actions · from Portfolio</div>';
+  if (!live.length) {
+    el.innerHTML = head + `<div class="pf-tier-empty" style="margin-bottom:1.5rem;">No Focus ON or Maintain endeavours yet. Choose tiers in the <a href="#" onclick="event.preventDefault();switchMasterTab('portfolio')" style="color:var(--active);">Portfolio</a> tab and each one's next action lands here.</div>`;
+    return;
+  }
+  el.innerHTML = head + '<div class="pf-na-list">' + live.map(p => {
+    const t = pfTierOf(p);
+    return `<div class="pf-na-card">
+      <div class="pf-na-top"><span class="pf-pill ${t}">${PF_TIER_META[t].label}</span><span class="pf-nm" style="cursor:default;">${esc(p.name)}</span><span class="pf-sub" style="margin:0;">${PF_STAGE_LABEL[pfStageOf(p)]}</span></div>
+      ${p.offering ? `<div class="pf-sub" style="margin:0 0 8px;">${esc(p.offering)}</div>` : ''}
+      ${pfNextActionField(p, t)}
+    </div>`;
+  }).join('') + '</div>';
+}
+
+// ── Productiveness tab: weekly review (~20 min) ──
+function pRenderReview() {
+  const el = document.getElementById('ppanel-review');
+  if (!el) return;
+  const items = loadPortfolio();
+  const byTier = t => items.filter(p => pfTierOf(p) === t).sort(pfSortByStage);
+  const focus = byTier('focus'), maintain = byTier('maintain'), parked = byTier('parked'), unsorted = byTier('unsorted');
+  const weekDates = getWeekDates(new Date());
+  const wk = dateKey(weekDates[0]);
+  const reviews = loadWeeklyReviews();
+  const cur = reviews[wk] || {};
+  const weekStartMs = weekDates[0].getTime();
+  const fmt = d => d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+  const movedCount = p => (p.actionsDone || []).filter(a => new Date(a.at).getTime() >= weekStartMs).length;
+
+  const warns = [];
+  if (!focus.length) warns.push('No Focus ON project yet. Pick one — it gets your biggest blocks next week.');
+  if (focus.length > 1) warns.push('More than one Focus ON. The point is a single focus; move the others to Maintain.');
+  if (maintain.length > 3) warns.push(`Maintain has ${maintain.length}. The guide is 2–3 — consider parking the least alive.`);
+  if (unsorted.length) warns.push(`${unsorted.length} still unsorted: ${unsorted.map(p => esc(p.name)).join(', ')}. Choose a tier in the Portfolio tab.`);
+
+  const liveRow = p => {
+    const t = pfTierOf(p);
+    const n = movedCount(p);
+    return `<div class="pf-na-card">
+      <div class="pf-na-top"><span class="pf-pill ${t}">${PF_TIER_META[t].label}</span><span class="pf-nm" style="cursor:default;">${esc(p.name)}</span>${pfStageSelect(p)}<span class="pf-sub" style="margin:0;">${n} action${n === 1 ? '' : 's'} done this week</span></div>
+      ${pfNextActionField(p, t)}
+    </div>`;
+  };
+  const parkedRow = p => `<div class="pf-na-card">
+      <div class="pf-na-top"><span class="pf-pill parked">Parked</span><span class="pf-nm" style="cursor:default;">${esc(p.name)}</span>${pfStageSelect(p)}<button class="pf-iconbtn" onclick="pfSetTier(${p.id}, 'maintain')">Trigger hit → Maintain</button></div>
+      ${pfNextActionField(p, 'parked')}
+    </div>`;
+
+  const past = Object.keys(reviews).filter(k => k !== wk).sort().reverse().slice(0, 6);
+  const doneLabel = cur.doneAt
+    ? '✓ Done ' + new Date(cur.doneAt).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' })
+    : 'Not done yet this week';
+  const greenBtn = 'font-family:\'DM Mono\',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;';
+
+  el.innerHTML = `
+    <div class="p-card">
+      <div class="p-card-title">Weekly review · about 20 minutes · ${fmt(weekDates[0])} – ${fmt(weekDates[6])}</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--text-secondary);line-height:1.5;">Work top to bottom. Saturday's block on the Homepage calendar brings you here.</div>
+      <div style="margin-top:10px;font-family:var(--mono);font-size:11px;color:${cur.doneAt ? 'var(--active)' : 'var(--text-hint)'};">${doneLabel}</div>
+    </div>
+    ${warns.length ? `<div class="p-card">${warns.map(w => `<div class="rv-warn">⚠ ${w}</div>`).join('')}</div>` : ''}
+    <div class="p-card"><div class="rv-step">
+      <h4>1 · Focus ON + Maintain — did the next actions happen? (~8 min)</h4>
+      ${(focus.length || maintain.length) ? focus.concat(maintain).map(liveRow).join('') : '<div class="pf-tier-empty">Nothing in Focus ON or Maintain yet.</div>'}
+    </div></div>
+    <div class="p-card"><div class="rv-step">
+      <h4>2 · Parked — has any restart trigger happened? (~5 min)</h4>
+      ${parked.length ? parked.map(parkedRow).join('') : '<div class="pf-tier-empty">Nothing parked.</div>'}
+    </div></div>
+    <div class="p-card"><div class="rv-step">
+      <h4>3 · One note (~5 min)</h4>
+      <textarea class="rv-note" id="rv-note" placeholder="What moved? What's stuck? One thing to do differently next week." onblur="pfSaveReviewNote(this.value)">${esc(cur.note || '')}</textarea>
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+        ${cur.doneAt
+          ? `<button onclick="pfReopenReview()" class="pf-iconbtn">Reopen this week's review</button>`
+          : `<button onclick="pfCompleteReview()" style="${greenBtn}">Mark this week's review done</button>`}
+      </div>
+    </div></div>
+    ${past.length ? `<div class="p-card"><div class="p-card-title">Previous reviews</div>${past.map(k => {
+      const r = reviews[k];
+      const label = new Date(k + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+      return `<div style="padding:8px 0;border-bottom:0.5px solid var(--border);"><div style="font-family:var(--mono);font-size:11px;color:${r.doneAt ? 'var(--active)' : 'var(--text-hint)'};">Week of ${label} · ${r.doneAt ? 'done' : 'not completed'}</div>${r.note ? `<div style="font-family:var(--sans);font-size:12.5px;color:var(--text-secondary);margin-top:4px;white-space:pre-wrap;line-height:1.45;">${esc(r.note)}</div>` : ''}</div>`;
+    }).join('')}</div>` : ''}`;
+}
+function pfSaveReviewNote(val) {
+  const wk = dateKey(getWeekDates(new Date())[0]);
+  const reviews = loadWeeklyReviews();
+  const prev = reviews[wk] || {};
+  const note = (val || '').trim();
+  if ((prev.note || '') === note) return;
+  reviews[wk] = Object.assign({}, prev, { note });
+  saveWeeklyReviews(reviews);
+}
+function pfCompleteReview() {
+  const wk = dateKey(getWeekDates(new Date())[0]);
+  const reviews = loadWeeklyReviews();
+  const noteEl = document.getElementById('rv-note');
+  reviews[wk] = Object.assign({}, reviews[wk] || {}, { note: noteEl ? noteEl.value.trim() : ((reviews[wk] || {}).note || ''), doneAt: new Date().toISOString() });
+  saveWeeklyReviews(reviews);
+  pRenderReview();
+}
+function pfReopenReview() {
+  const wk = dateKey(getWeekDates(new Date())[0]);
+  const reviews = loadWeeklyReviews();
+  if (reviews[wk]) { delete reviews[wk].doneAt; saveWeeklyReviews(reviews); }
+  pRenderReview();
 }
 function deletePortfolioItem(id, ev) {
   if (ev) ev.stopPropagation();
@@ -5500,6 +5911,13 @@ function renderNotionLinks() {
 
 function renderPortfolio() {
   renderNotionLinks();
+  const pfView = getPfView();
+  const tBtn = document.getElementById('pf-view-table'), cBtn = document.getElementById('pf-view-cards');
+  if (tBtn) tBtn.classList.toggle('on', pfView === 'table');
+  if (cBtn) cBtn.classList.toggle('on', pfView === 'cards');
+  document.getElementById('portfolio-table-view').style.display = pfView === 'table' ? 'block' : 'none';
+  document.getElementById('portfolio-cards-view').style.display = pfView === 'cards' ? 'block' : 'none';
+  renderPortfolioTable(loadPortfolio());
   const items = loadPortfolio();
   const listEl = document.getElementById('portfolio-list');
   const emptyEl = document.getElementById('portfolio-empty');
@@ -5523,6 +5941,7 @@ function renderPortfolio() {
       ${p.notes ? `<div class="pf-field-label">Notes</div><div class="pf-field-val">${esc(p.notes)}</div>` : ''}
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;">
         <div class="pf-status pf-${p.status}">${PF_STATUS_LABEL[p.status] || p.status}</div>
+        <span class="pf-pill ${pfTierOf(p)}" style="margin-top:10px;">${PF_TIER_META[pfTierOf(p)].label} · ${PF_STAGE_LABEL[pfStageOf(p)]}</span>
         <span class="pf-val-badge ${tier.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${tier.label}</span>
         <a href="#" onclick="event.stopPropagation();event.preventDefault();switchMasterTab('do');" style="font-family:var(--mono);font-size:10px;color:var(--text-hint);text-decoration:none;letter-spacing:0.04em;border:0.5px solid var(--border2);border-radius:20px;padding:2px 9px;">Open in Do →</a>
       </div>
@@ -5536,6 +5955,9 @@ function buildPortfolioLines() {
   const lines = ['MISSION CONTROL — PORTFOLIO', '='.repeat(50), dateStr, ''];
   items.forEach(p => {
     lines.push(p.name + '  [' + (PF_STATUS_LABEL[p.status] || p.status) + ']');
+    lines.push('  Tier: ' + PF_TIER_META[pfTierOf(p)].label + ' · Stage: ' + PF_STAGE_LABEL[pfStageOf(p)]);
+    if (pfTierOf(p) === 'parked') { if (p.parkTrigger) lines.push('  Restart trigger: ' + p.parkTrigger); }
+    else if (p.nextAction) lines.push('  Next action: ' + p.nextAction);
     if (p.offering) lines.push('  Offering: ' + p.offering);
     if (p.target) lines.push('  Target market: ' + p.target);
     if (p.notes) lines.push('  Notes: ' + p.notes);
@@ -5863,6 +6285,10 @@ function hpGetDayItems(dateKeyStr) {
       items.push({ kind: 'start', id: t.id, text: t.text, start: t.start || HP_DEFAULT_START, end: t.end || HP_DEFAULT_END });
     });
   }
+  // Saturday: the weekly-review block
+  if (new Date(dateKeyStr + 'T00:00:00').getDay() === 6) {
+    items.push({ kind: 'review', id: 'weekly-review', text: 'Weekly review', start: HP_REVIEW_START, end: hpAddMinutes(HP_REVIEW_START, 20) });
+  }
   return items;
 }
 // Returns the first conflicting item on that day, or null. Pass excludeKind/excludeId to ignore the item being edited.
@@ -5978,6 +6404,13 @@ function renderHomepage() {
     });
   }
 
+  // Saturday weekly-review block (opens the Productiveness > Weekly review tab)
+  const reviewDoneThisWeek = !!((loadWeeklyReviews()[weekKeys[0]] || {}).doneAt);
+  manualByDay[weekKeys[5]].push({
+    kind: 'review', id: 'weekly-review', text: 'Weekly review · 20 min', color: '#a78bfa', link: null,
+    start: HP_REVIEW_START, end: hpAddMinutes(HP_REVIEW_START, 20), done: reviewDoneThisWeek
+  });
+
   // Hour labels for the shared time gutter
   const hourLabels = [];
   for (let m = HP_DAY_START_MIN; m <= HP_DAY_END_MIN; m += 60) {
@@ -6005,6 +6438,8 @@ function renderHomepage() {
         : '';
       const clickHandler = item.kind === 'start'
         ? `toggleStartTaskDone('${item.id}')`
+        : item.kind === 'review'
+        ? `openWeeklyReview()`
         : `openHomepageTimeEditor('${item.kind}','${item.id}','${key}')`;
       return `
         <div class="homepage-block" style="top:${top}px;height:${height}px;border-left-color:${item.color};background:${item.color}22;"
@@ -6013,6 +6448,7 @@ function renderHomepage() {
           ${showTimeLabel ? `<div class="homepage-block-time">${hpFmtTime(item.start)}–${hpFmtTime(item.end)}</div>` : ''}
           ${item.kind === 'mission' ? `<span class="homepage-block-tag">${item.isDue ? 'due' : 'planned'}</span>` : ''}
           ${item.kind === 'start' ? `<span class="homepage-block-tag">start</span>` : ''}
+          ${item.kind === 'review' ? `<span class="homepage-block-tag">${item.done ? 'done ✓' : 'review'}</span>` : ''}
           ${linkBtn}
           ${delBtn}
         </div>`;
@@ -6069,6 +6505,7 @@ function buildHomepageLines() {
     manual.filter(m => m.date === key).forEach(m => {
       dayItems.push({ text: m.text, start: m.start || HP_DEFAULT_START, end: m.end || HP_DEFAULT_END, tag: '' });
     });
+    if (i === 5) dayItems.push({ text: 'Weekly review (20 min) — Productiveness tab', start: HP_REVIEW_START, end: hpAddMinutes(HP_REVIEW_START, 20), tag: '' });
     dayItems.sort((a, b) => (hpMinsFromMidnight(a.start) || 0) - (hpMinsFromMidnight(b.start) || 0));
 
     lines.push(fmt(d).toUpperCase());
@@ -6308,6 +6745,7 @@ renderHomepage();
     <button class="prod-sub-btn" id="psub-wasters" onclick="showProdSub('wasters')">Time wasters</button>
     <button class="prod-sub-btn" id="psub-today" onclick="showProdSub('today')">Today's log</button>
     <button class="prod-sub-btn" id="psub-report" onclick="showProdSub('report')">Weekly report</button>
+    <button class="prod-sub-btn" id="psub-review" onclick="showProdSub('review')">Weekly review</button>
     <div style="margin-left:auto;">
       <button onclick="emailProdView()" style="font-family:'DM Mono',monospace;font-size:11px;padding:7px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48,0 2px 4px rgba(0,0,0,0.4)';this.style.top='2px';" onmouseup="this.style.boxShadow='0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
     </div>
@@ -6403,6 +6841,9 @@ renderHomepage();
       </div>
     </div>
 
+    <!-- WEEKLY REVIEW -->
+    <div class="prod-sub-panel" id="ppanel-review"></div>
+
   </div><!-- /prod-content -->
 </div><!-- /prod-panel -->
 
@@ -6466,13 +6907,14 @@ function pUpdateMetrics() {
 
 // ── Sub-tab switching ──
 function showProdSub(name) {
-  ['today','goals','wasters','report'].forEach(s => {
+  ['today','goals','wasters','report','review'].forEach(s => {
     document.getElementById('psub-'+s).classList.toggle('prod-sub-active', s===name);
     document.getElementById('ppanel-'+s).classList.toggle('prod-visible', s===name);
   });
   if (name==='report') pInitCharts();
   if (name==='goals') pRenderMissionActions();
   if (name==='wasters') pRenderWasters();
+  if (name==='review') pRenderReview();
 }
 
 // ── Activities ──
