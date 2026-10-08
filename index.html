@@ -1183,6 +1183,24 @@
   .rv-warn { font-family:var(--sans); font-size:12.5px; color:var(--hold); margin-bottom:6px; line-height:1.45; }
   .rv-note { width:100%; min-height:90px; resize:vertical; font-family:var(--sans); font-size:13px; line-height:1.5; background:var(--bg); color:var(--text); border:0.5px solid var(--border2); border-radius:8px; padding:10px 12px; outline:none; }
   .rv-note:focus { border-color:var(--active); }
+  /* ── Compendium tab ── */
+  .cp-wrap { max-width: 920px; }
+  .cp-lead { font-family: var(--sans); font-size: 13.5px; line-height: 1.6; color: var(--text-secondary); margin-bottom: 14px; }
+  .cp-bar { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+  .cp-sec { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); margin-bottom: 10px; }
+  .cp-sec > summary { cursor: pointer; list-style: none; padding: 13px 16px; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text); display: flex; align-items: center; gap: 10px; }
+  .cp-sec > summary::-webkit-details-marker { display: none; }
+  .cp-sec > summary::before { content: '▸'; color: var(--active); transition: transform 0.15s; }
+  .cp-sec[open] > summary::before { transform: rotate(90deg); }
+  .cp-body { padding: 2px 18px 16px; font-family: var(--sans); font-size: 13.5px; line-height: 1.65; color: var(--text); }
+  .cp-body h4 { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--active); font-weight: 500; margin: 16px 0 6px; }
+  .cp-body p { margin-bottom: 8px; color: var(--text-secondary); }
+  .cp-body ul { margin: 0 0 8px 18px; color: var(--text-secondary); }
+  .cp-body li { margin-bottom: 4px; }
+  .cp-body b { color: var(--text); font-weight: 500; }
+  .cp-go { color: var(--active); text-decoration: none; border-bottom: 0.5px dotted var(--active); cursor: pointer; }
+  .cp-note { border-left: 2px solid var(--active); padding: 6px 12px; margin: 10px 0; background: var(--active-bg); border-radius: 0 6px 6px 0; font-size: 13px; color: var(--text); }
+
   @media (max-width:700px) {
     .pf-tablewrap { overflow-x:visible; }
     table.pf-table { min-width:0; }
@@ -2667,6 +2685,7 @@
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
+  <button class="master-tab" id="mtab-compendium" onclick="switchMasterTab('compendium')">Compendium</button>
 </div>
 
 <!-- ══ HOMEPAGE PANEL ══ -->
@@ -3434,6 +3453,215 @@
   </div>
 </div>
 
+<!-- ══ COMPENDIUM PANEL ══ -->
+<div id="compendium-panel" style="display:none;">
+  <div class="mc-mobile-pad cp-wrap" style="padding:1.25rem 2.5rem 3rem;">
+    <div class="cp-lead">How Mission Control fits together and how to use each tab. Tap a heading to open it.</div>
+    <div class="cp-bar">
+      <button class="pf-iconbtn" onclick="cpToggleAll(true)">Expand all</button>
+      <button class="pf-iconbtn" onclick="cpToggleAll(false)">Collapse all</button>
+    </div>
+
+    <details class="cp-sec" open>
+      <summary>Start here — how it all fits together</summary>
+      <div class="cp-body">
+        <h4>The tabs, left to right</h4>
+        <ul>
+          <li><b>Homepage</b> — this week as a Monday–Sunday timeline (6am–11pm). Missions with a due or planned day, your own entries, Start tasks and the Saturday weekly review all appear here.</li>
+          <li><b>Start</b> — up to 10 basic tasks you do no matter what, each with a time.</li>
+          <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
+          <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
+          <li><b>Projects</b> — the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
+          <li><b>Missions</b> — missions and tasks, with folders, priorities, sequencing and Google Calendar.</li>
+          <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
+          <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
+          <li><b>Compendium</b> — this guide.</li>
+        </ul>
+        <h4>How information moves between tabs</h4>
+        <ul>
+          <li>Portfolio → <b>Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up at the top of Projects.</li>
+          <li>Portfolio → <b>Productiveness</b>: the weekly review is built from your tiers, stages, next actions and restart triggers.</li>
+          <li>Weekly review → <b>Homepage</b>: a review block appears every Saturday and shows "done ✓" once you finish it.</li>
+          <li>Missions → <b>Homepage</b>: a mission with a due date or scheduled days appears on those days.</li>
+          <li>Engine Room → <b>Homepage</b>: steps you schedule land on the calendar at the date and time you choose.</li>
+          <li>Start → <b>Homepage</b>: each Start task repeats every remaining day this week until you tick it done.</li>
+        </ul>
+        <h4>Where your data lives</h4>
+        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so use <b>Portfolio → Export backup</b> now and then (it saves the portfolio list; the other tabs have Email view buttons rather than a backup file).</p>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Portfolio — tiers, stages and next actions</summary>
+      <div class="cp-body">
+        <h4>The idea</h4>
+        <p>Stage says how far along an endeavour is. Tier says how much of your time it gets. You set both yourself.</p>
+        <ul>
+          <li><b>Focus ON (1 endeavour)</b> — gets your biggest blocks each week.</li>
+          <li><b>Maintain (2–3 endeavours)</b> — a small fixed slot each, enough to keep them moving.</li>
+          <li><b>Parked (everything else)</b> — zero time, written down with a trigger for restarting, such as "when I have 5 people interested" or "after the focus project ships". Parking isn't abandoning.</li>
+        </ul>
+        <h4>Stage (set by you)</h4>
+        <p><b>Idea → Building → Launched → Earning.</b> Within each tier list, the furthest-along endeavour sits at the top: Earning, then Launched, then Building, then Idea. Change a stage and the list reorders.</p>
+        <h4>The Tiers table</h4>
+        <ul>
+          <li>Three separate lists, in order: Focus ON, Maintain, Parked. Each row shows the endeavour and its one-line offering, stage, tier, next action (or restart trigger for Parked) and validation score.</li>
+          <li>Headers show counts such as <b>Maintain 2/3</b>; the count turns amber when you go over the guide.</li>
+          <li>An <b>Unsorted</b> list appears for any endeavour that has no tier yet, and disappears once everything is placed.</li>
+          <li>Change stage or tier straight from the dropdowns on a row, or tap the endeavour's name for the full edit window (name, offering, target market, notes, stage, tier, next action or restart trigger, status).</li>
+          <li>Making a second endeavour Focus ON asks whether to move the current focus to Maintain.</li>
+        </ul>
+        <h4>Next actions</h4>
+        <ul>
+          <li>Focus ON and Maintain endeavours must have one next concrete action; the app won't save them without it, and highlights the box in amber when it's empty.</li>
+          <li>Type it and press Enter (or tap away) to save.</li>
+          <li>Tap <b>✓ Done</b> when it's finished: it's logged, the box clears, and the app asks for the next one straight away.</li>
+          <li>Moving an endeavour to Parked asks for a restart trigger instead.</li>
+        </ul>
+        <h4>Tiers table vs Cards</h4>
+        <p>The two buttons above the list switch views. <b>Cards</b> is the original layout (offering, target market, notes, status, validation badge, Open in Do) and now also shows each endeavour's tier and stage. Your choice is remembered.</p>
+        <h4>Other Portfolio tools</h4>
+        <ul>
+          <li><b>Validation scorecard</b> — tap an endeavour's validation badge. Six criteria (problem clarity, evidence of demand, competition and differentiation, willingness to pay, feasibility, path to first customer), each scored Not yet / Some evidence / Strong evidence, out of 12.</li>
+          <li><b>Status</b> — the older Active / On hold / In planning / Shelved label, still available in the edit window.</li>
+          <li><b>+ New project</b> — adds an endeavour. New ones start as Idea and Parked.</li>
+          <li><b>Import from Notion</b> — reads a CSV export of a Notion database and adds each row as an endeavour set to "In planning". Rows already in the portfolio are skipped.</li>
+          <li><b>Refer to Notion</b> — paste a link to your Notion database (a name is optional). It's saved as a chip under the buttons; tap it to open Notion, ✕ to remove it.</li>
+          <li><b>Export backup</b> — downloads your portfolio as a JSON file. <b>Email view</b> — emails the portfolio as text, now including tier, stage and next action.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Projects</summary>
+      <div class="cp-body">
+        <h4>Next actions (top of the tab)</h4>
+        <p>Every Focus ON and Maintain endeavour from Portfolio, Focus first, each with its stage, its one-line note and an editable next action. Edit it in place, or tap <b>✓ Done</b> to log it and enter the next one. Parked endeavours don't appear here, since they get zero time.</p>
+        <h4>Project cards</h4>
+        <ul>
+          <li><b>+ New project</b> — name, which business in your portfolio it belongs to, department, a short description and a category folder (Career, Health, Investing or None). Creating one opens its roadmap.</li>
+          <li>Each card shows how many missions are linked to it, how many are active, and roadmap progress.</li>
+          <li><b>Roadmap</b> — an ordered path of steps. Tap a step's number to tick it, use ↑ ↓ to reorder, ✕ to remove. "Use an existing Do task instead?" lets you pick a task already in Do.</li>
+          <li><b>+ New marketing project</b> — opens Communic8 to fill out the campaign. Once you save it there, the project's title comes back here with a "→ Communic8" link to that idea.</li>
+          <li>Deleting a project unlinks its missions but doesn't delete them.</li>
+          <li><b>Email view</b> — emails the projects list.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Missions</summary>
+      <div class="cp-body">
+        <ul>
+          <li><b>+ New mission</b> — choose the project it belongs to, name the specific action, say in a few words what needs to get done, and pick a category folder.</li>
+          <li>Filter by <b>All / Active / On hold / In planning / Completed</b>, or by category folder. A Priority Actions counter sits at the top and a Completed missions drawer holds finished ones.</li>
+          <li><b>Sequencing</b> — when adding a task or mission you can say it precedes another, follows another, or is independent. Sequenced items get letter badges (A, B…).</li>
+          <li><b>📅 Add to Calendar</b> — pick a mission, a date, an optional time and a duration (30 minutes to all day), then open Google Calendar with it filled in.</li>
+          <li>A mission with a due date or scheduled days shows on those days on the Homepage.</li>
+          <li><b>✉ Email this view</b> — emails the missions list.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Homepage and Start</summary>
+      <div class="cp-body">
+        <h4>Homepage</h4>
+        <ul>
+          <li>A Monday–Sunday timeline for the current week, with today highlighted. Blocks come from missions (tagged "due" or "planned"), your own entries, Start tasks and the Saturday weekly review.</li>
+          <li><b>+</b> in a day's header adds an entry for that day. Tap a mission or entry block to change its time; overlapping times are refused with a message naming the clash. Tap a Start task block to tick it done.</li>
+          <li>✕ removes your own entries; 🔗 on a block opens its link.</li>
+          <li><b>Email this week</b> sends the week as text; <b>Email entire view</b> sends a snapshot of every tab.</li>
+          <li>The header notes that task details live in <b>Do → Plan week</b>.</li>
+        </ul>
+        <h4>Start</h4>
+        <ul>
+          <li>Up to 10 basic tasks "no matter what". Each needs a time.</li>
+          <li>A Start task appears on the Homepage at that time on every remaining day this week until you tick it done (the circle on the Start tab, or tap its block on the Homepage). ✕ removes it.</li>
+          <li>At the limit, tick one off to add another.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Engine Room</summary>
+      <div class="cp-body">
+        <h4>Ideas</h4>
+        <p>Every idea follows the same 8 stages: <b>Idea, Validate, Plan, Build / Make, Brand &amp; marketing, Sell &amp; distribute, Launch, Review.</b> Add an idea as a digital product or service, a physical product, or an affiliate idea, and the steps within the stages adjust to suit. Tick off steps as you complete them, or use <b>+ Schedule</b> on a step to put it on your Homepage calendar (pick the date, start time and length from 30 minutes to 2 hours). ✕ removes it from the calendar.</p>
+        <h4>My skills</h4>
+        <p>Five kinds of card: <b>skills</b> (what you can do, rated Exploring, Developing, Functional or Strong), <b>capabilities</b>, <b>experiments</b> (attempts that turn skills into evidence), <b>background</b> (qualifications and experience) and <b>passions</b>.</p>
+        <h4>Skill gaps</h4>
+        <p>Lists skills your upcoming steps rely on that you don't yet have, or have rated below Functional.</p>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Productiveness and the weekly review</summary>
+      <div class="cp-body">
+        <h4>Sub-tabs</h4>
+        <ul>
+          <li><b>Goals vs action</b> — today's action for each active mission, plus a reconciliation of productive time, wasted time, missions set and completion rate.</li>
+          <li><b>Time wasters</b> — build your own list and log time wasted today.</li>
+          <li><b>Today's log</b> — log what you did as productive, time waster or neutral, with minutes; shows productive time, wasted time, tasks completed and completion rate.</li>
+          <li><b>Weekly report</b> — charts of daily completion rate and productive vs wasted time across the week.</li>
+          <li><b>Weekly review</b> — the 20-minute review below.</li>
+        </ul>
+        <h4>The 20-minute weekly review</h4>
+        <ul>
+          <li><b>Saturday cue:</b> a purple "Weekly review · 20 min" block sits on your Homepage every Saturday at 9:00am. Tap it to open the review. It shows "done ✓" once completed.</li>
+          <li><b>Warnings at the top</b> if there's no Focus ON project, more than one, more than 3 in Maintain, or endeavours still unsorted.</li>
+          <li><b>Step 1 (~8 min)</b> — Focus ON and Maintain: for each, see how many actions you completed this week, change its stage, tick ✓ Done and set the next action.</li>
+          <li><b>Step 2 (~5 min)</b> — Parked: read each restart trigger. If one has happened, tap <b>Trigger hit → Maintain</b> and the app asks for its next action.</li>
+          <li><b>Step 3 (~5 min)</b> — one note: what moved, what's stuck, one thing to do differently. It saves when you tap away.</li>
+          <li><b>Mark this week's review done</b> to record it. The last six reviews are listed below with their notes. You can reopen the current week's review if you need to.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Do — the nine sub-tabs</summary>
+      <div class="cp-body">
+        <ul>
+          <li><b>Today</b> — three task slots ("Three, no more. Choose with intent."). If the oration gate is showing, log today's oration to unlock your slots. <b>Email today's tasks</b> sends them to you. Past days are listed underneath, with a Manage activities link.</li>
+          <li><b>Plan week</b> — step through weeks with ‹ ›, and email the week.</li>
+          <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
+          <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>
+          <li><b>Targeted Action</b> — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>
+          <li><b>This week, prioritised</b> — Strategic Objectives, Focus Projects, then Communication: Mass (plan content with purpose, theme, location, backing track and basic script; execute plan) and 1:1 (plan interactions; instigate interactions). Tap <b>Save priorities</b>.</li>
+          <li><b>Prioritise Next Week</b> — the same structure for the coming week, with Targeted Action underneath. Plan it ahead of the week starting.</li>
+          <li><b>Time wasters</b> — two checkpoint lists: <b>Catch mid-motion</b> (things to notice the moment you're about to start) and <b>Filter before saying yes</b> (things to weigh before a commitment lands on your plate). Not a guilt list.</li>
+          <li><b>Insights</b> — Today, This week or All time, with a Log time button and a breakdown by category.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>One way to run the week</summary>
+      <div class="cp-body">
+        <p>This is a suggested rhythm built from the features above, not something the app enforces.</p>
+        <ul>
+          <li><b>Every day:</b> Start tasks on the Homepage, then Do → Today for your three slots.</li>
+          <li><b>As you go:</b> tick ✓ Done on next actions (Projects or Portfolio) and enter the next one while it's fresh.</li>
+          <li><b>Saturday, ~20 minutes:</b> the weekly review in Productiveness.</li>
+          <li><b>Before the week starts:</b> Do → Prioritise Next Week, then put the Focus ON project's biggest blocks on the Homepage.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Installing, updating and troubleshooting</summary>
+      <div class="cp-body">
+        <ul>
+          <li><b>Install:</b> use your browser's Add to Home Screen. It then opens like an app.</li>
+          <li><b>Updates:</b> the app checks for a new version each time it opens. After an update, open it, wait a few seconds, then fully close and reopen it; the second open runs the new version.</li>
+          <li><b>Still on an old version?</b> Clear this site's data in your browser settings. Deleting the home-screen icon alone doesn't do it. Export a backup first, because clearing site data also removes your saved data.</li>
+          <li><b>Different devices</b> hold separate data. Use Export backup and Email view buttons to move things across.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</div>
+
 <!-- ══ PROJECTS PANEL ══ -->
 <div id="projects-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
@@ -3834,6 +4062,7 @@ function loadWeeklyReviews() {
 }
 function saveWeeklyReviews(o) { localStorage.setItem('mc_weekly_reviews', JSON.stringify(o)); }
 function openWeeklyReview() { switchMasterTab('prod'); showProdSub('review'); }
+function cpToggleAll(open) { document.querySelectorAll('#compendium-panel details.cp-sec').forEach(d => { d.open = !!open; }); }
 
 function load() {
   return JSON.parse(localStorage.getItem('mc_ventures') || '[]');
@@ -5238,6 +5467,8 @@ function switchMasterTab(tab) {
   document.getElementById('mtab-missions').classList.toggle('master-active', tab === 'missions');
   document.getElementById('mtab-prod').classList.toggle('master-active', tab === 'prod');
   document.getElementById('mtab-do').classList.toggle('master-active', tab === 'do');
+  document.getElementById('compendium-panel').style.display = tab === 'compendium' ? 'block' : 'none';
+  document.getElementById('mtab-compendium').classList.toggle('master-active', tab === 'compendium');
   document.getElementById('engine-room-panel').style.display = tab === 'engine' ? 'block' : 'none';
   document.getElementById('mtab-engine').classList.toggle('master-active', tab === 'engine');
   document.getElementById('missions-panel').classList.toggle('master-hidden', tab !== 'missions');
