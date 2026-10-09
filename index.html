@@ -2681,7 +2681,7 @@
   <button class="master-tab" id="mtab-start" onclick="switchMasterTab('start')">Start</button>
   <button class="master-tab" id="mtab-engine" onclick="switchMasterTab('engine')">Engine Room</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
-  <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Projects</button>
+  <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Today's Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
@@ -3471,7 +3471,7 @@
           <li><b>Start</b> — up to 10 basic tasks you do no matter what, each with a time.</li>
           <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
           <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
-          <li><b>Projects</b> — the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
+          <li><b>Today's Projects</b> — the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
           <li><b>Missions</b> — missions and tasks, with folders, priorities, sequencing and Google Calendar.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
           <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
@@ -3479,7 +3479,7 @@
         </ul>
         <h4>How information moves between tabs</h4>
         <ul>
-          <li>Portfolio → <b>Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up at the top of Projects.</li>
+          <li>Portfolio → <b>Today's Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up at the top of Today's Projects.</li>
           <li>Portfolio → <b>Productiveness</b>: the weekly review is built from your tiers, stages, next actions and restart triggers.</li>
           <li>Weekly review → <b>Homepage</b>: a review block appears every Saturday and shows "done ✓" once you finish it.</li>
           <li>Missions → <b>Homepage</b>: a mission with a due date or scheduled days appears on those days.</li>
@@ -3487,7 +3487,7 @@
           <li>Start → <b>Homepage</b>: each Start task repeats every remaining day this week until you tick it done.</li>
         </ul>
         <h4>Where your data lives</h4>
-        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so use <b>Portfolio → Export backup</b> now and then (it saves the portfolio list; the other tabs have Email view buttons rather than a backup file).</p>
+        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so back up now and then: <b>Portfolio → Export backup</b> saves the portfolio list, and <b>Do → Manage activities → ⇩ Backup my data</b> saves Do's data. The other tabs have Email view buttons rather than a backup file.</p>
       </div>
     </details>
 
@@ -3497,19 +3497,19 @@
         <h4>The idea</h4>
         <p>Stage says how far along an endeavour is. Tier says how much of your time it gets. You set both yourself.</p>
         <ul>
-          <li><b>Focus ON (1 endeavour)</b> — gets your biggest blocks each week.</li>
-          <li><b>Maintain (2–3 endeavours)</b> — a small fixed slot each, enough to keep them moving.</li>
-          <li><b>Parked (everything else)</b> — zero time, written down with a trigger for restarting, such as "when I have 5 people interested" or "after the focus project ships". Parking isn't abandoning.</li>
+          <li><b>Focus ON (up to 5 endeavours)</b> — get your biggest blocks each week.</li>
+          <li><b>Maintain (up to 10 endeavours)</b> — a small fixed slot each, enough to keep them moving.</li>
+          <li><b>Parked (up to 15 endeavours)</b> — zero time, written down with a trigger for restarting, such as "when I have 5 people interested" or "after the focus project ships". Parking isn't abandoning.</li>
         </ul>
         <h4>Stage (set by you)</h4>
         <p><b>Idea → Building → Launched → Earning.</b> Within each tier list, the furthest-along endeavour sits at the top: Earning, then Launched, then Building, then Idea. Change a stage and the list reorders.</p>
         <h4>The Tiers table</h4>
         <ul>
           <li>Three separate lists, in order: Focus ON, Maintain, Parked. Each row shows the endeavour and its one-line offering, stage, tier, next action (or restart trigger for Parked) and validation score.</li>
-          <li>Headers show counts such as <b>Maintain 2/3</b>; the count turns amber when you go over the guide.</li>
+          <li>Headers show counts such as <b>Maintain 4/10</b>; the count turns amber if a list is ever over its limit.</li>
           <li>An <b>Unsorted</b> list appears for any endeavour that has no tier yet, and disappears once everything is placed.</li>
           <li>Change stage or tier straight from the dropdowns on a row, or tap the endeavour's name for the full edit window (name, offering, target market, notes, stage, tier, next action or restart trigger, status).</li>
-          <li>Making a second endeavour Focus ON asks whether to move the current focus to Maintain.</li>
+          <li>Each list has a limit: Focus ON 5, Maintain 10, Parked 15. When a list is full the app says "Sorry, this list is full. Happy to demote?" and lets you pick which endeavour in that list to move down one list (Focus ON → Maintain, Maintain → Parked); the one you were moving in then goes in. Parked is the lowest list, so if it's full you'll need to remove one. Editing an endeavour already in a full list is never blocked.</li>
         </ul>
         <h4>Next actions</h4>
         <ul>
@@ -3524,7 +3524,7 @@
         <ul>
           <li><b>Validation scorecard</b> — tap an endeavour's validation badge. Six criteria (problem clarity, evidence of demand, competition and differentiation, willingness to pay, feasibility, path to first customer), each scored Not yet / Some evidence / Strong evidence, out of 12.</li>
           <li><b>Status</b> — the older Active / On hold / In planning / Shelved label, still available in the edit window.</li>
-          <li><b>+ New project</b> — adds an endeavour. New ones start as Idea and Parked.</li>
+          <li><b>+ New project</b> — adds an endeavour. It starts as Idea, and you must choose its list (Focus ON, Maintain or Parked) before it will save.</li>
           <li><b>Import from Notion</b> — reads a CSV export of a Notion database and adds each row as an endeavour set to "In planning". Rows already in the portfolio are skipped.</li>
           <li><b>Refer to Notion</b> — paste a link to your Notion database (a name is optional). It's saved as a chip under the buttons; tap it to open Notion, ✕ to remove it.</li>
           <li><b>Export backup</b> — downloads your portfolio as a JSON file. <b>Email view</b> — emails the portfolio as text, now including tier, stage and next action.</li>
@@ -3533,7 +3533,7 @@
     </details>
 
     <details class="cp-sec">
-      <summary>Projects</summary>
+      <summary>Today's Projects</summary>
       <div class="cp-body">
         <h4>Next actions (top of the tab)</h4>
         <p>Every Focus ON and Maintain endeavour from Portfolio, Focus first, each with its stage, its one-line note and an editable next action. Edit it in place, or tap <b>✓ Done</b> to log it and enter the next one. Parked endeavours don't appear here, since they get zero time.</p>
@@ -3609,7 +3609,7 @@
         <h4>The 20-minute weekly review</h4>
         <ul>
           <li><b>Saturday cue:</b> a purple "Weekly review · 20 min" block sits on your Homepage every Saturday at 9:00am. Tap it to open the review. It shows "done ✓" once completed.</li>
-          <li><b>Warnings at the top</b> if there's no Focus ON project, more than one, more than 3 in Maintain, or endeavours still unsorted.</li>
+          <li><b>Warnings at the top</b> if there's no Focus ON project, a list is over its limit, or endeavours are still unsorted.</li>
           <li><b>Step 1 (~8 min)</b> — Focus ON and Maintain: for each, see how many actions you completed this week, change its stage, tick ✓ Done and set the next action.</li>
           <li><b>Step 2 (~5 min)</b> — Parked: read each restart trigger. If one has happened, tap <b>Trigger hit → Maintain</b> and the app asks for its next action.</li>
           <li><b>Step 3 (~5 min)</b> — one note: what moved, what's stuck, one thing to do differently. It saves when you tap away.</li>
@@ -3641,7 +3641,7 @@
         <p>This is a suggested rhythm built from the features above, not something the app enforces.</p>
         <ul>
           <li><b>Every day:</b> Start tasks on the Homepage, then Do → Today for your three slots.</li>
-          <li><b>As you go:</b> tick ✓ Done on next actions (Projects or Portfolio) and enter the next one while it's fresh.</li>
+          <li><b>As you go:</b> tick ✓ Done on next actions (Today's Projects or Portfolio) and enter the next one while it's fresh.</li>
           <li><b>Saturday, ~20 minutes:</b> the weekly review in Productiveness.</li>
           <li><b>Before the week starts:</b> Do → Prioritise Next Week, then put the Focus ON project's biggest blocks on the Homepage.</li>
         </ul>
@@ -3655,7 +3655,7 @@
           <li><b>Install:</b> use your browser's Add to Home Screen. It then opens like an app.</li>
           <li><b>Updates:</b> the app checks for a new version each time it opens. After an update, open it, wait a few seconds, then fully close and reopen it; the second open runs the new version.</li>
           <li><b>Still on an old version?</b> Clear this site's data in your browser settings. Deleting the home-screen icon alone doesn't do it. Export a backup first, because clearing site data also removes your saved data.</li>
-          <li><b>Different devices</b> hold separate data. Use Export backup and Email view buttons to move things across.</li>
+          <li><b>Different devices</b> hold separate data. Use the backup buttons (Portfolio → Export backup, Do → Manage activities → Backup my data) and the Email view buttons to move things across.</li>
         </ul>
       </div>
     </details>
@@ -3908,11 +3908,11 @@
       <button type="button" class="pf-chip" data-stage="launched" onclick="selectPfStage(this)">Launched</button>
       <button type="button" class="pf-chip" data-stage="earning" onclick="selectPfStage(this)">Earning</button>
     </div>
-    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Tier — where your time goes</div>
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Tier — choose one (required)</div>
     <div class="modal-status-row" id="pf-tier-row">
-      <button type="button" class="pf-chip" data-tier="focus" onclick="selectPfTier(this)">Focus ON (1)</button>
-      <button type="button" class="pf-chip" data-tier="maintain" onclick="selectPfTier(this)">Maintain (2–3)</button>
-      <button type="button" class="pf-chip" data-tier="parked" onclick="selectPfTier(this)">Parked</button>
+      <button type="button" class="pf-chip" data-tier="focus" onclick="selectPfTier(this)">Focus ON (up to 5)</button>
+      <button type="button" class="pf-chip" data-tier="maintain" onclick="selectPfTier(this)">Maintain (up to 10)</button>
+      <button type="button" class="pf-chip" data-tier="parked" onclick="selectPfTier(this)">Parked (up to 15)</button>
     </div>
     <div id="pf-next-wrap">
       <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:6px;">Next concrete action (required for Focus ON / Maintain)</div>
@@ -3933,6 +3933,20 @@
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closePortfolioModal()">Cancel</button>
       <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add project</button>
+    </div>
+  </div>
+</div>
+
+<!-- List-full / demote modal -->
+<div class="modal-overlay" id="pf-full-modal" style="z-index:300;">
+  <div class="modal">
+    <h2>LIST IS FULL</h2>
+    <div style="font-family:var(--sans);font-size:14px;color:var(--text);line-height:1.5;">Sorry, this list is full. Happy to demote?</div>
+    <div id="pf-full-sub" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;"></div>
+    <select class="pf-sel" id="pf-full-select" style="width:100%;font-size:12.5px;padding:9px 10px;"></select>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="pfDemoteCancel()">Cancel</button>
+      <button class="modal-confirm" onclick="pfDemoteConfirm()">Demote</button>
     </div>
   </div>
 </div>
@@ -4042,9 +4056,9 @@
 const PF_STAGE_FLOW = ['idea', 'building', 'launched', 'earning']; // later in this list = higher up each tier's list
 const PF_STAGE_LABEL = { idea: 'Idea', building: 'Building', launched: 'Launched', earning: 'Earning' };
 const PF_TIER_META = {
-  focus:    { label: 'Focus ON', hint: '1 project · gets your biggest blocks each week', limit: 1 },
-  maintain: { label: 'Maintain', hint: '2–3 projects · a small fixed slot each', limit: 3 },
-  parked:   { label: 'Parked',   hint: "zero time · written down with a restart trigger — parking isn't abandoning" },
+  focus:    { label: 'Focus ON', hint: 'up to 5 · gets your biggest blocks each week', limit: 5 },
+  maintain: { label: 'Maintain', hint: 'up to 10 · a small fixed slot each', limit: 10 },
+  parked:   { label: 'Parked',   hint: "up to 15 · zero time · written down with a restart trigger — parking isn't abandoning", limit: 15 },
   unsorted: { label: 'Unsorted', hint: 'not placed yet — choose a tier for each' }
 };
 const HP_REVIEW_START = '09:00'; // Saturday weekly-review block on the Homepage calendar (20 min)
@@ -4056,6 +4070,47 @@ function pfTierOf(p) { return (p.tier === 'focus' || p.tier === 'maintain' || p.
 function pfSortByStage(a, b) {
   return (PF_STAGE_FLOW.indexOf(pfStageOf(b)) - PF_STAGE_FLOW.indexOf(pfStageOf(a)))
     || String(a.name).localeCompare(String(b.name));
+}
+// A tier with a limit refuses new entries once full. An endeavour already in the tier is never blocked from being edited.
+function pfHasRoom(items, tier, existing) {
+  const lim = PF_TIER_META[tier] && PF_TIER_META[tier].limit;
+  if (!lim) return true;
+  if (existing && pfTierOf(existing) === tier) return true;
+  return items.filter(x => pfTierOf(x) === tier).length < lim;
+}
+const PF_LOWER = { focus: 'maintain', maintain: 'parked' };
+let pfDemoteCtx = null;
+// A list is full: offer to demote one of its endeavours one list down, then carry on with what was being done.
+function pfFullPrompt(tier, excludeId, onDone) {
+  const m = PF_TIER_META[tier];
+  const lower = PF_LOWER[tier];
+  const items = loadPortfolio();
+  if (!lower) { alert(`Sorry, ${m.label} is full (${m.limit} of ${m.limit}). It's the lowest list, so there's nothing to demote to. Remove one first.`); return; }
+  if (!pfHasRoom(items, lower, null)) { alert(`Sorry, ${m.label} is full, and ${PF_TIER_META[lower].label} is full too, so nothing can drop into it. Make room in ${PF_TIER_META[lower].label} first.`); return; }
+  const cands = items.filter(x => pfTierOf(x) === tier && x.id !== excludeId).sort((a, b) => pfSortByStage(b, a)); // least advanced first
+  pfDemoteCtx = { lower, onDone };
+  document.getElementById('pf-full-sub').textContent = `Choose one to move down to ${PF_TIER_META[lower].label}:`;
+  document.getElementById('pf-full-select').innerHTML = cands.map(x => `<option value="${x.id}">${esc(x.name)} (${PF_STAGE_LABEL[pfStageOf(x)]})</option>`).join('');
+  document.getElementById('pf-full-modal').classList.add('visible');
+}
+function pfDemoteConfirm() {
+  const ctx = pfDemoteCtx;
+  const id = Number(document.getElementById('pf-full-select').value);
+  document.getElementById('pf-full-modal').classList.remove('visible');
+  pfDemoteCtx = null;
+  if (!ctx || !id) return;
+  const items = loadPortfolio();
+  const x = items.find(i => i.id === id);
+  if (!x) return;
+  x.tier = ctx.lower;
+  savePortfolio(items);
+  pfRefreshViews();
+  if (ctx.onDone) ctx.onDone();
+}
+function pfDemoteCancel() {
+  document.getElementById('pf-full-modal').classList.remove('visible');
+  pfDemoteCtx = null;
+  pfRefreshViews();
 }
 function loadWeeklyReviews() {
   try { return JSON.parse(localStorage.getItem('mc_weekly_reviews')) || {}; } catch (e) { return {}; }
@@ -5511,13 +5566,13 @@ let pfStatus = 'active';
 let pfEditId = null;
 
 let pfModalStage = 'idea';
-let pfModalTier = 'parked';
+let pfModalTier = '';
 function pfSyncModalChips() {
   document.querySelectorAll('#pf-stage-row .pf-chip').forEach(b => b.classList.toggle('on', b.dataset.stage === pfModalStage));
   document.querySelectorAll('#pf-tier-row .pf-chip').forEach(b => b.classList.toggle('on', b.dataset.tier === pfModalTier));
-  const parked = pfModalTier === 'parked';
-  document.getElementById('pf-next-wrap').style.display = parked ? 'none' : 'block';
-  document.getElementById('pf-trigger-wrap').style.display = parked ? 'block' : 'none';
+  const t = pfModalTier;
+  document.getElementById('pf-next-wrap').style.display = (t === 'focus' || t === 'maintain') ? 'block' : 'none';
+  document.getElementById('pf-trigger-wrap').style.display = t === 'parked' ? 'block' : 'none';
 }
 function selectPfStage(btn) { pfModalStage = btn.dataset.stage; pfSyncModalChips(); }
 function selectPfTier(btn) { pfModalTier = btn.dataset.tier; pfSyncModalChips(); }
@@ -5533,7 +5588,7 @@ function openPortfolioModal(editId) {
   document.getElementById('pf-trigger').value = item ? (item.parkTrigger || '') : '';
   document.getElementById('pf-modal-err').style.display = 'none';
   pfModalStage = item ? pfStageOf(item) : 'idea';
-  pfModalTier = item ? (item.tier || '') : 'parked';
+  pfModalTier = item ? (item.tier || '') : '';
   pfSyncModalChips();
   document.getElementById('pf-modal-title').textContent = item ? 'EDIT PROJECT' : 'NEW PROJECT';
   document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add project';
@@ -5560,6 +5615,11 @@ function confirmAddPortfolio() {
   const parkTrigger = document.getElementById('pf-trigger').value.trim();
   const errEl = document.getElementById('pf-modal-err');
   errEl.style.display = 'none';
+  if (!pfModalTier) {
+    errEl.textContent = 'Choose a list for this project: Focus ON, Maintain or Parked.';
+    errEl.style.display = 'block';
+    return;
+  }
   if ((pfModalTier === 'focus' || pfModalTier === 'maintain') && !nextAction) {
     errEl.textContent = 'What is the next concrete action? Focus ON and Maintain both need one.';
     errEl.style.display = 'block';
@@ -5567,12 +5627,10 @@ function confirmAddPortfolio() {
     return;
   }
   const items = loadPortfolio();
-  if (pfModalTier === 'focus') {
-    const cur = items.find(x => x.tier === 'focus' && x.id !== pfEditId);
-    if (cur) {
-      if (!confirm(`"${cur.name}" is your Focus ON project right now. Move it to Maintain and make "${name}" the focus?`)) return;
-      cur.tier = 'maintain';
-    }
+  const editing = pfEditId ? items.find(x => x.id === pfEditId) : null;
+  if (!pfHasRoom(items, pfModalTier, editing)) {
+    pfFullPrompt(pfModalTier, pfEditId, () => confirmAddPortfolio());
+    return;
   }
   const data = {
     name,
@@ -5650,8 +5708,8 @@ function renderPortfolioTable(items) {
     const meta = PF_TIER_META[tier];
     const over = meta.limit && rows.length > meta.limit;
     const count = meta.limit ? `${rows.length}/${meta.limit}` : String(rows.length);
-    const emptyMsg = tier === 'focus' ? 'Nothing in Focus ON yet. Pick the one endeavour that gets your biggest blocks each week.'
-      : tier === 'maintain' ? 'Nothing in Maintain yet. Choose 2–3 that each get a small fixed slot.'
+    const emptyMsg = tier === 'focus' ? 'Nothing in Focus ON yet. Pick up to 5 endeavours that get your biggest blocks each week.'
+      : tier === 'maintain' ? 'Nothing in Maintain yet. Choose up to 10 that each get a small fixed slot.'
       : 'Nothing parked.';
     const lastCol = tier === 'parked' ? 'Restart trigger' : 'Next action';
     return `<div class="pf-tier">
@@ -5692,13 +5750,7 @@ function pfSetTier(id, tier) {
   const items = loadPortfolio();
   const p = items.find(x => x.id === id);
   if (!p) return;
-  if (tier === 'focus') {
-    const cur = items.find(x => x.id !== id && x.tier === 'focus');
-    if (cur) {
-      if (!confirm(`"${cur.name}" is your Focus ON project right now. Move it to Maintain and make "${p.name}" the focus?`)) { pfRefreshViews(); return; }
-      cur.tier = 'maintain';
-    }
-  }
+  if (!pfHasRoom(items, tier, p)) { pfRefreshViews(); pfFullPrompt(tier, id, () => pfSetTier(id, tier)); return; }
   p.tier = tier;
   savePortfolio(items);
   pfRefreshViews();
@@ -5774,9 +5826,11 @@ function pRenderReview() {
   const movedCount = p => (p.actionsDone || []).filter(a => new Date(a.at).getTime() >= weekStartMs).length;
 
   const warns = [];
-  if (!focus.length) warns.push('No Focus ON project yet. Pick one — it gets your biggest blocks next week.');
-  if (focus.length > 1) warns.push('More than one Focus ON. The point is a single focus; move the others to Maintain.');
-  if (maintain.length > 3) warns.push(`Maintain has ${maintain.length}. The guide is 2–3 — consider parking the least alive.`);
+  if (!focus.length) warns.push('No Focus ON project yet. Pick at least one — it gets your biggest blocks next week.');
+  [['focus', focus], ['maintain', maintain], ['parked', parked]].forEach(([t, list]) => {
+    const lim = PF_TIER_META[t].limit;
+    if (list.length > lim) warns.push(`${PF_TIER_META[t].label} has ${list.length}; the limit is ${lim}. Move some out.`);
+  });
   if (unsorted.length) warns.push(`${unsorted.length} still unsorted: ${unsorted.map(p => esc(p.name)).join(', ')}. Choose a tier in the Portfolio tab.`);
 
   const liveRow = p => {
