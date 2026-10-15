@@ -119,7 +119,7 @@ function handleContentIdeaDeepLink() {
   if (emptyIdx === -1) {
     // No room today -- don't lose the handoff, just let them open a picker
     // themselves (e.g. on Plan week) and it'll still pre-fill when they do.
-    alert("Today's three slots are already full. Pick an empty slot on Plan week to add this content idea — the description will still be ready to drop in.");
+    alert("Today's three slots are already full. Pick an empty slot on Plan Next Week to add this content idea — the description will still be ready to drop in.");
     return;
   }
   openPicker(today, emptyIdx);
@@ -129,6 +129,7 @@ let pendingCancelIso = null;   // which day's stone is being cancelled/substitut
 let pendingSubstituteActivityId = null; // if cancelling-to-substitute, the new activity chosen
 let pendingDetailIso = null;   // which day's slot the detail modal is editing
 let pendingDetailSlot = null;  // which slot index the detail modal is editing
+let planTabOpened = false;    // first visit to Plan Next Week in a session lands on next week
 let currentWeekStart = null;   // Monday ISO of the week currently shown in "This week"
 let pendingLogItemType = null; // 'activity' | 'waster' — what the time-log modal is logging against
 let pendingLogItemId = null;
@@ -495,7 +496,9 @@ function computeStreak() {
 /* ---------------------------------------------------------- */
 
 function renderDo() {
-  const addedFromPortfolio = syncPortfolioVenturesIntoActivities();
+  // Portfolio endeavours no longer sync in automatically -- they come in only via the
+  // "Import business endeavours from Portfolio" button on Plan Next Week.
+  const addedFromPortfolio = 0;
   const addedFromProjects = syncProjectsIntoActivities();
   const added = addedFromPortfolio + addedFromProjects;
   const statusEl = document.getElementById("portfolio-sync-status");
@@ -1680,6 +1683,7 @@ function syncPortfolioVenturesIntoActivities() {
   let added = 0;
   ventures.forEach((v) => {
     if (!v || !v.name) return;
+    if (v.tier !== "focus" && v.tier !== "maintain") return; // Parked / Unsorted get no time, so they aren't imported
     const before = STATE.activities.length;
     addVentureIfMissing(v.name);
     if (STATE.activities.length > before) added++;
@@ -1809,6 +1813,99 @@ function renderWeekTab() {
   document.getElementById("carry-forward-status").textContent = "";
   renderWeekDays();
   renderUpcomingList();
+  updatePlanWeekControls();
+}
+
+/* ---------------------------------------------------------- */
+/* Plan Next Week: import from Portfolio / export to Week's      */
+/* Projects. Export unlocks only when every slot of the shown    */
+/* week (7 days x 3 slots) has a task in it.                     */
+/* ---------------------------------------------------------- */
+
+const WEEK_EXPORT_KEY = "mc_week_schedule"; // read by Mission Control's Week's Projects tab
+
+function planWeekFillCounts() {
+  let filled = 0;
+  let total = 0;
+  weekDates(currentWeekStart).forEach((iso) => {
+    const day = dayData(iso);
+    (day ? day.slots : []).forEach((s) => {
+      total++;
+      if (s.status !== "empty" && s.activityId) filled++;
+    });
+  });
+  return { filled, total };
+}
+
+function updatePlanWeekControls() {
+  const thisMonday = mondayOf(todayISO());
+  const tag = document.getElementById("week-range-tag");
+  if (tag) {
+    tag.textContent =
+      currentWeekStart === upcomingMondayISO() ? "Next week"
+      : currentWeekStart === thisMonday ? "This week"
+      : currentWeekStart < thisMonday ? "Past week" : "";
+  }
+  const btn = document.getElementById("btn-export-week");
+  const status = document.getElementById("week-export-status");
+  if (!btn) return;
+  const { filled, total } = planWeekFillCounts();
+  const past = currentWeekStart < thisMonday;
+  const ready = !past && total > 0 && filled === total;
+  btn.disabled = !ready;
+  if (status) {
+    status.textContent = past
+      ? "Past weeks can't be exported."
+      : ready
+      ? `✓ All ${total} slots filled — ready to export.`
+      : `${filled} of ${total} slots filled — fill every day to unlock the export.`;
+  }
+  const result = document.getElementById("week-export-result");
+  if (result) result.innerHTML = "";
+}
+
+function importPortfolioEndeavours() {
+  const statusEl = document.getElementById("week-import-status");
+  if (typeof loadPortfolio !== "function") {
+    if (statusEl) statusEl.textContent = "Portfolio isn't available here.";
+    return;
+  }
+  const eligible = loadPortfolio().filter((v) => v && v.name && (v.tier === "focus" || v.tier === "maintain"));
+  if (!eligible.length) {
+    if (statusEl) statusEl.textContent = "No Focus ON or Maintain endeavours yet — choose tiers in the Portfolio tab first.";
+    return;
+  }
+  const added = syncPortfolioVenturesIntoActivities();
+  const already = eligible.length - added;
+  if (statusEl) {
+    statusEl.textContent = added
+      ? `✓ Imported ${added} endeavour${added === 1 ? "" : "s"}${already ? ` (${already} already in your list)` : ""}. They're now in the "+ Plan a task" picker.`
+      : `All ${eligible.length} Focus ON and Maintain endeavours are already in your picker.`;
+  }
+}
+
+function exportWeekSchedule() {
+  const { filled, total } = planWeekFillCounts();
+  if (!total || filled !== total) return; // gate, in case the button is clicked while disabled
+  const days = weekDates(currentWeekStart).map((iso) => ({
+    date: iso,
+    slots: dayData(iso).slots.map((s) => {
+      const a = activityById(s.activityId);
+      return { label: a ? a.label : "Unknown", detail: s.detail || "", link: s.link || "" };
+    }),
+  }));
+  const result = document.getElementById("week-export-result");
+  try {
+    localStorage.setItem(WEEK_EXPORT_KEY, JSON.stringify({ weekOf: currentWeekStart, exportedAt: new Date().toISOString(), days }));
+  } catch (e) {
+    if (result) result.textContent = "Couldn't save the export (storage is full or blocked).";
+    return;
+  }
+  if (result) {
+    result.innerHTML = `✓ Exported the week of ${escapeHtml(fmtWeekRangeLabel(currentWeekStart))}. <a href="#" id="open-week-projects" style="color:var(--sage-dark, inherit);">Open Week's Projects →</a>`;
+    const link = document.getElementById("open-week-projects");
+    if (link) link.addEventListener("click", (e) => { e.preventDefault(); if (typeof switchMasterTab === "function") switchMasterTab("projects"); });
+  }
 }
 
 function renderWeekDays() {
@@ -1893,7 +1990,7 @@ function renderUpcomingList() {
   if (!rows.length) {
     const empty = document.createElement("div");
     empty.id = "upcoming-empty";
-    empty.textContent = "Nothing planned ahead yet — assign a task on Plan week to see it here.";
+    empty.textContent = "Nothing planned ahead yet — assign a task on Plan Next Week to see it here.";
     list.appendChild(empty);
     return;
   }
@@ -2667,7 +2764,10 @@ function switchTab(tab) {
   document.getElementById("tab-nextweek").classList.toggle("active", tab === "nextweek");
   document.getElementById("tab-wasters").classList.toggle("active", tab === "wasters");
   document.getElementById("tab-insights").classList.toggle("active", tab === "insights");
-  if (tab === "week") renderWeekTab();
+  if (tab === "week") {
+    if (!planTabOpened) { currentWeekStart = upcomingMondayISO(); planTabOpened = true; }
+    renderWeekTab();
+  }
   if (tab === "insights") renderInsights();
   if (tab === "strategize") renderStrategize();
   if (tab === "targeted-action") renderTargetedAction();
@@ -2784,6 +2884,8 @@ function wireUI() {
   document.getElementById("btn-prev-week").addEventListener("click", () => goToWeek(-7));
   document.getElementById("btn-next-week").addEventListener("click", () => goToWeek(7));
   document.getElementById("btn-email-week").addEventListener("click", emailWeek);
+  document.getElementById("btn-import-portfolio").addEventListener("click", importPortfolioEndeavours);
+  document.getElementById("btn-export-week").addEventListener("click", exportWeekSchedule);
   document.getElementById("btn-carry-forward").addEventListener("click", carryWeekForward);
   document.getElementById("btn-email-today").addEventListener("click", emailToday);
   document.getElementById("btn-email-wasters").addEventListener("click", emailWasters);

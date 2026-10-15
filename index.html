@@ -2681,7 +2681,7 @@
   <button class="master-tab" id="mtab-start" onclick="switchMasterTab('start')">Start</button>
   <button class="master-tab" id="mtab-engine" onclick="switchMasterTab('engine')">Engine Room</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
-  <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Today's Projects</button>
+  <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Week's Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
@@ -2694,7 +2694,7 @@
     <div>
       <div style="font-family:var(--mono);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-hint);">This week</div>
       <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:2px;" id="homepage-week-range"></div>
-      <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">(please see Do → Plan Week for task details)</div>
+      <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:4px;font-style:italic;">(please see Do → Plan Next Week for task details)</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button onclick="emailHomepageView()" style="font-family:'DM Mono',monospace;font-size:11px;padding:7px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48,0 2px 4px rgba(0,0,0,0.4)';this.style.top='2px';" onmouseup="this.style.boxShadow='0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 3px 0 #0f6e48,0 5px 10px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
@@ -2865,8 +2865,8 @@
       <div class="streak-badge" id="streak-badge"></div>
     </div>
     <nav id="tab-nav">
+      <button class="tab-btn" id="tab-week" data-tab="week">Plan Next Week</button>
       <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
-      <button class="tab-btn" id="tab-week" data-tab="week">Plan week</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
       <button class="tab-btn" id="tab-visualizer" data-tab="visualizer">Visualizer</button>
       <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
@@ -2906,13 +2906,21 @@
 
   <div id="tab-week-panel" class="tab-panel" style="display:none;">
     <section id="week-section">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn primary" id="btn-import-portfolio">⇩ Import business endeavours from Portfolio</button>
+        <button class="btn primary" id="btn-export-week" disabled>⇧ Export weekly schedule to Week's Projects</button>
+      </div>
+      <div id="week-import-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:6px;"></div>
+      <div id="week-export-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px;"></div>
+      <div id="week-export-result" style="font-family: var(--sans); font-size: 12px; min-height: 16px; margin-bottom:6px;"></div>
       <div class="week-nav">
         <button class="btn" id="btn-prev-week" title="Previous week">‹</button>
         <div class="week-range" id="week-range-label"></div>
+        <span id="week-range-tag" style="font-family: var(--sans); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);"></span>
         <button class="btn" id="btn-next-week" title="Next week">›</button>
       </div>
       <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <button class="btn primary" id="btn-email-week">✉ Email this week</button>
+        <button class="btn" id="btn-email-week">✉ Email this week</button>
         <button class="btn" id="btn-carry-forward" style="display:none;">↷ Carry week forward</button>
       </div>
       <div id="carry-forward-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:4px;"></div>
@@ -3471,7 +3479,7 @@
           <li><b>Start</b> — up to 10 basic tasks you do no matter what, each with a time.</li>
           <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
           <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
-          <li><b>Today's Projects</b> — the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
+          <li><b>Week's Projects</b> — the week's schedule exported from Do, then the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
           <li><b>Missions</b> — missions and tasks, with folders, priorities, sequencing and Google Calendar.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
           <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
@@ -3479,7 +3487,7 @@
         </ul>
         <h4>How information moves between tabs</h4>
         <ul>
-          <li>Portfolio → <b>Today's Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up at the top of Today's Projects.</li>
+          <li>Portfolio → <b>Week's Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up on Week's Projects, under the exported schedule.</li>
           <li>Portfolio → <b>Productiveness</b>: the weekly review is built from your tiers, stages, next actions and restart triggers.</li>
           <li>Weekly review → <b>Homepage</b>: a review block appears every Saturday and shows "done ✓" once you finish it.</li>
           <li>Missions → <b>Homepage</b>: a mission with a due date or scheduled days appears on those days.</li>
@@ -3533,9 +3541,11 @@
     </details>
 
     <details class="cp-sec">
-      <summary>Today's Projects</summary>
+      <summary>Week's Projects</summary>
       <div class="cp-body">
-        <h4>Next actions (top of the tab)</h4>
+        <h4>Week's schedule (top of the tab)</h4>
+        <p>The schedule you exported from <b>Do → Plan Next Week</b>: a table of the seven days with their three slots each, today highlighted. It's a snapshot taken at export time, so re-export from Plan Next Week if you change the plan afterwards. Until you export, the tab shows a prompt instead.</p>
+        <h4>Next actions</h4>
         <p>Every Focus ON and Maintain endeavour from Portfolio, Focus first, each with its stage, its one-line note and an editable next action. Edit it in place, or tap <b>✓ Done</b> to log it and enter the next one. Parked endeavours don't appear here, since they get zero time.</p>
         <h4>Project cards</h4>
         <ul>
@@ -3572,7 +3582,7 @@
           <li><b>+</b> in a day's header adds an entry for that day. Tap a mission or entry block to change its time; overlapping times are refused with a message naming the clash. Tap a Start task block to tick it done.</li>
           <li>✕ removes your own entries; 🔗 on a block opens its link.</li>
           <li><b>Email this week</b> sends the week as text; <b>Email entire view</b> sends a snapshot of every tab.</li>
-          <li>The header notes that task details live in <b>Do → Plan week</b>.</li>
+          <li>The header notes that task details live in <b>Do → Plan Next Week</b>.</li>
         </ul>
         <h4>Start</h4>
         <ul>
@@ -3622,8 +3632,8 @@
       <summary>Do — the nine sub-tabs</summary>
       <div class="cp-body">
         <ul>
+          <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email this week</b>, and <b>↷ Carry week forward</b> (past weeks only). Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
           <li><b>Today</b> — three task slots ("Three, no more. Choose with intent."). If the oration gate is showing, log today's oration to unlock your slots. <b>Email today's tasks</b> sends them to you. Past days are listed underneath, with a Manage activities link.</li>
-          <li><b>Plan week</b> — step through weeks with ‹ ›, and email the week.</li>
           <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
           <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>
           <li><b>Targeted Action</b> — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>
@@ -3641,7 +3651,7 @@
         <p>This is a suggested rhythm built from the features above, not something the app enforces.</p>
         <ul>
           <li><b>Every day:</b> Start tasks on the Homepage, then Do → Today for your three slots.</li>
-          <li><b>As you go:</b> tick ✓ Done on next actions (Today's Projects or Portfolio) and enter the next one while it's fresh.</li>
+          <li><b>As you go:</b> tick ✓ Done on next actions (Week's Projects or Portfolio) and enter the next one while it's fresh.</li>
           <li><b>Saturday, ~20 minutes:</b> the weekly review in Productiveness.</li>
           <li><b>Before the week starts:</b> Do → Prioritise Next Week, then put the Focus ON project's biggest blocks on the Homepage.</li>
         </ul>
@@ -3669,6 +3679,7 @@
     <button onclick="createMarketingProject()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#ffb066 0%,#f0964a 50%,#d97a30 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #8a4a12, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #8a4a12, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" title="Opens Communic8 to fill out the campaign — the title links back here once you save it there">+ New marketing project →</button>
     <button onclick="emailProjectsView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;margin-left:auto;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email view</button>
   </div>
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 0;" id="projects-week-schedule"></div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 0;" id="projects-next-actions"></div>
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem;" id="projects-grid">
     <div id="projects-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
@@ -5457,6 +5468,7 @@ function deleteProject(id) {
 }
 
 function renderProjects() {
+  renderWeekSchedule();
   renderProjectNextActions();
   const projects = loadProjects();
   const listEl = document.getElementById('projects-list');
@@ -5808,6 +5820,32 @@ function renderProjectNextActions() {
       ${pfNextActionField(p, t)}
     </div>`;
   }).join('') + '</div>';
+}
+
+// ── Week's Projects: the schedule exported from Do → Plan Next Week ──
+function loadWeekSchedule() {
+  try { return JSON.parse(localStorage.getItem('mc_week_schedule')) || null; } catch (e) { return null; }
+}
+function renderWeekSchedule() {
+  const el = document.getElementById('projects-week-schedule');
+  if (!el) return;
+  const head = '<div class="pf-na-title">Week\'s schedule · from Do</div>';
+  const sc = loadWeekSchedule();
+  if (!sc || !Array.isArray(sc.days) || !sc.days.length) {
+    el.innerHTML = head + `<div class="pf-tier-empty">No schedule exported yet. Fill every day in <a href="#" onclick="event.preventDefault();switchMasterTab('do')" style="color:var(--active);">Do → Plan Next Week</a>, then press <b>Export weekly schedule</b> and it lands here.</div>`;
+    return;
+  }
+  const today = dateKey(new Date());
+  const fmtDay = iso => new Date(iso + 'T00:00:00').toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
+  const first = sc.days[0].date, last = sc.days[sc.days.length - 1].date;
+  const ended = last < today;
+  const exported = sc.exportedAt ? new Date(sc.exportedAt).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : '';
+  const cell = x => x ? `<div class="pf-nm" style="cursor:default;">${esc(x.label)}</div>${x.detail ? `<div class="pf-sub">${esc(x.detail)}</div>` : ''}${x.link && /^https?:\/\//i.test(x.link) ? `<div class="pf-sub"><a href="${esc(x.link)}" target="_blank" rel="noopener" style="color:var(--active);">link ↗</a></div>` : ''}` : '';
+  el.innerHTML = head +
+    `<div class="pf-sub" style="margin:0 0 8px;">${fmtDay(first)} – ${fmtDay(last)}${exported ? ' · exported ' + exported : ''}${ended ? ' · this week has ended — export the next one from Do → Plan Next Week' : ''}</div>` +
+    `<div class="pf-tablewrap"><table class="pf-table"><thead><tr><th>Day</th><th>Slot 1</th><th>Slot 2</th><th>Slot 3</th></tr></thead><tbody>` +
+    sc.days.map(d => `<tr${d.date === today ? ' style="background:var(--active-bg);"' : ''}><td data-l="Day"><div class="pf-nm" style="cursor:default;">${fmtDay(d.date)}</div>${d.date === today ? '<div class="pf-sub">Today</div>' : ''}</td>${[0, 1, 2].map(i => `<td data-l="Slot ${i + 1}">${cell((d.slots || [])[i])}</td>`).join('')}</tr>`).join('') +
+    `</tbody></table></div>`;
 }
 
 // ── Productiveness tab: weekly review (~20 min) ──
