@@ -1174,6 +1174,9 @@
   .pf-pill.focus { background:var(--active-bg); color:var(--active); border-color:var(--active); }
   .pf-pill.maintain { background:var(--planning-bg); color:var(--planning); border-color:var(--planning); }
   .pf-pill.parked { background:var(--completed-bg); color:var(--completed); }
+  .ca-table { min-width:0; }
+  .ca-ta { width:100%; min-height:64px; resize:vertical; font-family:var(--sans); font-size:13px; line-height:1.45; padding:8px 10px; border:0.5px solid var(--border2); border-radius:8px; background:var(--bg); color:var(--text); outline:none; box-sizing:border-box; }
+  .ca-ta:focus { border-color:var(--active); }
   .pf-na-title { font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-hint); margin-bottom:10px; }
   .pf-na-list { display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem; }
   .pf-na-card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:12px 16px; margin-bottom:8px; }
@@ -1555,6 +1558,37 @@
     font-style: italic;
     margin-top: 12px;
   }
+  .stone .stone-detail-text {
+    font-size: 12px; line-height: 1.35; color: var(--ink-soft);
+    margin: -4px 0 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .stone.locked .stone-cta { font-size: 11px; color: var(--ink-soft); }
+  #extras-section { margin-top: 22px; }
+  .extras-head {
+    font-family: var(--serif); font-weight: 600; font-size: 15px; color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .extra-row {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px; margin-bottom: 6px;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .extra-check {
+    flex: none; width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+    border: 1.5px solid var(--sage); background: transparent; color: #fff; font-size: 12px; line-height: 1; padding: 0;
+  }
+  .extra-row.done .extra-check { background: var(--sage); }
+  .extra-text { flex: 1; font-family: var(--sans); font-size: 14px; color: var(--ink); word-break: break-word; }
+  .extra-row.done .extra-text { text-decoration: line-through; color: var(--ink-soft); }
+  .extra-remove { flex: none; background: none; border: none; color: var(--ink-soft); cursor: pointer; font-size: 13px; padding: 2px 6px; opacity: 0.6; }
+  .extra-remove:hover { opacity: 1; color: var(--clay-dark); }
+  .extras-add { display: flex; gap: 8px; margin-top: 4px; }
+  .extras-add input {
+    flex: 1; font-family: var(--sans); font-size: 14px; padding: 9px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink); outline: none;
+  }
+  .extras-add input:focus { border-color: var(--sage); }
+  .extras-add input:disabled, .extras-add button:disabled { opacity: 0.45; cursor: not-allowed; }
+  .extras-lock { font-size: 12px; color: var(--ink-soft); font-style: italic; margin-top: 6px; }
 
   /* ── Activity picker modal ──────────────────────────────── */
   #picker-overlay, #reason-overlay, #manage-overlay, #detail-overlay, #log-time-overlay {
@@ -2724,6 +2758,21 @@
     <div id="start-error-msg" style="display:none;font-family:var(--sans);font-size:11.5px;color:#ff6b6b;margin-top:8px;line-height:1.4;"></div>
     <div id="start-limit-msg" style="display:none;font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:8px;">Limit reached — tick one off to add another.</div>
   </div>
+
+  <!-- Competitive advantages table -->
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 3rem;border-top:0.5px solid var(--border);">
+    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:6px;">Basing Pursuits on Competitive Advantages - The Fundamental Key</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-bottom:14px;font-style:italic;">List each competitive advantage you have, then the pursuits that leverage it. Add as many rows as you need.</div>
+    <div class="pf-tablewrap">
+      <table class="pf-table ca-table">
+        <thead><tr><th style="width:42%;">Competitive Advantage</th><th>Pursuits That Leverage CAs</th><th style="width:44px;"></th></tr></thead>
+        <tbody id="ca-rows"></tbody>
+      </table>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="pf-iconbtn" onclick="addCaRow()" style="font-size:12px;padding:8px 16px;">+ Add row</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ ENGINE ROOM PANEL ══ -->
@@ -2892,7 +2941,8 @@
       </div>
       <div id="portfolio-sync-status" class="import-status"></div>
       <div id="stones-row"></div>
-      <div id="stones-hint">Three, no more. Choose with intent.</div>
+      <div id="extras-section"></div>
+      <div id="stones-hint">Your three planned tasks come from Plan Next Week. Anything extra goes under "Also today" and doesn't count toward your streak.</div>
     </section>
 
     <section id="history-section">
@@ -3589,6 +3639,7 @@
           <li>Up to 10 basic tasks "no matter what". Each needs a time.</li>
           <li>A Start task appears on the Homepage at that time on every remaining day this week until you tick it done (the circle on the Start tab, or tap its block on the Homepage). ✕ removes it.</li>
           <li>At the limit, tick one off to add another.</li>
+          <li><b>Basing Pursuits on Competitive Advantages - The Fundamental Key</b> — a two-column table below the tasks. Column one lists each competitive advantage you have; column two lists the pursuits that leverage it (one per line is easiest). <b>+ Add row</b> adds as many as you like, × removes a row (it asks first if the row has text), and everything saves as you type. Like the rest of the app, it lives in this browser on this device.</li>
         </ul>
       </div>
     </details>
@@ -3633,7 +3684,7 @@
       <div class="cp-body">
         <ul>
           <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email this week</b>, and <b>↷ Carry week forward</b> (past weeks only). Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
-          <li><b>Today</b> — three task slots ("Three, no more. Choose with intent."). If the oration gate is showing, log today's oration to unlock your slots. <b>Email today's tasks</b> sends them to you. Past days are listed underneath, with a Manage activities link.</li>
+          <li><b>Today</b> — your day's diary. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath, with a Manage activities link.</li>
           <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
           <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>
           <li><b>Targeted Action</b> — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>
@@ -3650,7 +3701,7 @@
       <div class="cp-body">
         <p>This is a suggested rhythm built from the features above, not something the app enforces.</p>
         <ul>
-          <li><b>Every day:</b> Start tasks on the Homepage, then Do → Today for your three slots.</li>
+          <li><b>Every day:</b> Start tasks on the Homepage, then Do → Today: log your oration, then work through your planned tasks and any extras.</li>
           <li><b>As you go:</b> tick ✓ Done on next actions (Week's Projects or Portfolio) and enter the next one while it's fresh.</li>
           <li><b>Saturday, ~20 minutes:</b> the weekly review in Productiveness.</li>
           <li><b>Before the week starts:</b> Do → Prioritise Next Week, then put the Focus ON project's biggest blocks on the Homepage.</li>
@@ -6524,7 +6575,57 @@ function deleteStartTask(id) {
   renderStartTab();
   if (typeof renderHomepage === 'function') renderHomepage();
 }
+// ── Start: competitive advantages table (stored as one list under mc_ca_table) ──
+function loadCaRows() {
+  try { const r = JSON.parse(localStorage.getItem('mc_ca_table')); return Array.isArray(r) ? r : []; } catch (e) { return []; }
+}
+function saveCaRows(rows) {
+  try { localStorage.setItem('mc_ca_table', JSON.stringify(rows)); } catch (e) {}
+}
+function caAutosize(el) {
+  el.style.height = 'auto';
+  if (el.scrollHeight > 0) el.style.height = Math.max(el.scrollHeight + 2, 64) + 'px';
+}
+function renderCaTable() {
+  const body = document.getElementById('ca-rows');
+  if (!body) return;
+  let rows = loadCaRows();
+  if (!rows.length) { rows = [{ id: 'ca' + Date.now(), ca: '', pursuits: '' }]; saveCaRows(rows); }
+  body.innerHTML = rows.map(r => `<tr>
+    <td data-l="Competitive Advantage"><textarea class="ca-ta" data-ca-id="${r.id}" data-ca-field="ca" placeholder="e.g. Teaching and economics background" oninput="caEdit('${r.id}','ca',this)">${esc(r.ca)}</textarea></td>
+    <td data-l="Pursuits That Leverage CAs"><textarea class="ca-ta" data-ca-id="${r.id}" data-ca-field="pursuits" placeholder="Pursuits that use this advantage — one per line" oninput="caEdit('${r.id}','pursuits',this)">${esc(r.pursuits)}</textarea></td>
+    <td><button class="pf-iconbtn danger" onclick="removeCaRow('${r.id}')" title="Remove row">×</button></td>
+  </tr>`).join('');
+  body.querySelectorAll('.ca-ta').forEach(caAutosize);
+}
+function caEdit(id, field, el) {
+  const rows = loadCaRows();
+  const r = rows.find(x => x.id === id);
+  if (!r) return;
+  r[field] = el.value;
+  saveCaRows(rows);
+  caAutosize(el);
+}
+function addCaRow() {
+  const rows = loadCaRows();
+  const id = 'ca' + Date.now() + Math.floor(Math.random() * 1000);
+  rows.push({ id, ca: '', pursuits: '' });
+  saveCaRows(rows);
+  renderCaTable();
+  const el = document.querySelector(`.ca-ta[data-ca-id="${id}"][data-ca-field="ca"]`);
+  if (el) el.focus();
+}
+function removeCaRow(id) {
+  const rows = loadCaRows();
+  const r = rows.find(x => x.id === id);
+  if (!r) return;
+  if ((r.ca.trim() || r.pursuits.trim()) && !confirm('Remove this row?')) return;
+  saveCaRows(rows.filter(x => x.id !== id));
+  renderCaTable();
+}
+
 function renderStartTab() {
+  renderCaTable();
   const tasks = loadStartTasks();
   const list = document.getElementById('start-list');
   const addRow = document.getElementById('start-add-row');

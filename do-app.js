@@ -418,11 +418,13 @@ function ensureDay(iso) {
         { id: "s_" + iso + "_2", activityId: null, status: "empty", detail: "", link: "", note: "", actionType: null },
       ],
       log: [],
+      extras: [], // extra free-text tasks for the day; deliberately outside the three slots, so streak maths ignores them
     };
     saveToStorage();
   } else {
     // migrate: older saved days may predate detail/link/note fields
     let changed = false;
+    if (!Array.isArray(STATE.days[iso].extras)) { STATE.days[iso].extras = []; changed = true; }
     STATE.days[iso].slots.forEach((s) => {
       if (s.detail === undefined) { s.detail = ""; changed = true; }
       if (s.link === undefined) { s.link = ""; changed = true; }
@@ -513,6 +515,7 @@ function renderDo() {
   renderHeader();
   renderOrationGate();
   renderStones();
+  renderExtras();
   renderHistory();
   renderTimeWasters();
   renderWeekTab();
@@ -600,13 +603,14 @@ function renderStones() {
   row.innerHTML = "";
   const iso = todayISO();
   const day = dayData(iso);
+  const orationLocked = !hasOrationToday();
 
   day.slots.forEach((slot, i) => {
     const stone = document.createElement("div");
     stone.dataset.slotIndex = i;
 
     if (slot.status === "empty") {
-      const locked = !hasOrationToday();
+      const locked = orationLocked;
       stone.className = locked ? "stone empty locked" : "stone empty";
       stone.innerHTML = locked
         ? `
@@ -617,7 +621,7 @@ function renderStones() {
         : `
         <span class="stone-number">${i + 1}</span>
         <span class="stone-plus">+</span>
-        <span class="stone-cta">Pick a task</span>
+        <span class="stone-cta">Nothing planned yet — tap to choose</span>
       `;
       stone.addEventListener("click", () => {
         if (locked) {
@@ -625,6 +629,19 @@ function renderStones() {
           return;
         }
         openPicker(iso, i);
+      });
+    } else if (orationLocked && slot.status !== "done") {
+      // Planned task, but today's oration isn't logged yet: visible, not usable.
+      const activity = activityById(slot.activityId);
+      const label = activity ? activity.label : "Unknown";
+      stone.className = "stone active locked";
+      stone.innerHTML = `
+        <span class="stone-number">${i + 1}</span>
+        <span class="stone-activity">${escapeHtml(label)}</span>
+        <span class="stone-cta">🔒 Log oration to unlock</span>
+      `;
+      stone.addEventListener("click", () => {
+        document.getElementById("oration-gate").scrollIntoView({ behavior: "smooth", block: "center" });
       });
     } else {
       const activity = activityById(slot.activityId);
@@ -637,6 +654,7 @@ function renderStones() {
         <span class="stone-detail-btn" title="Add detail, link, or a note">✎</span>
         <span class="stone-time-btn" title="Log time spent">⏱</span>
         <span class="stone-activity">${escapeHtml(label)}</span>
+        ${slot.detail ? `<span class="stone-detail-text">${escapeHtml(slot.detail)}</span>` : ""}
         ${actionBadgeHtml(slot.actionType)}
         <span class="stone-indicators">${slotIndicatorsHtml(slot)}</span>
         ${
@@ -674,6 +692,71 @@ function renderStones() {
 
     row.appendChild(stone);
   });
+}
+
+/* ---------------------------------------------------------- */
+/* Also today: extra free-text tasks beyond the three planned    */
+/* slots. Locked behind the oration gate like everything else,   */
+/* and kept out of the streak and Insights on purpose.           */
+/* ---------------------------------------------------------- */
+
+function addExtraTask(text) {
+  const t = (text || "").trim();
+  if (!t || !hasOrationToday()) return;
+  const day = dayData(todayISO());
+  if (!Array.isArray(day.extras)) day.extras = [];
+  day.extras.push({ id: "x_" + Date.now() + "_" + Math.floor(Math.random() * 1000), text: t, done: false });
+  saveToStorage();
+  renderExtras();
+}
+function toggleExtraTask(id) {
+  if (!hasOrationToday()) return;
+  const x = (dayData(todayISO()).extras || []).find((e) => e.id === id);
+  if (!x) return;
+  x.done = !x.done;
+  saveToStorage();
+  renderExtras();
+}
+function removeExtraTask(id) {
+  if (!hasOrationToday()) return;
+  const day = dayData(todayISO());
+  day.extras = (day.extras || []).filter((e) => e.id !== id);
+  saveToStorage();
+  renderExtras();
+}
+
+function renderExtras() {
+  const el = document.getElementById("extras-section");
+  if (!el) return;
+  const day = dayData(todayISO());
+  const extras = (day && day.extras) || [];
+  const locked = !hasOrationToday();
+  el.innerHTML = `
+    <div class="extras-head">Also today</div>
+    <div id="extras-list"></div>
+    <div class="extras-add">
+      <input id="extras-input" type="text" maxlength="200" placeholder="Add another task for today…" ${locked ? "disabled" : ""} />
+      <button class="btn" id="btn-add-extra" ${locked ? "disabled" : ""}>Add</button>
+    </div>
+    ${locked ? `<div class="extras-lock">Log your oration to unlock.</div>` : ""}
+  `;
+  const list = el.querySelector("#extras-list");
+  extras.forEach((x) => {
+    const row = document.createElement("div");
+    row.className = "extra-row" + (x.done ? " done" : "");
+    row.innerHTML = `
+      <button class="extra-check" title="${x.done ? "Mark not done" : "Mark done"}">${x.done ? "✓" : ""}</button>
+      <span class="extra-text">${escapeHtml(x.text)}</span>
+      <button class="extra-remove" title="Remove">✕</button>
+    `;
+    row.querySelector(".extra-check").addEventListener("click", () => toggleExtraTask(x.id));
+    row.querySelector(".extra-remove").addEventListener("click", () => removeExtraTask(x.id));
+    list.appendChild(row);
+  });
+  const input = el.querySelector("#extras-input");
+  const add = () => { addExtraTask(input.value); };
+  el.querySelector("#btn-add-extra").addEventListener("click", add);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
 }
 
 function categoryById(id) {
@@ -2121,6 +2204,12 @@ function emailToday() {
       if (s.link) body += `    link: ${s.link}\n`;
       if (s.note) body += `    worth checking: ${s.note}\n`;
     });
+  }
+
+  const extras = day.extras || [];
+  if (extras.length) {
+    body += `\nAlso today:\n`;
+    extras.forEach((x) => { body += `- ${x.text}${x.done ? " (done)" : ""}\n`; });
   }
 
   sendMailto(`Do — ${dayLabel}`, body);
