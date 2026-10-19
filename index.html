@@ -1690,6 +1690,26 @@
   .btn.warn:hover { background: var(--clay); color: white; }
   .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 
+  /* Big raised button at the top of Do */
+  .email-week-wrap { margin: 6px 0 18px; }
+  .btn-3d {
+    display: block; width: 100%; max-width: 440px; margin: 0 auto;
+    font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: 0.02em;
+    color: #fff; text-shadow: 0 1px 0 rgba(0,0,0,0.25);
+    padding: 16px 28px; border-radius: 16px; cursor: pointer;
+    border: 1px solid var(--sage-dark);
+    background: linear-gradient(180deg, #98B89C 0%, var(--sage) 45%, #5F8265 100%);
+    box-shadow: 0 6px 0 var(--sage-dark), 0 10px 18px rgba(31,41,55,0.22),
+                inset 0 1px 0 rgba(255,255,255,0.45), inset 0 -2px 0 rgba(0,0,0,0.08);
+    transition: transform 0.08s, box-shadow 0.08s, filter 0.15s;
+  }
+  .btn-3d:hover { filter: brightness(1.06); }
+  .btn-3d:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 var(--sage-dark), 0 4px 8px rgba(31,41,55,0.2), inset 0 1px 0 rgba(255,255,255,0.35);
+  }
+  .btn-3d:focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+
   .do-modal-actions {
     display: flex;
     justify-content: flex-end;
@@ -1949,6 +1969,8 @@
   #week-section {
     padding: 28px 24px 8px;
   }
+  .wk-msg { font-family: var(--sans); font-size: 12px; color: var(--ink-soft); margin-top: 6px; }
+  .wk-msg:empty { display: none; }
   .week-nav {
     display: flex;
     align-items: center;
@@ -2913,6 +2935,9 @@
       </div>
       <div class="streak-badge" id="streak-badge"></div>
     </div>
+    <div class="email-week-wrap">
+      <button class="btn-3d" id="btn-email-this-week" title="Opens your email app with this week's plan as text. Nothing is sent until you press send.">✉ Email this week's plan</button>
+    </div>
     <nav id="tab-nav">
       <button class="tab-btn" id="tab-week" data-tab="week">Plan Next Week</button>
       <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
@@ -2960,20 +2985,20 @@
         <button class="btn primary" id="btn-import-portfolio">⇩ Import business endeavours from Portfolio</button>
         <button class="btn primary" id="btn-export-week" disabled>⇧ Export weekly schedule to Week's Projects</button>
       </div>
-      <div id="week-import-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:6px;"></div>
-      <div id="week-export-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px;"></div>
-      <div id="week-export-result" style="font-family: var(--sans); font-size: 12px; min-height: 16px; margin-bottom:6px;"></div>
+      <div id="week-export-status" class="wk-msg"></div>
+      <div id="week-import-status" class="wk-msg"></div>
+      <div id="week-export-result" class="wk-msg"></div>
       <div class="week-nav">
         <button class="btn" id="btn-prev-week" title="Previous week">‹</button>
         <div class="week-range" id="week-range-label"></div>
         <span id="week-range-tag" style="font-family: var(--sans); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft);"></span>
         <button class="btn" id="btn-next-week" title="Next week">›</button>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <button class="btn" id="btn-email-week">✉ Email this week</button>
+      <div id="week-actions-row" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:center; margin-bottom:6px;">
+        <button class="btn" id="btn-email-week" title="Opens your email app with this plan as text. Nothing is sent until you press send.">✉ Email next week's plan</button>
         <button class="btn" id="btn-carry-forward" style="display:none;">↷ Carry week forward</button>
       </div>
-      <div id="carry-forward-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:4px;"></div>
+      <div id="carry-forward-status" class="wk-msg"></div>
       <div id="week-days"></div>
     </section>
 
@@ -3683,7 +3708,8 @@
       <summary>Do — the nine sub-tabs</summary>
       <div class="cp-body">
         <ul>
-          <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email this week</b>, and <b>↷ Carry week forward</b> (past weeks only). Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
+          <li><b>✉ Email this week's plan</b> — the big raised green button above the tabs, on every Do sub-tab. It emails the current week (Monday to Sunday), whichever week Plan Next Week is showing. It opens your mail app with the plan as text; nothing sends until you press send.</li>
+          <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email next week's plan</b> (it appears for next week and any later week, reading "Email this plan" beyond next week; it opens your mail app with that plan as text, you choose who it goes to, and nothing is sent until you press send), and <b>↷ Carry week forward</b> (past weeks only). There's no email button for this week or past weeks here: this week's plan has the big button at the top of Do. Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
           <li><b>Today</b> — your day's diary. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath, with a Manage activities link.</li>
           <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
           <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>

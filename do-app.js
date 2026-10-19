@@ -1929,6 +1929,16 @@ function updatePlanWeekControls() {
       : currentWeekStart === thisMonday ? "This week"
       : currentWeekStart < thisMonday ? "Past week" : "";
   }
+  const emailBtn = document.getElementById("btn-email-week");
+  // This page emails next week and later weeks only. This week has the big button at the top of Do; past weeks have none.
+  const emailVisible = currentWeekStart > thisMonday;
+  if (emailBtn) {
+    emailBtn.style.display = emailVisible ? "" : "none";
+    emailBtn.textContent = currentWeekStart === upcomingMondayISO() ? "✉ Email next week's plan" : "✉ Email this plan";
+  }
+  const actionsRow = document.getElementById("week-actions-row");
+  const carry = document.getElementById("btn-carry-forward");
+  if (actionsRow) actionsRow.style.display = (emailVisible || (carry && carry.style.display !== "none")) ? "flex" : "none";
   const btn = document.getElementById("btn-export-week");
   const status = document.getElementById("week-export-status");
   if (!btn) return;
@@ -2159,9 +2169,10 @@ function carryWeekForward() {
   document.getElementById("carry-forward-status").textContent = msg;
 }
 
-function emailWeek() {
-  const dates = weekDates(currentWeekStart);
-  let body = `Do — Week of ${fmtWeekRangeLabel(currentWeekStart)}\n\n`;
+function emailWeek(startISO) {
+  const start = startISO || currentWeekStart;
+  const dates = weekDates(start);
+  let body = `Do — Week of ${fmtWeekRangeLabel(start)}\n\n`;
 
   dates.forEach((iso) => {
     const day = dayData(iso);
@@ -2183,7 +2194,7 @@ function emailWeek() {
     body += "\n";
   });
 
-  sendMailto(`Do — Week of ${fmtWeekRangeLabel(currentWeekStart)}`, body);
+  sendMailto(`Do — Week of ${fmtWeekRangeLabel(start)}`, body);
 }
 
 function emailToday() {
@@ -2972,7 +2983,8 @@ function wireUI() {
 
   document.getElementById("btn-prev-week").addEventListener("click", () => goToWeek(-7));
   document.getElementById("btn-next-week").addEventListener("click", () => goToWeek(7));
-  document.getElementById("btn-email-week").addEventListener("click", emailWeek);
+  document.getElementById("btn-email-week").addEventListener("click", () => emailWeek(currentWeekStart));
+  document.getElementById("btn-email-this-week").addEventListener("click", () => emailWeek(mondayOf(todayISO())));
   document.getElementById("btn-import-portfolio").addEventListener("click", importPortfolioEndeavours);
   document.getElementById("btn-export-week").addEventListener("click", exportWeekSchedule);
   document.getElementById("btn-carry-forward").addEventListener("click", carryWeekForward);
