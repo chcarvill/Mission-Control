@@ -1697,17 +1697,29 @@
   .act-note { font-size: 12px; color: var(--clay-dark); margin-top: 6px; line-height: 1.4; }
   .act-note:empty { display: none; }
   .manage-row .act-select { margin-left: auto; font-size: 12px; padding: 5px 8px; max-width: 46%; }
+  #manage-overlay {
+    --sans: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", "SF Mono", Consolas, monospace;
+    font-family: var(--sans); color: var(--ink);
+  }
   .choices-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 22px; }
   .choices-wrap.locked { opacity: 0.55; }
   .choices-head { font-family: var(--serif); font-weight: 600; font-size: 16px; color: var(--ink); }
   .choices-sub { font-size: 12px; color: var(--ink-soft); margin: 2px 0 10px; }
-  .choice-group { margin-top: 10px; }
-  .choice-group-name { font-size: 11px; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-soft); font-weight: 700; margin-bottom: 6px; }
-  .choice-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .choice-chip { font-family: var(--sans); font-size: 14px; padding: 9px 14px; border-radius: 22px; cursor: pointer; border: 1.5px solid var(--sage); background: transparent; color: var(--ink); }
-  .choice-chip:hover { background: rgba(127,160,131,0.14); }
-  .choice-chip.chosen { background: var(--sage); color: #fff; border-color: var(--sage-dark); }
-  .choice-badge { margin-left: 6px; font-size: 12px; font-weight: 700; }
+  .choice-tablewrap { overflow-x: auto; margin-top: 8px; }
+  table.choice-table { width: 100%; border-collapse: collapse; }
+  .choice-table th { text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); padding: 6px 8px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .choice-table td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 14px; color: var(--ink); }
+  .choice-table tr:last-child td { border-bottom: none; }
+  .choice-name { font-weight: 600; }
+  .choice-end { color: var(--ink-soft); font-size: 13px; }
+  .choice-end.unlinked { font-style: italic; }
+  .choice-act { white-space: nowrap; text-align: right; }
+  .choice-in { color: var(--sage-dark); font-size: 12px; font-weight: 700; margin-right: 8px; }
+  .choice-add { font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 1.5px solid var(--sage); background: transparent; color: var(--ink); }
+  .choice-add:hover { background: rgba(127,160,131,0.14); }
+  .choice-more { margin-top: 12px; }
+  .choice-more summary { cursor: pointer; font-size: 13px; color: var(--ink-soft); }
   .choices-empty { font-size: 13px; color: var(--ink-soft); font-style: italic; line-height: 1.45; }
   .choices-msg { font-size: 12px; color: var(--clay-dark); margin-top: 10px; }
   .choices-msg:empty { display: none; }
@@ -3482,29 +3494,7 @@
   </div>
 </div>
 
-<!-- Manage the activity pool -->
-<div id="manage-overlay">
-  <div class="do-modal">
-    <h2>Your activities</h2>
-    <p class="modal-sub">The pool you choose from each day. Every activity must contribute to a Focus ON endeavour.</p>
-    <div id="manage-list"></div>
-    <hr class="modal-divider" />
-    <div id="new-activity-row-2" style="display:flex;flex-wrap:wrap; gap:8px;">
-      <input id="new-activity-input-2" type="text" placeholder="e.g. Cold outreach" style="flex:1; min-width:140px; font-family: var(--sans); font-size:13px; border:1px solid var(--line); border-radius:7px; padding:8px 10px; background: var(--paper); color: var(--ink);" />
-      <select id="new-activity-endeavour-2" class="act-select"></select>
-      <button class="btn" id="btn-add-activity-2">Add</button>
-    </div>
-    <div id="new-activity-note-2" class="act-note"></div>
-    <hr class="modal-divider" />
-    <button class="btn" id="btn-backup-data" style="width:100%;">⇩ Backup my data</button>
-    <input type="file" id="do-history-import-file" accept="application/json" style="display:none;" />
-    <button class="btn" id="btn-import-do-history" style="width:100%;margin-top:8px;">⇧ Import old Do history (one-time)</button>
-    <div id="do-history-import-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:6px;"></div>
-    <div class="do-modal-actions">
-      <button class="btn primary" id="btn-close-manage">Done</button>
-    </div>
-  </div>
-</div>
+
 
 <!-- Task detail: notes, link, and a static "worth checking" reminder -->
 <div id="detail-overlay">
@@ -3559,6 +3549,30 @@
 </div>
 
 
+</div>
+
+<!-- Manage Activities pop-up. Lives outside #do-panel so the Portfolio tab can open it without visiting Do. -->
+<div id="manage-overlay">
+  <div class="do-modal">
+    <h2>Your activities</h2>
+    <p class="modal-sub">The pool you choose from each day. Every activity must contribute to a Focus ON endeavour.</p>
+    <div id="manage-list"></div>
+    <hr class="modal-divider" />
+    <div id="new-activity-row-2" style="display:flex;flex-wrap:wrap; gap:8px;">
+      <input id="new-activity-input-2" type="text" placeholder="e.g. Cold outreach" style="flex:1; min-width:140px; font-family: var(--sans); font-size:13px; border:1px solid var(--line); border-radius:7px; padding:8px 10px; background: var(--paper); color: var(--ink);" />
+      <select id="new-activity-endeavour-2" class="act-select"></select>
+      <button class="btn" id="btn-add-activity-2">Add</button>
+    </div>
+    <div id="new-activity-note-2" class="act-note"></div>
+    <hr class="modal-divider" />
+    <button class="btn" id="btn-backup-data" style="width:100%;">⇩ Backup my data</button>
+    <input type="file" id="do-history-import-file" accept="application/json" style="display:none;" />
+    <button class="btn" id="btn-import-do-history" style="width:100%;margin-top:8px;">⇧ Import old Do history (one-time)</button>
+    <div id="do-history-import-status" style="font-family: var(--sans); font-size: 12px; color: var(--ink-soft); min-height: 16px; margin-top:6px;"></div>
+    <div class="do-modal-actions">
+      <button class="btn primary" id="btn-close-manage">Done</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ PORTFOLIO PANEL ══ -->
@@ -3675,7 +3689,7 @@
           <li><b>+ New project</b> — adds an endeavour. It starts as Idea, and you must choose its list (Focus ON, Maintain or Parked) before it will save.</li>
           <li><b>Import from Notion</b> — reads a CSV export of a Notion database and adds each row as an endeavour set to "In planning". Rows already in the portfolio are skipped.</li>
           <li><b>Refer to Notion</b> — paste a link to your Notion database (a name is optional). It's saved as a chip under the buttons; tap it to open Notion, ✕ to remove it.</li>
-          <li><b>Manage Activities</b> — the pool of activities Do chooses from (it used to live on Today). Each activity must be linked to a Focus ON endeavour: pick one from the dropdown when you add it, and change the link on any row. The same rule applies to the quick-add box in Do's picker. Activities linked to a Focus ON endeavour appear in the visible list on Today; older activities stay in the pool but show as not linked until you link them. It also holds the ⇩ Backup my data button.</li>
+          <li><b>Manage Activities</b> — the pool of activities Do chooses from (it used to live on Today). It opens straight away from here, you don't need to visit Do first. Each activity must be linked to a Focus ON endeavour: pick one from the dropdown when you add it, and change the link on any row. The same rule applies to the quick-add box in Do's picker. Activities linked to a Focus ON endeavour appear in the visible list on Today; older activities stay in the pool but show as not linked until you link them. It also holds the ⇩ Backup my data button.</li>
           <li><b>Export backup</b> — downloads your portfolio as a JSON file. <b>Email view</b> — emails the portfolio as text, now including tier, stage and next action.</li>
         </ul>
       </div>
@@ -3776,7 +3790,7 @@
         <ul>
           <li><b>✉ Email this week's plan</b> — the big raised green button above the tabs, on every Do sub-tab. It emails the current week (Monday to Sunday), whichever week Plan Next Week is showing. It opens your mail app with the plan as text; nothing sends until you press send. Directly under that big button, <b>▤ View this week's plan</b> opens a page showing this week's saved weekly plan as a table of seven days by three slots: ✓ done where a planned task was completed, "now: …" where a slot has since changed from the plan, and a count of extras. It also lets you update the saved plan to match what's in the slots now.</li>
           <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email next week's plan</b> (it appears for next week and any later week, reading "Email this plan" beyond next week; it opens your mail app with that plan as text, you choose who it goes to, and nothing is sent until you press send), and <b>↷ Carry week forward</b> (past weeks only). There's no email button for this week or past weeks here: this week's plan has the big button at the top of Do. Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
-          <li><b>Today</b> — your day's diary. Above the three slots, <b>Choose today's three</b> lists the activities of your Focus ON endeavours, grouped by endeavour, always visible (the list is greyed out until your oration is logged). Tap an activity to put it in your next open slot; a ✓ marks the ones already chosen. If all three slots are full it tells you to use Edit. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots are two buttons: <b>↺ Import today's plan</b> is always shown but greyed out until the week has been fully planned (all 21 slots filled; the app then saves it as the weekly plan automatically, and a note under the buttons tells you how many slots are left). Once it's active, and only if you press it, it puts today's planned tasks back into any slot you've changed or cleared (done tasks are kept, and it asks before replacing anything); <b>✎ Edit today's plan</b> switches the not-yet-done slots into edit mode, where each shows <b>↻ Change task</b> to overwrite what was filled in without the cancel-and-explain step that ✕ needs. Both stay locked until your oration is logged. Further down, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath.</li>
+          <li><b>Today</b> — your day's diary. Above the three slots, <b>Choose today's three</b> is an embedded table of your activities: <b>Activity</b>, <b>Contributes to</b> (the Focus ON endeavour) and a <b>+ Add</b> button, with your Focus ON endeavours' activities first and any not-yet-linked ones tucked into a "Not linked" section underneath. It's always visible and greyed out until your oration is logged. Tap <b>+ Add</b> to put an activity in your next open slot; "✓ in today" marks the ones already chosen. If all three slots are full it tells you to use Edit. To change the list itself, use Portfolio → Manage Activities. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots are two buttons: <b>↺ Import today's plan</b> is always shown but greyed out until the week has been fully planned (all 21 slots filled; the app then saves it as the weekly plan automatically, and a note under the buttons tells you how many slots are left). Once it's active, and only if you press it, it puts today's planned tasks back into any slot you've changed or cleared (done tasks are kept, and it asks before replacing anything); <b>✎ Edit today's plan</b> switches the not-yet-done slots into edit mode, where each shows <b>↻ Change task</b> to overwrite what was filled in without the cancel-and-explain step that ✕ needs. Both stay locked until your oration is logged. Further down, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath.</li>
           <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
           <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>
           <li><b>Plan This Week</b> (the page itself is headed <b>Targeted Action</b>) — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>

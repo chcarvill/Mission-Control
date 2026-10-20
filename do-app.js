@@ -883,6 +883,7 @@ function importTodaysPlan() {
 }
 
 let todayChoicesMsg = "";
+let choiceMoreOpen = false;   // keeps the "Not linked" section open across re-renders
 
 function renderTodayChoices() {
   const el = document.getElementById("today-choices");
@@ -892,29 +893,54 @@ function renderTodayChoices() {
   const day = dayData(todayISO());
   const counts = {};
   (day ? day.slots : []).forEach((s) => { if (s.status !== "empty" && s.activityId) counts[s.activityId] = (counts[s.activityId] || 0) + 1; });
-  let body;
+
+  const rowHtml = (a, endName, isGeneral) => {
+    const n = counts[a.id] || 0;
+    return `<tr class="choice-row">
+      <td class="choice-name">${escapeHtml(isGeneral ? a.label + " (general)" : a.label)}</td>
+      <td class="choice-end${endName ? "" : " unlinked"}">${endName ? escapeHtml(endName) : "not linked"}</td>
+      <td class="choice-act">${n ? `<span class="choice-in">✓ in today${n > 1 ? " ×" + n : ""}</span>` : ""}<button class="choice-add" data-aid="${a.id}">+ Add</button></td>
+    </tr>`;
+  };
+  const tableHtml = (rows) => `<div class="choice-tablewrap"><table class="choice-table"><thead><tr><th>Activity</th><th>Contributes to</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+
+  const used = new Set();
+  const linkedRows = [];
+  eds.forEach((e) => {
+    STATE.activities.forEach((a) => {
+      if (!used.has(a.id) && activityBelongsTo(a, e)) {
+        used.add(a.id);
+        const isGeneral = (a.label || "").trim().toLowerCase() === (e.name || "").trim().toLowerCase();
+        linkedRows.push(rowHtml(a, e.name, isGeneral));
+      }
+    });
+  });
+  const otherRows = STATE.activities.filter((a) => !used.has(a.id)).map((a) => rowHtml(a, null, false));
+
+  let body = "";
   if (!eds.length) {
-    body = `<div class="choices-empty">No Focus ON endeavours yet. Set one in the Portfolio tab, then add its activities under Portfolio → Manage Activities.</div>`;
+    body += `<div class="choices-empty">No Focus ON endeavours yet. Set one in the Portfolio tab, then add its activities under Portfolio → Manage Activities.</div>`;
+  } else if (!linkedRows.length) {
+    body += `<div class="choices-empty">No activities linked to your Focus ON endeavours yet. Add some under Portfolio → Manage Activities.</div>`;
   } else {
-    body = eds.map((e) => {
-      const acts = STATE.activities.filter((a) => activityBelongsTo(a, e));
-      const chips = acts.length
-        ? acts.map((a) => {
-            const n = counts[a.id] || 0;
-            const isGeneral = (a.label || "").trim().toLowerCase() === (e.name || "").trim().toLowerCase();
-            return `<button class="choice-chip${n ? " chosen" : ""}" data-aid="${a.id}">${escapeHtml(isGeneral ? a.label + " (general)" : a.label)}${n ? `<span class="choice-badge">✓${n > 1 ? " ×" + n : ""}</span>` : ""}</button>`;
-          }).join("")
-        : `<span class="choices-empty">No activities yet. Add some under Portfolio → Manage Activities.</span>`;
-      return `<div class="choice-group"><div class="choice-group-name">${escapeHtml(e.name)}</div><div class="choice-chips">${chips}</div></div>`;
-    }).join("");
+    body += tableHtml(linkedRows.join(""));
   }
+  if (otherRows.length) {
+    body += `<details class="choice-more"><summary>Not linked to an endeavour (${otherRows.length})</summary>${tableHtml(otherRows.join(""))}</details>`;
+  }
+
   el.innerHTML = `<div class="choices-wrap${locked ? " locked" : ""}">
     <div class="choices-head">Choose today's three</div>
-    <div class="choices-sub">${locked ? "🔒 Log your oration to unlock. Until then, read the list and decide." : "Tap an activity to put it in your next open slot."}</div>
+    <div class="choices-sub">${locked ? "🔒 Log your oration to unlock. Until then, read the list and decide." : "Tap + Add to put an activity in your next open slot."}</div>
     ${body}
     <div class="choices-msg">${escapeHtml(todayChoicesMsg)}</div>
   </div>`;
-  el.querySelectorAll(".choice-chip").forEach((btn) => btn.addEventListener("click", () => chooseFromList(btn.dataset.aid)));
+  const more = el.querySelector(".choice-more");
+  if (more) {
+    more.open = choiceMoreOpen;
+    more.addEventListener("toggle", () => { choiceMoreOpen = more.open; });
+  }
+  el.querySelectorAll(".choice-add").forEach((btn) => btn.addEventListener("click", () => chooseFromList(btn.dataset.aid)));
 }
 
 function chooseFromList(activityId) {
