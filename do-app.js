@@ -885,13 +885,20 @@ function renderTodayTools() {
   const el = document.getElementById("today-tools");
   if (!el) return;
   const locked = !hasOrationToday();
-  const plan = STATE.weekPlans && STATE.weekPlans[mondayOf(todayISO())];
+  const ws = mondayOf(todayISO());
+  const plan = STATE.weekPlans && STATE.weekPlans[ws];
   const canImport = !!(plan && plan.days[todayISO()]);
+  const { filled, total } = weekFillCounts(ws);
+  const importTitle = !canImport
+    ? "Available once the week's plan is saved"
+    : locked ? "Log your oration first" : "Put today's planned tasks back from the weekly plan";
+  // Import is always shown; it stays inactive until the weekly plan has been saved (every slot filled) and the oration is logged.
   el.innerHTML = `
     <div class="today-tools">
-      ${canImport ? `<button class="btn" id="btn-import-today" ${locked ? "disabled" : ""} title="${locked ? "Log your oration first" : "Put today's planned tasks back from the weekly plan"}">↺ Import today's plan</button>` : ""}
+      <button class="btn" id="btn-import-today" ${canImport && !locked ? "" : "disabled"} title="${importTitle}">↺ Import today's plan</button>
       <button class="btn${todayEditMode ? " on" : ""}" id="btn-edit-today" ${locked ? "disabled" : ""} title="${locked ? "Log your oration first" : "Overwrite what was filled in for today"}">${todayEditMode ? "✓ Done editing" : "✎ Edit today's plan"}</button>
     </div>
+    ${canImport ? "" : `<div class="today-tools-note">To activate “Import today's plan”, fill all ${total} of this week's slots (${filled} filled so far) in Plan Next Week or Plan This Week. The weekly plan then saves automatically.</div>`}
     <div class="today-tools-msg">${escapeHtml(todayToolsMsg)}</div>
   `;
   const imp = el.querySelector("#btn-import-today");
