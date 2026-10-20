@@ -84,6 +84,9 @@ const RESERVED_CATEGORY_IDS = [CAT_MARKET_ID, CAT_IMPROVE_ID];
 
 let pendingSlotIndex = null;   // which stone (0/1/2) the picker modal is filling
 let pendingIso = null;         // which day's slot the picker modal is filling
+let todayEditMode = false;       // Today: "Edit today's plan" mode (each unfinished slot shows Change task)
+let editOverwrite = null;        // {iso, slot} while the picker is open to overwrite a planned slot
+let todayToolsMsg = "";          // one-line feedback under the Today buttons
 let pendingPickerActivity = null; // the activity chosen in the picker, awaiting the optional details step
 let pendingPickerDates = [];   // day(s) this task should land on, from the details step's multi-date list
 let pendingC8Handoff = null;   // pre-fill text waiting from a "Send to Do" link (Communic8), used once
@@ -192,6 +195,10 @@ function boot() {
 
   if (!STATE.taRuns) {
     STATE.taRuns = [];
+  }
+
+  if (!STATE.weekPlans || typeof STATE.weekPlans !== "object") {
+    STATE.weekPlans = {}; // { "<monday iso>": { savedAt, days: { "<iso>": [3 x {activityId, detail, link, note, actionType}] } } }
   }
 
   if (!STATE.categories || !STATE.categories.length) {
@@ -318,6 +325,10 @@ function importDoHistoryBackup(jsonText) {
   mergeArrayById(STATE.objectives, backup.objectives);
   mergeArrayById(STATE.commitments, backup.commitments);
   mergeArrayById(STATE.taRuns, backup.taRuns);
+  if (backup.weekPlans && typeof backup.weekPlans === "object") {
+    if (!STATE.weekPlans) STATE.weekPlans = {};
+    Object.keys(backup.weekPlans).forEach((k) => { if (!STATE.weekPlans[k]) STATE.weekPlans[k] = backup.weekPlans[k]; });
+  }
   mergeArrayById(STATE.categories, backup.categories);
   if (backup.timeWasters) {
     mergeArrayById(STATE.timeWasters.habits, backup.timeWasters.habits);
@@ -502,6 +513,7 @@ function renderDo() {
   // "Import business endeavours from Portfolio" button on Plan Next Week.
   const addedFromPortfolio = 0;
   const addedFromProjects = syncProjectsIntoActivities();
+  maybeSnapshotWeekPlan();
   const added = addedFromPortfolio + addedFromProjects;
   const statusEl = document.getElementById("portfolio-sync-status");
   if (statusEl) {
@@ -515,7 +527,9 @@ function renderDo() {
   renderHeader();
   renderOrationGate();
   renderStones();
+  renderTodayTools();
   renderExtras();
+  renderThisWeekPlanPage();
   renderHistory();
   renderTimeWasters();
   renderWeekTab();
@@ -647,7 +661,8 @@ function renderStones() {
       const activity = activityById(slot.activityId);
       const label = activity ? activity.label : "Unknown";
       const statusClass = slot.status === "done" ? "done" : "active";
-      stone.className = `stone ${statusClass}`;
+      const editingThis = todayEditMode && slot.status !== "done";
+      stone.className = `stone ${statusClass}${editingThis ? " editing" : ""}`;
       stone.innerHTML = `
         <span class="stone-number">${i + 1}</span>
         <span class="stone-cancel" title="Cancel or swap this task">✕</span>
@@ -660,6 +675,8 @@ function renderStones() {
         ${
           slot.status === "done"
             ? `<span class="stone-check">✓ done</span>`
+            : editingThis
+            ? `<button class="stone-change-btn">↻ Change task</button>`
             : `<button class="stone-mark-done">Mark done</button>`
         }
       `;
@@ -680,6 +697,14 @@ function renderStones() {
       });
       const linkEl = stone.querySelector(".stone-link");
       if (linkEl) linkEl.addEventListener("click", (e) => e.stopPropagation());
+      const changeBtn = stone.querySelector(".stone-change-btn");
+      if (changeBtn) {
+        changeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openPicker(iso, i);
+          editOverwrite = { iso, slot: i }; // set after openPicker so the open itself doesn't clear it
+        });
+      }
       const doneBtn = stone.querySelector(".stone-mark-done");
       if (doneBtn) {
         doneBtn.addEventListener("click", (e) => {
@@ -757,6 +782,169 @@ function renderExtras() {
   const add = () => { addExtraTask(input.value); };
   el.querySelector("#btn-add-extra").addEventListener("click", add);
   input.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); add(); } });
+}
+
+/* ---------------------------------------------------------- */
+/* Weekly plan: saved automatically the first time a week has    */
+/* every one of its 21 slots filled. Today can re-import from    */
+/* it (voluntary); the "This week's plan" page shows it.         */
+/* ---------------------------------------------------------- */
+
+function weekFillCounts(ws) {
+  let filled = 0;
+  let total = 0;
+  weekDates(ws).forEach((iso) => {
+    const day = dayData(iso);
+    (day ? day.slots : []).forEach((s) => {
+      total++;
+      if (s.status !== "empty" && s.activityId) filled++;
+    });
+  });
+  return { filled, total };
+}
+
+function snapshotWeekPlan(ws) {
+  const days = {};
+  weekDates(ws).forEach((iso) => {
+    const day = dayData(iso);
+    days[iso] = (day ? day.slots : []).map((s) => ({
+      activityId: s.activityId,
+      detail: s.detail || "",
+      link: s.link || "",
+      note: s.note || "",
+      actionType: s.actionType || null,
+    }));
+  });
+  STATE.weekPlans[ws] = { savedAt: new Date().toISOString(), days };
+}
+
+// Runs on every render: any week (this week or next) that has just become fully filled gets its plan saved.
+function maybeSnapshotWeekPlan() {
+  if (!STATE.weekPlans) STATE.weekPlans = {};
+  let saved = false;
+  [mondayOf(todayISO()), upcomingMondayISO()].forEach((ws) => {
+    if (STATE.weekPlans[ws]) return;
+    const { filled, total } = weekFillCounts(ws);
+    if (total > 0 && filled === total) { snapshotWeekPlan(ws); saved = true; }
+  });
+  if (saved) saveToStorage();
+}
+
+function refreshWeekPlanSnapshot() {
+  const ws = mondayOf(todayISO());
+  const { filled, total } = weekFillCounts(ws);
+  if (filled !== total) return;
+  if (!confirm("Replace the saved weekly plan with what's in this week's slots right now?")) return;
+  snapshotWeekPlan(ws);
+  saveToStorage();
+  renderDo();
+}
+
+function toggleTodayEdit() {
+  if (!hasOrationToday()) return;
+  todayEditMode = !todayEditMode;
+  todayToolsMsg = "";
+  renderStones();
+  renderTodayTools();
+}
+
+function importTodaysPlan() {
+  if (!hasOrationToday()) return;
+  const iso = todayISO();
+  const plan = STATE.weekPlans && STATE.weekPlans[mondayOf(iso)];
+  if (!plan || !plan.days[iso]) { todayToolsMsg = "There's no saved weekly plan for today yet."; renderTodayTools(); return; }
+  const day = dayData(iso);
+  const changes = [];
+  plan.days[iso].forEach((p, i) => {
+    const slot = day.slots[i];
+    if (!slot || slot.status === "done" || !p.activityId || !activityById(p.activityId)) return;
+    const same = slot.status !== "empty" && slot.activityId === p.activityId &&
+      (slot.detail || "") === (p.detail || "") && (slot.link || "") === (p.link || "") &&
+      (slot.note || "") === (p.note || "") && (slot.actionType || null) === (p.actionType || null);
+    if (!same) changes.push(i);
+  });
+  if (!changes.length) { todayToolsMsg = "Today already matches your weekly plan."; renderTodayTools(); return; }
+  const overwriting = changes.filter((i) => day.slots[i].status !== "empty").length;
+  if (overwriting && !confirm(`Replace ${overwriting} task${overwriting === 1 ? "" : "s"} with the weekly plan? Tasks you've already done are kept.`)) return;
+  changes.forEach((i) => {
+    const p = plan.days[iso][i];
+    const slot = day.slots[i];
+    slot.activityId = p.activityId;
+    slot.status = "active";
+    slot.detail = p.detail || "";
+    slot.link = p.link || "";
+    slot.note = p.note || "";
+    slot.actionType = p.actionType || null;
+  });
+  saveToStorage();
+  todayToolsMsg = `✓ Imported ${changes.length} task${changes.length === 1 ? "" : "s"} from the weekly plan.`;
+  renderDo();
+}
+
+function renderTodayTools() {
+  const el = document.getElementById("today-tools");
+  if (!el) return;
+  const locked = !hasOrationToday();
+  const plan = STATE.weekPlans && STATE.weekPlans[mondayOf(todayISO())];
+  const canImport = !!(plan && plan.days[todayISO()]);
+  el.innerHTML = `
+    <div class="today-tools">
+      ${canImport ? `<button class="btn" id="btn-import-today" ${locked ? "disabled" : ""} title="${locked ? "Log your oration first" : "Put today's planned tasks back from the weekly plan"}">↺ Import today's plan</button>` : ""}
+      <button class="btn${todayEditMode ? " on" : ""}" id="btn-edit-today" ${locked ? "disabled" : ""} title="${locked ? "Log your oration first" : "Overwrite what was filled in for today"}">${todayEditMode ? "✓ Done editing" : "✎ Edit today's plan"}</button>
+    </div>
+    <div class="today-tools-msg">${escapeHtml(todayToolsMsg)}</div>
+  `;
+  const imp = el.querySelector("#btn-import-today");
+  if (imp) imp.addEventListener("click", importTodaysPlan);
+  el.querySelector("#btn-edit-today").addEventListener("click", toggleTodayEdit);
+}
+
+function renderThisWeekPlanPage() {
+  const el = document.getElementById("thisplan-body");
+  if (!el) return;
+  const ws = mondayOf(todayISO());
+  const dates = weekDates(ws);
+  const plan = STATE.weekPlans && STATE.weekPlans[ws];
+  const { filled, total } = weekFillCounts(ws);
+  const today = todayISO();
+  const savedLabel = plan ? new Date(plan.savedAt).toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" }) : "";
+  const status = plan
+    ? `Weekly plan saved ${escapeHtml(savedLabel)}. A ✓ means that planned task is done; "now: …" means the slot has since changed.`
+    : `Not fully planned yet — ${filled} of ${total} slots filled. The weekly plan is saved automatically once every slot is filled.`;
+
+  const labelOf = (id) => { const a = activityById(id); return a ? a.label : "Unknown"; };
+  const rows = dates.map((iso) => {
+    const day = dayData(iso);
+    const cells = [0, 1, 2].map((i) => {
+      const live = day ? day.slots[i] : null;
+      const planned = plan && plan.days[iso] ? plan.days[iso][i] : null;
+      const src = planned && planned.activityId ? planned : (live && live.status !== "empty" ? live : null);
+      if (!src) return `<td data-l="Slot ${i + 1}"><span class="tp-empty">not set</span></td>`;
+      let mark = "";
+      if (planned && planned.activityId && live) {
+        if (live.status === "done" && live.activityId === planned.activityId) mark = `<span class="tp-done">✓ done</span>`;
+        else if (live.status === "empty") mark = iso <= today ? `<span class="tp-changed">now: empty</span>` : "";
+        else if (live.activityId !== planned.activityId) mark = `<span class="tp-changed">now: ${escapeHtml(labelOf(live.activityId))}${live.status === "done" ? " ✓" : ""}</span>`;
+      } else if (!plan && live && live.status === "done") {
+        mark = `<span class="tp-done">✓ done</span>`;
+      }
+      return `<td data-l="Slot ${i + 1}"><div class="tp-task">${escapeHtml(labelOf(src.activityId))}</div>${src.detail ? `<div class="tp-detail">${escapeHtml(src.detail)}</div>` : ""}${mark}</td>`;
+    }).join("");
+    const extras = (day && day.extras) || [];
+    const extraLine = extras.length ? `<span class="tp-extras">+${extras.length} extra${extras.length === 1 ? "" : "s"} (${extras.filter((x) => x.done).length} done)</span>` : "";
+    return `<tr class="${iso === today ? "tp-today" : ""}"><td data-l="Day"><div class="tp-day">${escapeHtml(fmtDayLabelShort(iso))}${iso === today ? " · today" : ""}</div>${extraLine}</td>${cells}</tr>`;
+  }).join("");
+
+  el.innerHTML = `
+    <div class="tp-status"><b>${escapeHtml(fmtWeekRangeLabel(ws))}</b><br>${status}</div>
+    <div class="thisplan-wrap"><table class="thisplan-table"><thead><tr><th>Day</th><th>Slot 1</th><th>Slot 2</th><th>Slot 3</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="tp-actions">
+      <button class="btn" id="btn-thisplan-back">← Back to Today</button>
+      <button class="btn" id="btn-thisplan-refresh" ${filled === total ? "" : "disabled"} title="${filled === total ? "Replace the saved plan with what's in the slots now" : "Fill every slot first"}">Update weekly plan to match now</button>
+    </div>
+  `;
+  el.querySelector("#btn-thisplan-back").addEventListener("click", () => switchTab("today"));
+  el.querySelector("#btn-thisplan-refresh").addEventListener("click", refreshWeekPlanSnapshot);
 }
 
 function categoryById(id) {
@@ -918,6 +1106,12 @@ function syncSlotCompletionToMission(slot) {
 
 function assignActivity(iso, slotIndex, activityId) {
   const day = dayData(iso);
+  if (editOverwrite && editOverwrite.iso === iso && editOverwrite.slot === slotIndex) {
+    // Overwriting an auto-filled task: clear the old task's detail so it doesn't linger on the new one.
+    const sl = day.slots[slotIndex];
+    sl.detail = ""; sl.link = ""; sl.note = ""; sl.actionType = null;
+    editOverwrite = null;
+  }
   day.slots[slotIndex].activityId = activityId;
   day.slots[slotIndex].status = "active";
   saveToStorage();
@@ -1177,6 +1371,7 @@ function savePickerDetails(force) {
 const HP_DEFAULT_START_DO = "09:00"; // matches Mission Control's own HP_DEFAULT_START
 
 function closePicker() {
+  editOverwrite = null;
   document.getElementById("picker-overlay").classList.remove("open");
   showPickerListStep();
   pendingIso = null;
@@ -1908,16 +2103,7 @@ function renderWeekTab() {
 const WEEK_EXPORT_KEY = "mc_week_schedule"; // read by Mission Control's Week's Projects tab
 
 function planWeekFillCounts() {
-  let filled = 0;
-  let total = 0;
-  weekDates(currentWeekStart).forEach((iso) => {
-    const day = dayData(iso);
-    (day ? day.slots : []).forEach((s) => {
-      total++;
-      if (s.status !== "empty" && s.activityId) filled++;
-    });
-  });
-  return { filled, total };
+  return weekFillCounts(currentWeekStart);
 }
 
 function updatePlanWeekControls() {
@@ -2852,6 +3038,7 @@ function switchTab(tab) {
   document.getElementById("tab-visualizer-panel").style.display = tab === "visualizer" ? "" : "none";
   document.getElementById("tab-targeted-action-panel").style.display = tab === "targeted-action" ? "" : "none";
   document.getElementById("tab-thisweek-panel").style.display = tab === "thisweek" ? "" : "none";
+  document.getElementById("tab-thisplan-panel").style.display = tab === "thisplan" ? "" : "none";
   document.getElementById("tab-nextweek-panel").style.display = tab === "nextweek" ? "" : "none";
   document.getElementById("tab-wasters-panel").style.display = tab === "wasters" ? "" : "none";
   document.getElementById("tab-insights-panel").style.display = tab === "insights" ? "" : "none";
@@ -2864,6 +3051,7 @@ function switchTab(tab) {
   document.getElementById("tab-nextweek").classList.toggle("active", tab === "nextweek");
   document.getElementById("tab-wasters").classList.toggle("active", tab === "wasters");
   document.getElementById("tab-insights").classList.toggle("active", tab === "insights");
+  if (tab === "thisplan") renderThisWeekPlanPage();
   if (tab === "week") {
     if (!planTabOpened) { currentWeekStart = upcomingMondayISO(); planTabOpened = true; }
     renderWeekTab();
@@ -2985,6 +3173,7 @@ function wireUI() {
   document.getElementById("btn-next-week").addEventListener("click", () => goToWeek(7));
   document.getElementById("btn-email-week").addEventListener("click", () => emailWeek(currentWeekStart));
   document.getElementById("btn-email-this-week").addEventListener("click", () => emailWeek(mondayOf(todayISO())));
+  document.getElementById("btn-view-week-plan").addEventListener("click", () => switchTab("thisplan"));
   document.getElementById("btn-import-portfolio").addEventListener("click", importPortfolioEndeavours);
   document.getElementById("btn-export-week").addEventListener("click", exportWeekSchedule);
   document.getElementById("btn-carry-forward").addEventListener("click", carryWeekForward);

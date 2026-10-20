@@ -1692,6 +1692,37 @@
 
   /* Big raised button at the top of Do */
   .email-week-wrap { margin: 6px 0 18px; }
+  .view-plan-row { text-align: center; margin-top: 14px; }
+  .today-tools { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 16px; }
+  .today-tools-msg { font-size: 12px; color: var(--ink-soft); text-align: center; margin-top: 6px; }
+  .today-tools-msg:empty { display: none; }
+  .today-tools .btn.on { background: var(--sage); color: #fff; border-color: var(--sage-dark); }
+  .stone.editing { outline: 2px dashed var(--amber); outline-offset: 2px; }
+  .stone-change-btn {
+    font-family: var(--sans); font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px;
+    cursor: pointer; border: 1.5px solid var(--amber); background: transparent; color: var(--ink);
+  }
+  .thisplan-wrap { overflow-x: auto; margin-top: 10px; }
+  table.thisplan-table { width: 100%; border-collapse: collapse; }
+  .thisplan-table th { text-align: left; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); padding: 8px 10px; border-bottom: 1px solid var(--line); font-weight: 600; }
+  .thisplan-table td { padding: 10px; border-bottom: 1px solid var(--line); vertical-align: top; font-size: 13px; color: var(--ink); }
+  .thisplan-table tr.tp-today td { background: rgba(127,160,131,0.14); }
+  .tp-day { font-weight: 600; }
+  .tp-task { font-weight: 600; }
+  .tp-detail { color: var(--ink-soft); font-size: 12px; margin-top: 2px; }
+  .tp-done { display: inline-block; margin-top: 3px; color: var(--sage-dark); font-size: 12px; font-weight: 600; }
+  .tp-changed { display: inline-block; margin-top: 3px; color: var(--clay-dark); font-size: 12px; font-style: italic; }
+  .tp-empty { color: var(--ink-soft); font-style: italic; }
+  .tp-extras { display: block; margin-top: 3px; font-size: 11px; color: var(--ink-soft); font-weight: 400; }
+  .tp-status { font-size: 13px; color: var(--ink-soft); line-height: 1.5; }
+  .tp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+  @media (max-width: 700px) {
+    .thisplan-table thead { display: none; }
+    .thisplan-table, .thisplan-table tbody, .thisplan-table tr, .thisplan-table td { display: block; width: 100%; }
+    .thisplan-table tr { padding: 8px 4px; border-bottom: 1px solid var(--line); }
+    .thisplan-table td { border: none; padding: 4px 6px; }
+    .thisplan-table td[data-l]::before { content: attr(data-l); display: block; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 2px; }
+  }
   .btn-3d {
     display: block; width: 100%; max-width: 440px; margin: 0 auto;
     font-family: var(--sans); font-size: 17px; font-weight: 700; letter-spacing: 0.02em;
@@ -2937,13 +2968,14 @@
     </div>
     <div class="email-week-wrap">
       <button class="btn-3d" id="btn-email-this-week" title="Opens your email app with this week's plan as text. Nothing is sent until you press send.">✉ Email this week's plan</button>
+      <div class="view-plan-row"><button class="btn" id="btn-view-week-plan" title="Opens a page showing this week's saved plan and how it's going">▤ View this week's plan</button></div>
     </div>
     <nav id="tab-nav">
       <button class="tab-btn" id="tab-week" data-tab="week">Plan Next Week</button>
+      <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Plan This Week</button>
       <button class="tab-btn active" id="tab-today" data-tab="today">Today</button>
       <button class="tab-btn" id="tab-strategize" data-tab="strategize">Strategize</button>
       <button class="tab-btn" id="tab-visualizer" data-tab="visualizer">Visualizer</button>
-      <button class="tab-btn" id="tab-targeted-action" data-tab="targeted-action">Targeted Action</button>
       <button class="tab-btn" id="tab-thisweek" data-tab="thisweek">This week, prioritised</button>
       <button class="tab-btn" id="tab-nextweek" data-tab="nextweek">Prioritise Next Week</button>
       <button class="tab-btn" id="tab-wasters" data-tab="wasters">Time wasters</button>
@@ -2966,6 +2998,7 @@
       </div>
       <div id="portfolio-sync-status" class="import-status"></div>
       <div id="stones-row"></div>
+      <div id="today-tools"></div>
       <div id="extras-section"></div>
       <div id="stones-hint">Your three planned tasks come from Plan Next Week. Anything extra goes under "Also today" and doesn't count toward your streak.</div>
     </section>
@@ -3315,6 +3348,13 @@
 
       <h2 style="margin-top:28px;">Past runs</h2>
       <div id="ta-history"></div>
+    </section>
+  </div>
+
+  <div id="tab-thisplan-panel" class="tab-panel" style="display:none;">
+    <section id="thisplan-section">
+      <h2>This week's plan</h2>
+      <div id="thisplan-body"></div>
     </section>
   </div>
 
@@ -3708,12 +3748,12 @@
       <summary>Do — the nine sub-tabs</summary>
       <div class="cp-body">
         <ul>
-          <li><b>✉ Email this week's plan</b> — the big raised green button above the tabs, on every Do sub-tab. It emails the current week (Monday to Sunday), whichever week Plan Next Week is showing. It opens your mail app with the plan as text; nothing sends until you press send.</li>
+          <li><b>✉ Email this week's plan</b> — the big raised green button above the tabs, on every Do sub-tab. It emails the current week (Monday to Sunday), whichever week Plan Next Week is showing. It opens your mail app with the plan as text; nothing sends until you press send. Directly under that big button, <b>▤ View this week's plan</b> opens a page showing this week's saved weekly plan as a table of seven days by three slots: ✓ done where a planned task was completed, "now: …" where a slot has since changed from the plan, and a count of extras. It also lets you update the saved plan to match what's in the slots now.</li>
           <li><b>Plan Next Week</b> (first tab) — opens on next week. Four buttons, in order: <b>⇩ Import business endeavours from Portfolio</b> (adds your Focus ON and Maintain endeavours to Do's pick-list so you can assign them to slots; Parked and Unsorted ones are left out, and nothing comes in unless you press it), <b>⇧ Export weekly schedule to Week's Projects</b> (greyed out until every slot on every day of the week shown is filled, 21 of 21; it then sends the schedule to Week's Projects), <b>✉ Email next week's plan</b> (it appears for next week and any later week, reading "Email this plan" beyond next week; it opens your mail app with that plan as text, you choose who it goes to, and nothing is sent until you press send), and <b>↷ Carry week forward</b> (past weeks only). There's no email button for this week or past weeks here: this week's plan has the big button at the top of Do. Below that, step through weeks with ‹ ›; a tag beside the dates says Next week, This week or Past week. Tap a "+ Plan a task" chip to fill a slot; ✎ adds detail, a link or a note.</li>
-          <li><b>Today</b> — your day's diary. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath, with a Manage activities link.</li>
+          <li><b>Today</b> — your day's diary. Whatever you planned for today in Plan Next Week fills the three slots by itself, each showing its detail line. <b>The oration gate comes first:</b> until you log today's oration, the planned tasks and the extras box stay locked (dimmed, with a 🔒). After that, tap <b>Mark done</b> on each task; ✎ adds detail, a link or a note, ⏱ logs time, ✕ cancels or swaps. A slot you didn't plan reads "Nothing planned yet — tap to choose", so an unplanned day still works. Under the slots are two buttons: <b>↺ Import today's plan</b> appears once the week has been fully planned (all 21 slots filled; the app then saves it as the weekly plan automatically) and, only if you press it, puts today's planned tasks back into any slot you've changed or cleared (done tasks are kept, and it asks before replacing anything); <b>✎ Edit today's plan</b> switches the not-yet-done slots into edit mode, where each shows <b>↻ Change task</b> to overwrite what was filled in without the cancel-and-explain step that ✕ needs. Both stay locked until your oration is logged. Further down, <b>Also today</b> is a free-text list for extra tasks: type one, tap Add, tick it off or remove it. Extras don't count toward your streak. <b>Email today's tasks</b> includes them. Past days are listed underneath, with a Manage activities link.</li>
           <li><b>Strategize</b> — keep your long-term objectives in view. <b>Stipulate daily tasks</b>: commit an activity to a single day or a date range and it fills an open slot automatically, skipping any day that's already full.</li>
           <li><b>Visualizer</b> — Ascent: a trail toward a goal ("What's the mountain?"). Add steps and say which step each comes after; pick more than one to converge two paths. Mark steps done; deleting a goal removes its whole trail and asks for a reason.</li>
-          <li><b>Targeted Action</b> — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>
+          <li><b>Plan This Week</b> (the page itself is headed <b>Targeted Action</b>) — marketing and improvement together. Set an outreach day per project and a stage/ratio (how many non-outreach days that week carry an improve touch), then generate the week; it fills open slots only. Attribution categories Market and Improve can be renamed but not removed, and you can add your own and apply them to a task with its ✎ button; they roll up in Insights.</li>
           <li><b>This week, prioritised</b> — Strategic Objectives, Focus Projects, then Communication: Mass (plan content with purpose, theme, location, backing track and basic script; execute plan) and 1:1 (plan interactions; instigate interactions). Tap <b>Save priorities</b>.</li>
           <li><b>Prioritise Next Week</b> — the same structure for the coming week, with Targeted Action underneath. Plan it ahead of the week starting.</li>
           <li><b>Time wasters</b> — two checkpoint lists: <b>Catch mid-motion</b> (things to notice the moment you're about to start) and <b>Filter before saying yes</b> (things to weigh before a commitment lands on your plate). Not a guilt list.</li>
