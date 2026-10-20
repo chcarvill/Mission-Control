@@ -527,6 +527,7 @@ function renderDo() {
   renderHeader();
   renderOrationGate();
   renderStones();
+  renderTodayChoices();
   renderTodayTools();
   renderExtras();
   renderThisWeekPlanPage();
@@ -881,6 +882,59 @@ function importTodaysPlan() {
   renderDo();
 }
 
+let todayChoicesMsg = "";
+
+function renderTodayChoices() {
+  const el = document.getElementById("today-choices");
+  if (!el) return;
+  const locked = !hasOrationToday();
+  const eds = focusEndeavours();
+  const day = dayData(todayISO());
+  const counts = {};
+  (day ? day.slots : []).forEach((s) => { if (s.status !== "empty" && s.activityId) counts[s.activityId] = (counts[s.activityId] || 0) + 1; });
+  let body;
+  if (!eds.length) {
+    body = `<div class="choices-empty">No Focus ON endeavours yet. Set one in the Portfolio tab, then add its activities under Portfolio → Manage Activities.</div>`;
+  } else {
+    body = eds.map((e) => {
+      const acts = STATE.activities.filter((a) => activityBelongsTo(a, e));
+      const chips = acts.length
+        ? acts.map((a) => {
+            const n = counts[a.id] || 0;
+            const isGeneral = (a.label || "").trim().toLowerCase() === (e.name || "").trim().toLowerCase();
+            return `<button class="choice-chip${n ? " chosen" : ""}" data-aid="${a.id}">${escapeHtml(isGeneral ? a.label + " (general)" : a.label)}${n ? `<span class="choice-badge">✓${n > 1 ? " ×" + n : ""}</span>` : ""}</button>`;
+          }).join("")
+        : `<span class="choices-empty">No activities yet. Add some under Portfolio → Manage Activities.</span>`;
+      return `<div class="choice-group"><div class="choice-group-name">${escapeHtml(e.name)}</div><div class="choice-chips">${chips}</div></div>`;
+    }).join("");
+  }
+  el.innerHTML = `<div class="choices-wrap${locked ? " locked" : ""}">
+    <div class="choices-head">Choose today's three</div>
+    <div class="choices-sub">${locked ? "🔒 Log your oration to unlock. Until then, read the list and decide." : "Tap an activity to put it in your next open slot."}</div>
+    ${body}
+    <div class="choices-msg">${escapeHtml(todayChoicesMsg)}</div>
+  </div>`;
+  el.querySelectorAll(".choice-chip").forEach((btn) => btn.addEventListener("click", () => chooseFromList(btn.dataset.aid)));
+}
+
+function chooseFromList(activityId) {
+  if (!hasOrationToday()) {
+    document.getElementById("oration-gate").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  const iso = todayISO();
+  const day = dayData(iso);
+  const i = day.slots.findIndex((s) => s.status === "empty");
+  if (i === -1) {
+    todayChoicesMsg = "All three slots are filled. Use ✎ Edit today's plan, then ↻ Change task, to swap one.";
+    renderTodayChoices();
+    return;
+  }
+  todayChoicesMsg = "";
+  assignActivity(iso, i, activityId);
+  renderDo();
+}
+
 function renderTodayTools() {
   const el = document.getElementById("today-tools");
   if (!el) return;
@@ -1143,6 +1197,7 @@ function openPicker(iso, slotIndex) {
 }
 
 function renderActivityList() {
+  populateEndeavourSelect(document.getElementById("new-activity-endeavour"));
   const list = document.getElementById("activity-list");
   list.innerHTML = "";
 
@@ -1891,12 +1946,13 @@ function renderInsightsCategoryBreakdown(entries) {
 /* Add a brand-new activity (from picker or manage modal)        */
 /* ---------------------------------------------------------- */
 
-function addActivity(label) {
+function addActivity(label, endeavourId) {
   const trimmed = label.trim();
   if (!trimmed) return null;
   const usedColors = STATE.activities.map((a) => a.color);
   const color = PALETTE.find((c) => !usedColors.includes(c)) || PALETTE[STATE.activities.length % PALETTE.length];
   const activity = { id: "a_" + Date.now(), label: trimmed, color };
+  if (endeavourId != null) activity.endeavourId = endeavourId; // the Focus ON endeavour this activity contributes to
   STATE.activities.push(activity);
   saveToStorage();
   return activity;
@@ -2002,20 +2058,77 @@ function syncProjectsIntoActivities() {
 function openManageModal() {
   renderManageList();
   document.getElementById("new-activity-input-2").value = "";
+  document.getElementById("new-activity-note-2").textContent = "";
   document.getElementById("manage-overlay").classList.add("open");
+}
+
+function focusEndeavours() {
+  if (typeof loadPortfolio !== "function") return [];
+  const list = loadPortfolio().filter((v) => v && v.tier === "focus");
+  return typeof pfSortByStage === "function" ? list.sort(pfSortByStage) : list;
+}
+
+function activityBelongsTo(a, e) {
+  return a.endeavourId === e.id || (a.label || "").trim().toLowerCase() === (e.name || "").trim().toLowerCase();
+}
+
+// Fills an endeavour dropdown. Returns false when there is no Focus ON endeavour to choose from.
+function populateEndeavourSelect(sel, selectedId) {
+  if (!sel) return false;
+  const eds = focusEndeavours();
+  if (!eds.length) {
+    sel.innerHTML = `<option value="">No Focus ON endeavour yet</option>`;
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  sel.innerHTML = `<option value="">${selectedId === undefined ? "Contributes to…" : "— not linked —"}</option>` +
+    eds.map((e) => `<option value="${e.id}"${e.id === selectedId ? " selected" : ""}>${escapeHtml(e.name)}</option>`).join("");
+  return true;
+}
+
+// Shared by the Manage Activities modal and the picker's quick-add: every new activity must name a Focus ON endeavour.
+function addActivityForEndeavour(inputEl, selectEl, noteEl) {
+  const name = (inputEl.value || "").trim();
+  if (noteEl) noteEl.textContent = "";
+  if (!name) return null;
+  if (!focusEndeavours().length) {
+    if (noteEl) noteEl.textContent = "Set a Focus ON endeavour in the Portfolio tab first. Every activity has to contribute to one.";
+    return null;
+  }
+  const id = Number(selectEl.value);
+  if (!selectEl.value || !id) {
+    if (noteEl) noteEl.textContent = "Choose which Focus ON endeavour this activity contributes to.";
+    selectEl.focus();
+    return null;
+  }
+  const activity = addActivity(name, id);
+  if (activity) { inputEl.value = ""; selectEl.value = ""; }
+  return activity;
 }
 
 function renderManageList() {
   const list = document.getElementById("manage-list");
   list.innerHTML = "";
+  populateEndeavourSelect(document.getElementById("new-activity-endeavour-2"));
+  const eds = focusEndeavours();
   STATE.activities.forEach((activity) => {
     const row = document.createElement("div");
     row.className = "manage-row";
     row.innerHTML = `
       <span class="dot" style="background:${colorHex(activity.color)};"></span>
       <span class="name">${escapeHtml(activity.label)}</span>
+      <select class="act-select" title="The Focus ON endeavour this contributes to"></select>
       <span class="remove-activity" title="Remove from your pool">✕</span>
     `;
+    const sel = row.querySelector(".act-select");
+    const current = eds.some((e) => e.id === activity.endeavourId) ? activity.endeavourId : null;
+    sel.innerHTML = `<option value="">— not linked —</option>` +
+      eds.map((e) => `<option value="${e.id}"${e.id === current ? " selected" : ""}>${escapeHtml(e.name)}</option>`).join("");
+    sel.addEventListener("change", () => {
+      if (sel.value) activity.endeavourId = Number(sel.value); else delete activity.endeavourId;
+      saveToStorage();
+    });
     row.querySelector(".remove-activity").addEventListener("click", () => {
       STATE.activities = STATE.activities.filter((a) => a.id !== activity.id);
       saveToStorage();
@@ -2884,7 +2997,7 @@ function renderTaVentureList() {
   list.innerHTML = "";
 
   if (!STATE.activities.length) {
-    list.innerHTML = `<div class="wasters-empty">No projects yet — add one from Today first.</div>`;
+    list.innerHTML = `<div class="wasters-empty">No projects yet — add one in Portfolio → Manage Activities.</div>`;
     return;
   }
 
@@ -3082,12 +3195,12 @@ function wireUI() {
   document.getElementById("btn-add-picker-date").addEventListener("click", addPickerDate);
 
   document.getElementById("btn-add-activity").addEventListener("click", () => {
-    const input = document.getElementById("new-activity-input");
-    const activity = addActivity(input.value);
-    if (activity) {
-      input.value = "";
-      renderActivityList();
-    }
+    const activity = addActivityForEndeavour(
+      document.getElementById("new-activity-input"),
+      document.getElementById("new-activity-endeavour"),
+      document.getElementById("new-activity-note")
+    );
+    if (activity) renderActivityList();
   });
   document.getElementById("new-activity-input").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btn-add-activity").click();
@@ -3099,18 +3212,17 @@ function wireUI() {
   });
   document.getElementById("btn-confirm-reason").addEventListener("click", confirmReason);
 
-  document.getElementById("manage-link").addEventListener("click", openManageModal);
   document.getElementById("btn-close-manage").addEventListener("click", () => {
     document.getElementById("manage-overlay").classList.remove("open");
     renderDo(); // in case activities were removed, refresh stones/history labels
   });
   document.getElementById("btn-add-activity-2").addEventListener("click", () => {
-    const input = document.getElementById("new-activity-input-2");
-    const activity = addActivity(input.value);
-    if (activity) {
-      input.value = "";
-      renderManageList();
-    }
+    const activity = addActivityForEndeavour(
+      document.getElementById("new-activity-input-2"),
+      document.getElementById("new-activity-endeavour-2"),
+      document.getElementById("new-activity-note-2")
+    );
+    if (activity) renderManageList();
   });
   document.getElementById("new-activity-input-2").addEventListener("keydown", (e) => {
     if (e.key === "Enter") document.getElementById("btn-add-activity-2").click();
@@ -3275,6 +3387,7 @@ if (document.readyState === "loading") {
        window.STATE always reflects the current value.
    ------------------------------------------------------------ */
 window.renderDo = renderDo;
+window.openManageActivities = openManageModal; // opened from the Portfolio tab
 Object.defineProperty(window, "STATE", {
   get: function () { return STATE; },
   configurable: true,
