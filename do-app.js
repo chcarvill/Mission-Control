@@ -977,6 +977,7 @@ function renderTodayTools() {
     <div class="today-tools">
       <button class="btn" id="btn-import-today" ${canImport && !locked ? "" : "disabled"} title="${importTitle}">↺ Import today's plan</button>
       <button class="btn${todayEditMode ? " on" : ""}" id="btn-edit-today" ${locked ? "disabled" : ""} title="${locked ? "Log your oration first" : "Overwrite what was filled in for today"}">${todayEditMode ? "✓ Done editing" : "✎ Edit today's plan"}</button>
+      <button class="btn" id="btn-email-today-plan" title="Opens your email app with today's plan as text. Nothing is sent until you press send.">✉ Email today's plan</button>
     </div>
     ${canImport ? "" : `<div class="today-tools-note">To activate “Import today's plan”, fill all ${total} of this week's slots (${filled} filled so far) in Plan Next Week or Plan This Week. The weekly plan then saves automatically.</div>`}
     <div class="today-tools-msg">${escapeHtml(todayToolsMsg)}</div>
@@ -984,6 +985,7 @@ function renderTodayTools() {
   const imp = el.querySelector("#btn-import-today");
   if (imp) imp.addEventListener("click", importTodaysPlan);
   el.querySelector("#btn-edit-today").addEventListener("click", toggleTodayEdit);
+  el.querySelector("#btn-email-today-plan").addEventListener("click", emailToday);
 }
 
 function renderThisWeekPlanPage() {
@@ -3322,7 +3324,6 @@ function wireUI() {
   document.getElementById("btn-import-portfolio").addEventListener("click", importPortfolioEndeavours);
   document.getElementById("btn-export-week").addEventListener("click", exportWeekSchedule);
   document.getElementById("btn-carry-forward").addEventListener("click", carryWeekForward);
-  document.getElementById("btn-email-today").addEventListener("click", emailToday);
   document.getElementById("btn-email-wasters").addEventListener("click", emailWasters);
 
   document.getElementById("btn-cancel-detail").addEventListener("click", closeDetailModal);
