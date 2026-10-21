@@ -2581,6 +2581,8 @@ function emailWasters() {
 }
 
 function sendMailto(subject, body) {
+  // Mission Control's shared helper: mail app on phones, Gmail compose window on computers.
+  if (typeof window.mcSendEmail === "function") { window.mcSendEmail(subject, body); return; }
   const encodedSubject = encodeURIComponent(subject);
   const encodedBody = encodeURIComponent(body);
   window.location.href = `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
