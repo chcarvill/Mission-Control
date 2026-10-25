@@ -1013,6 +1013,14 @@
   #prod-panel { display: none; }
   #prod-panel.master-visible { display: block; }
   #missions-panel.master-hidden { display: none; }
+  .pn-wrap { padding:1.2rem 2.5rem 0.4rem; border-bottom:0.5px solid var(--border); }
+  .pn-wrap .pf-tier { margin-bottom:1.4rem; }
+  .pn-item { margin:0 0 12px; }
+  .pn-name { font-family:var(--mono); font-size:12px; color:var(--text); margin-bottom:5px; letter-spacing:0.03em; }
+  .pn-area { width:100%; box-sizing:border-box; resize:vertical; min-height:4.9em; font-family:var(--sans); font-size:13px; line-height:1.5; color:var(--text); background:var(--surface2); border:0.5px solid var(--border2); border-radius:var(--radius); padding:8px 10px; }
+  .pn-area:focus { outline:none; border-color:var(--text-hint); }
+  .pn-missions-head { font-family:var(--mono); font-size:12px; letter-spacing:0.1em; text-transform:uppercase; color:var(--text); font-weight:500; padding:1rem 2.5rem 0.2rem; }
+  @media (max-width:700px) { .pn-wrap, .pn-missions-head { padding-left:1rem; padding-right:1rem; } }
 
   .prod-toolbar {
     padding: 0.75rem 2.5rem;
@@ -2801,7 +2809,7 @@
   <button class="master-tab" id="mtab-engine" onclick="switchMasterTab('engine')">Engine Room</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Week's Projects</button>
-  <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Missions</button>
+  <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Notes</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
   <button class="master-tab" id="mtab-compendium" onclick="switchMasterTab('compendium')">Compendium</button>
@@ -3577,6 +3585,8 @@
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="openPortfolioModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);position:relative;top:0;transition:all 0.1s ease;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">+ New project</button>
     <button onclick="exportPortfolioJson()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export backup</button>
+    <input type="file" id="pf-backup-file" accept=".json,application/json" style="display:none;" />
+    <button onclick="document.getElementById('pf-backup-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import backup</button>
     <input type="file" id="notion-import-file" accept=".csv,text/csv" style="display:none;" />
     <button onclick="document.getElementById('notion-import-file').click()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import from Notion</button>
     <button id="notion-refer-btn" onclick="toggleNotionPanel()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">🔗 Refer to Notion</button>
@@ -3631,7 +3641,7 @@
           <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
           <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
           <li><b>Week's Projects</b> — the week's schedule exported from Do, then the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
-          <li><b>Missions</b> — missions and tasks, with folders, priorities, sequencing and Google Calendar.</li>
+          <li><b>Notes</b> — a three-line notes field for every Portfolio endeavour, listed in the same Focus ON / Maintain / Parked order as Portfolio, with your missions and tasks (formerly the Missions tab) below.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
           <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
           <li><b>Compendium</b> — this guide.</li>
@@ -3639,14 +3649,15 @@
         <h4>How information moves between tabs</h4>
         <ul>
           <li>Portfolio → <b>Week's Projects</b>: each Focus ON or Maintain endeavour's next action and one-line note show up on Week's Projects, under the exported schedule.</li>
+          <li>Portfolio → <b>Notes</b>: every endeavour in Portfolio appears on the Notes tab automatically, under the same Focus ON, Maintain or Parked heading and in the same order. Add, move, re-stage or remove one in Portfolio and Notes follows.</li>
           <li>Portfolio → <b>Productiveness</b>: the weekly review is built from your tiers, stages, next actions and restart triggers.</li>
           <li>Weekly review → <b>Homepage</b>: a review block appears every Saturday and shows "done ✓" once you finish it.</li>
-          <li>Missions → <b>Homepage</b>: a mission with a due date or scheduled days appears on those days.</li>
+          <li>Notes tab (missions) → <b>Homepage</b>: a mission with a due date or scheduled days appears on those days.</li>
           <li>Engine Room → <b>Homepage</b>: steps you schedule land on the calendar at the date and time you choose.</li>
           <li>Start → <b>Homepage</b>: each Start task repeats every remaining day this week until you tick it done.</li>
         </ul>
         <h4>Where your data lives</h4>
-        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so back up now and then: <b>Portfolio → Export backup</b> saves the portfolio list, and <b>Portfolio → Manage Activities → ⇩ Backup my data</b> saves Do's data. The other tabs have Email view buttons rather than a backup file.</p>
+        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so back up now and then: <b>Portfolio → Export backup</b> saves the portfolio list, and <b>Portfolio → Manage Activities → ⇩ Backup my data</b> saves Do's data. The other tabs have Email view buttons rather than a backup file. The per-endeavour notes on the Notes tab are included in Portfolio → Export backup (as a <b>projectNotes</b> entry on each endeavour), and <b>Portfolio → Import backup</b> restores them. <b>Email entire view</b> on the Homepage also includes the portfolio.</p>
       </div>
     </details>
 
@@ -3687,7 +3698,7 @@
           <li><b>Import from Notion</b> — reads a CSV export of a Notion database and adds each row as an endeavour set to "In planning". Rows already in the portfolio are skipped.</li>
           <li><b>Refer to Notion</b> — paste a link to your Notion database (a name is optional). It's saved as a chip under the buttons; tap it to open Notion, ✕ to remove it.</li>
           <li><b>Manage Activities</b> — the pool of activities Do chooses from (it used to live on Today). It opens straight away from here, you don't need to visit Do first. Each activity must be linked to a Focus ON endeavour: pick one from the dropdown when you add it, and change the link on any row. The same rule applies to the quick-add box in Do's picker. Activities linked to a Focus ON endeavour appear in the visible list on Today; older activities stay in the pool but show as not linked until you link them. It also holds the ⇩ Backup my data button.</li>
-          <li><b>Export backup</b> — downloads your portfolio as a JSON file. <b>Email view</b> — emails the portfolio as text, now including tier, stage and next action.</li>
+          <li><b>Export backup</b> — downloads your portfolio as a JSON file, including each endeavour's Notes-tab notes. <b>Import backup</b> — reads that file back in. It only adds: endeavours already in the portfolio (matched by id or name) are left as they are, new ones are added, and a Notes-tab note is restored only where that endeavour has none yet. The result is shown under the buttons. <b>Email view</b> — emails the portfolio as text, including tier, stage, next action and Notes-tab notes.</li>
         </ul>
       </div>
     </details>
@@ -3712,15 +3723,24 @@
     </details>
 
     <details class="cp-sec">
-      <summary>Missions</summary>
+      <summary>Notes and Missions</summary>
       <div class="cp-body">
+        <h4>Notes (top of the tab)</h4>
+        <ul>
+          <li>One notes field per Portfolio endeavour, three lines tall (drag the corner to make it bigger). Endeavours are grouped under <b>Focus ON</b>, <b>Maintain</b> and <b>Parked</b> with the same counts and ordering as the Portfolio tiers table, plus an <b>Unsorted</b> group if any endeavour has no tier yet.</li>
+          <li>You don't add anything here yourself: new Portfolio endeavours appear automatically, and moving one to another tier moves its notes box with it. Whatever you type saves as you go.</li>
+          <li>These notes are separate from the Notes box inside an endeavour's edit window in Portfolio; the two don't overwrite each other.</li>
+          <li>Removing an endeavour from Portfolio removes it from this list.</li>
+          <li>Notes are saved in this browser. They are included in Portfolio → Export backup (restore with Import backup), the Portfolio Email view and the Homepage's Email entire view, so back up now and then.</li>
+        </ul>
+        <h4>Missions (below the notes)</h4>
         <ul>
           <li><b>+ New mission</b> — choose the project it belongs to, name the specific action, say in a few words what needs to get done, and pick a category folder.</li>
           <li>Filter by <b>All / Active / On hold / In planning / Completed</b>, or by category folder. A Priority Actions counter sits at the top and a Completed missions drawer holds finished ones.</li>
           <li><b>Sequencing</b> — when adding a task or mission you can say it precedes another, follows another, or is independent. Sequenced items get letter badges (A, B…).</li>
           <li><b>📅 Add to Calendar</b> — pick a mission, a date, an optional time and a duration (30 minutes to all day), then open Google Calendar with it filled in.</li>
           <li>A mission with a due date or scheduled days shows on those days on the Homepage.</li>
-          <li><b>✉ Email this view</b> — emails the missions list.</li>
+          <li><b>✉ Email this view</b> — emails the missions list (not the notes fields above).</li>
         </ul>
       </div>
     </details>
@@ -3844,6 +3864,8 @@
 
 <!-- ══ MISSIONS PANEL ══ -->
 <div id="missions-panel" class="master-hidden">
+<div class="pn-wrap" id="pn-wrap"><div id="pn-host"></div></div>
+<div class="pn-missions-head">Missions</div>
 <div class="mc-mobile-pad" style="padding:0.6rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);">
   <button onclick="emailCurrentView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4);transform:translateY(0);transition:all 0.1s ease;position:relative;top:0;" onmousedown="this.style.boxShadow='0 1px 0 #0f6e48, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #0f6e48, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">✉ Email this view</button>
   <button onclick="openCalModal()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#6baef6 0%,#4285f4 50%,#2a6fdb 100%);color:#fff;cursor:pointer;letter-spacing:0.06em;font-weight:500;box-shadow:0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4);transform:translateY(0);transition:all 0.1s ease;position:relative;top:0;" onmousedown="this.style.boxShadow='0 1px 0 #1a4fa0, 0 2px 4px rgba(0,0,0,0.4)';this.style.top='3px';" onmouseup="this.style.boxShadow='0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';" onmouseleave="this.style.boxShadow='0 4px 0 #1a4fa0, 0 6px 12px rgba(0,0,0,0.4)';this.style.top='0';">📅 Add to Calendar</button>
@@ -5718,6 +5740,7 @@ function switchMasterTab(tab) {
   if (tab === 'homepage') { renderHomepage(); }
   if (tab === 'start') { renderStartTab(); }
   if (tab === 'portfolio') { renderPortfolio(); }
+  if (tab === 'missions') { renderPortfolioNotes(); }
   if (tab === 'projects') { renderProjects(); }
   if (tab === 'do') { renderDo(); }
   if (tab === 'engine') { EngineRoom.render(); }
@@ -5911,6 +5934,40 @@ function renderPortfolioTable(items) {
 }
 
 // ── Inline edits (shared by Portfolio table, Projects tab and Weekly review) ──
+const PF_NOTES_KEY = 'mc_pf_notes';
+function pnLoad() { try { return JSON.parse(localStorage.getItem(PF_NOTES_KEY)) || {}; } catch { return {}; } }
+function pnSave(id, val) {
+  const m = pnLoad();
+  if (val) m[id] = val; else delete m[id];
+  localStorage.setItem(PF_NOTES_KEY, JSON.stringify(m));
+}
+// Notes tab: mirrors the Portfolio tier lists (same order, same sorting); one 3-line field per project
+function renderPortfolioNotes() {
+  const host = document.getElementById('pn-host');
+  if (!host) return;
+  const items = loadPortfolio();
+  if (!items.length) {
+    host.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:2rem 0;text-align:center;">no projects yet — add one in Portfolio</div>`;
+    return;
+  }
+  const notes = pnLoad();
+  host.innerHTML = ['focus', 'maintain', 'parked', 'unsorted'].map(tier => {
+    const rows = items.filter(p => pfTierOf(p) === tier).sort(pfSortByStage);
+    if (tier === 'unsorted' && !rows.length) return '';
+    const meta = PF_TIER_META[tier];
+    const over = meta.limit && rows.length > meta.limit;
+    const count = meta.limit ? `${rows.length}/${meta.limit}` : String(rows.length);
+    return `<div class="pf-tier">
+      <div class="pf-tier-head">
+        <span class="pf-tier-title">${meta.label}</span>
+        <span class="pf-tier-count${over ? ' over' : ''}">${count}${over ? ' · over the limit' : ''}</span>
+      </div>
+      ${rows.length ? rows.map(p => `<div class="pn-item"><div class="pn-name">${esc(p.name)}</div><textarea class="pn-area" rows="3" placeholder="Notes…" oninput="pnSave(${p.id}, this.value)">${esc(notes[p.id] || '')}</textarea></div>`).join('')
+        : `<div class="pf-tier-empty">Nothing here.</div>`}
+    </div>`;
+  }).join('');
+}
+
 function pfRefreshViews() {
   renderPortfolio();
   renderProjectNextActions();
@@ -6407,6 +6464,7 @@ function renderNotionLinks() {
 }
 
 function renderPortfolio() {
+  renderPortfolioNotes();
   renderNotionLinks();
   const pfView = getPfView();
   const tBtn = document.getElementById('pf-view-table'), cBtn = document.getElementById('pf-view-cards');
@@ -6458,6 +6516,8 @@ function buildPortfolioLines() {
     if (p.offering) lines.push('  Offering: ' + p.offering);
     if (p.target) lines.push('  Target market: ' + p.target);
     if (p.notes) lines.push('  Notes: ' + p.notes);
+    const pnText = (pnLoad()[p.id] || '').trim();
+    if (pnText) lines.push('  Project notes (Notes tab): ' + pnText.replace(/\r?\n/g, '\n    '));
     const total = pfValidationTotal(p);
     const tier = pfValidationTier(total);
     lines.push('  Validation: ' + total + '/' + VAL_MAX + ' — ' + tier.label);
@@ -6474,7 +6534,8 @@ function emailPortfolioView() {
   mcSendEmail(subject, lines.join('\n'));
 }
 function exportPortfolioJson() {
-  const items = loadPortfolio();
+  const pn = pnLoad();
+  const items = loadPortfolio().map(p => pn[p.id] ? { ...p, projectNotes: pn[p.id] } : p);
   const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -6622,6 +6683,45 @@ function importPortfolioCsv(csvText) {
       : (skipped ? `Nothing new -- all ${skipped} already in the portfolio.` : "Couldn't find any usable rows in that file.");
   }
 }
+// ── Restore from a Portfolio "Export backup" JSON file (additive; never overwrites) ──
+function importPortfolioJson(text) {
+  const statusEl = document.getElementById('notion-import-status');
+  const say = msg => { if (statusEl) statusEl.textContent = msg; };
+  let data;
+  try { data = JSON.parse(text); } catch { say("That file isn't a valid backup (couldn't read it as JSON)."); return; }
+  if (!Array.isArray(data) || !data.every(x => x && typeof x === 'object' && typeof x.name === 'string')) {
+    say("That file doesn't look like a Portfolio backup."); return;
+  }
+  const items = loadPortfolio();
+  const notes = pnLoad();
+  let added = 0, matched = 0, notesRestored = 0;
+  data.forEach(raw => {
+    const { projectNotes, ...rec } = raw;
+    const nm = rec.name.trim().toLowerCase();
+    // already present: same id, or same name (e.g. the sample endeavours re-created after clearing site data)
+    let existing = items.find(x => rec.id != null && x.id === rec.id) || items.find(x => (x.name || '').trim().toLowerCase() === nm);
+    if (existing) {
+      matched++;
+    } else {
+      if (rec.id == null || items.some(x => x.id === rec.id)) rec.id = Date.now() + Math.floor(Math.random() * 1e6);
+      items.push(rec);
+      existing = rec;
+      added++;
+    }
+    if (projectNotes && !notes[existing.id]) { notes[existing.id] = String(projectNotes); notesRestored++; }
+  });
+  savePortfolio(items);
+  localStorage.setItem(PF_NOTES_KEY, JSON.stringify(notes));
+  pfRefreshViews();
+  say(`Backup imported: ${added} endeavour${added === 1 ? '' : 's'} added, ${matched} already in the portfolio (left as they were), ${notesRestored} note${notesRestored === 1 ? '' : 's'} restored.`);
+}
+document.getElementById('pf-backup-file').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { importPortfolioJson(reader.result); e.target.value = ''; };
+  reader.readAsText(file);
+});
 document.getElementById('notion-import-file').addEventListener('change', (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -7127,6 +7227,7 @@ function emailEntireView() {
     '', ''
   ];
   lines.push(...buildHomepageLines(), '', '');
+  lines.push(...buildPortfolioLines(), '', '');
   lines.push(...buildProjectsLines(), '', '');
   lines.push(...buildMissionsLines(), '', '');
   lines.push(...buildProdSnapshotLines(), '');
@@ -7333,7 +7434,7 @@ renderHomepage();
       <div class="p-card">
         <div class="p-card-title">Missions — today's action</div>
         <div id="p-mission-action-list"></div>
-        <div id="p-mission-action-empty" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);padding:0.5rem 0;letter-spacing:0.04em;">No active missions found. Add missions in the Missions tab.</div>
+        <div id="p-mission-action-empty" style="font-family:var(--mono);font-size:11px;color:var(--text-hint);padding:0.5rem 0;letter-spacing:0.04em;">No active missions found. Add missions in the Notes tab.</div>
       </div>
       <div class="p-card">
         <div class="p-card-title">Reconciliation</div>
@@ -7619,7 +7720,7 @@ function pUpdateMetricsFromMissions() {
   document.getElementById('pr-bar').style.width = (rate || 0) + '%';
   document.getElementById('pr-msg').textContent = total > 0
     ? done + ' of ' + total + ' missions due today completed.'
-    : missions.length > 0 ? 'No missions due today. Log time devoted above.' : 'Add missions in the Missions tab.';
+    : missions.length > 0 ? 'No missions due today. Log time devoted above.' : 'Add missions in the Notes tab.';
 }
 
 // ── Time wasters ──
