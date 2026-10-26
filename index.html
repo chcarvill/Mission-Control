@@ -2671,6 +2671,13 @@
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 6px; }
 
   /* ══════════ END DO APP CSS ══════════ */
+  #mc-legal { text-align:center; padding:1.2rem 1rem calc(1.6rem + env(safe-area-inset-bottom, 0px)); font-family:var(--mono); font-size:11px; letter-spacing:0.05em; color:var(--text-hint); }
+  #mc-legal button { background:none; border:none; padding:0; font:inherit; letter-spacing:inherit; color:inherit; text-decoration:underline; cursor:pointer; }
+  #mc-legal-dlg { max-width:560px; width:calc(100% - 2rem); box-sizing:border-box; padding:1.4rem 1.5rem; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--surface); color:var(--text); font-family:var(--sans); font-size:13px; line-height:1.6; }
+  #mc-legal-dlg::backdrop { background:rgba(0,0,0,0.45); }
+  #mc-legal-dlg h2 { font-family:var(--mono); font-size:13px; letter-spacing:0.1em; text-transform:uppercase; font-weight:500; margin:0 0 0.8rem; }
+  #mc-legal-dlg p { margin:0 0 0.7rem; }
+  #mc-legal-dlg .mc-legal-close { margin-top:0.6rem; font-family:var(--mono); font-size:12px; padding:7px 18px; border-radius:8px; border:0.5px solid var(--border2); background:var(--surface2); color:var(--text); cursor:pointer; letter-spacing:0.05em; }
 </style>
 <style id="visualizer-styles">
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
@@ -3657,7 +3664,7 @@
           <li>Start → <b>Homepage</b>: each Start task repeats every remaining day this week until you tick it done.</li>
         </ul>
         <h4>Where your data lives</h4>
-        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so back up now and then: <b>Portfolio → Export backup</b> saves the portfolio list, and <b>Portfolio → Manage Activities → ⇩ Backup my data</b> saves Do's data. The other tabs have Email view buttons rather than a backup file. The per-endeavour notes on the Notes tab are included in Portfolio → Export backup (as a <b>projectNotes</b> entry on each endeavour), and <b>Portfolio → Import backup</b> restores them. <b>Email entire view</b> on the Homepage also includes the portfolio.</p>
+        <p>Everything is saved in this browser, on this device. Your phone and your laptop each hold their own separate copy. <b>Clearing the site's data in your browser wipes it</b>, so back up now and then: <b>Portfolio → Export backup</b> saves the portfolio list, and <b>Portfolio → Manage Activities → ⇩ Backup my data</b> saves Do's data. The other tabs have Email view buttons rather than a backup file. A <b>Disclaimer</b> link at the very bottom of the app explains how data is stored and the usual as-is terms. The per-endeavour notes on the Notes tab are included in Portfolio → Export backup (as a <b>projectNotes</b> entry on each endeavour), and <b>Portfolio → Import backup</b> restores them. <b>Email entire view</b> on the Homepage also includes the portfolio.</p>
       </div>
     </details>
 
@@ -8135,6 +8142,16 @@ const EngineRoom = (function () {
 })();
 </script>
 
+<div id="mc-legal"><button type="button" onclick="document.getElementById('mc-legal-dlg').showModal()">Disclaimer</button></div>
+<dialog id="mc-legal-dlg">
+  <h2>Disclaimer</h2>
+  <p>Mission Control is a free personal-productivity tool, provided “as is”. There is no promise that it will be error-free, always available, or suited to your particular needs. Please check anything important yourself.</p>
+  <p><b>Your data.</b> What you enter is saved in this browser, on this device. The app doesn’t send it to a server. Clearing site data, private browsing or changing device can erase it, so use the backup and export options regularly.</p>
+  <p><b>Third parties.</b> Fonts and chart code load from Google Fonts and cdnjs (Cloudflare), which, like any website you visit, can see your IP address and browser details. The Google Calendar, email and Notion features open those services, which have their own terms and privacy policies and are outside the author’s control.</p>
+  <p><b>Not advice.</b> Tiers, priorities and other views are organising aids only. They are not professional, financial, legal or medical advice.</p>
+  <p><b>Liability.</b> To the extent the law allows, the author is not liable for loss of data, or for any indirect or consequential loss, arising from use of the app. Nothing here excludes or limits any right or remedy you have under the Australian Consumer Law or any other law that cannot be excluded.</p>
+  <button type="button" class="mc-legal-close" onclick="this.closest('dialog').close()">Close</button>
+</dialog>
 <script src="do-app.js"></script>
 <script src="ascent-app.js"></script>
 </body>
