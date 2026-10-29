@@ -2873,8 +2873,9 @@
 
   <!-- Competitive advantages table -->
   <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 3rem;border-top:0.5px solid var(--border);">
-    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:6px;">Basing Pursuits on Competitive Advantages - The Fundamental Key</div>
-    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-bottom:14px;font-style:italic;">List each competitive advantage you have, then the pursuits that leverage it. Add as many rows as you need.</div>
+    <div style="font-family:var(--mono);font-size:20px;letter-spacing:0.06em;text-transform:uppercase;color:var(--text);font-weight:500;margin-bottom:18px;">Strengths Library</div>
+    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:6px;">1) Basing Pursuits on Competitive Advantages - The Fundamental Key</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-bottom:14px;font-style:italic;">List each skill/ability you have, then the pursuits that leverage it. Add as many rows as you need.</div>
     <div class="pf-tablewrap">
       <table class="pf-table ca-table">
         <thead><tr><th style="width:42%;">Competitive Advantage</th><th>Pursuits That Leverage CAs</th><th style="width:44px;"></th></tr></thead>
@@ -2884,6 +2885,25 @@
     <div style="margin-top:12px;">
       <button class="pf-iconbtn" onclick="addCaRow()" style="font-size:12px;padding:8px 16px;">+ Add row</button>
     </div>
+  </div>
+
+  <!-- Skills development -->
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 1rem;border-top:0.5px solid var(--border);">
+    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:6px;">2) Skills Development</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-bottom:14px;font-style:italic;">Each competitive advantage from the table above appears here automatically.</div>
+    <div class="pf-tablewrap">
+      <table class="pf-table ca-table">
+        <thead><tr><th style="width:42%;">Competitive Advantage</th><th>What can you do to further consolidate/upskill this?</th></tr></thead>
+        <tbody id="sd-rows"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Building capabilities -->
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 3rem;border-top:0.5px solid var(--border);">
+    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:6px;">3) Building Capabilities</div>
+    <div style="font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-bottom:14px;font-style:italic;">What areas do you want to strengthen, so as to leverage in the future?</div>
+    <textarea class="ca-ta" id="bc-text" placeholder="Areas to strengthen…" style="min-height:120px;" oninput="bcSave(this)"></textarea>
   </div>
 </div>
 
@@ -3739,6 +3759,7 @@
           <li><b>Import from Notion</b> — reads a CSV export of a Notion database and adds each row as an endeavour set to "In planning". Rows already in the portfolio are skipped.</li>
           <li><b>Refer to Notion</b> — paste a link to your Notion database (a name is optional). It's saved as a chip under the buttons; tap it to open Notion, ✕ to remove it.</li>
           <li><b>Manage Activities</b> — the pool of activities Do chooses from (it used to live on Today). It opens straight away from here, you don't need to visit Do first. Each activity must be linked to a Focus ON endeavour: pick one from the dropdown when you add it, and change the link on any row. The same rule applies to the quick-add box in Do's picker. Activities linked to a Focus ON endeavour appear in the visible list on Today; older activities stay in the pool but show as not linked until you link them. It also holds the ⇩ Backup my data button.</li>
+          <li><b>Competitive advantage question</b> — when you add a project, you pick which competitive advantage from the Start page it leverages (required for new projects, optional when editing older ones). If none fits, choose “None of these fit”, or find the list empty, and a prompt sends you to the Start page to add one first; your half-filled form is kept and comes back when you return to Portfolio. The chosen advantage is included in the Portfolio email and the backup.</li>
           <li><b>Export backup</b> — downloads your portfolio as a JSON file, including each endeavour's Notes-tab notes. <b>Import backup</b> — reads that file back in. It only adds: endeavours already in the portfolio (matched by id or name) are left as they are, new ones are added, and a Notes-tab note is restored only where that endeavour has none yet. The result is shown under the buttons. <b>Email view</b> — emails the portfolio as text, including tier, stage, next action and Notes-tab notes.</li>
         </ul>
       </div>
@@ -3802,7 +3823,10 @@
           <li>Up to 10 basic tasks "no matter what". Each needs a time.</li>
           <li>A Start task appears on the Homepage at that time on every remaining day this week until you tick it done (the circle on the Start tab, or tap its block on the Homepage). ✕ removes it.</li>
           <li>At the limit, tick one off to add another.</li>
-          <li><b>Basing Pursuits on Competitive Advantages - The Fundamental Key</b> — a two-column table below the tasks. Column one lists each competitive advantage you have; column two lists the pursuits that leverage it (one per line is easiest). <b>+ Add row</b> adds as many as you like, × removes a row (it asks first if the row has text), and everything saves as you type. Like the rest of the app, it lives in this browser on this device.</li>
+          <li><b>Strengths Library</b> — the three numbered sections below the tasks, in order: 1) Basing Pursuits on Competitive Advantages - The Fundamental Key, 2) Skills Development, 3) Building Capabilities.</li>
+          <li><b>1) Basing Pursuits on Competitive Advantages - The Fundamental Key</b> — a two-column table below the tasks. Column one lists each skill or ability you have; column two lists the pursuits that leverage it (one per line is easiest). <b>+ Add row</b> adds as many as you like, × removes a row (it asks first if the row has text), and everything saves as you type. Like the rest of the app, it lives in this browser on this device.</li>
+          <li><b>2) Skills Development</b> — below that table. Every competitive advantage you've listed above appears here automatically, with a box beside it for answering “What can you do to further consolidate/upskill this?”. Add or edit an advantage above and this list follows; the notes save as you type.</li>
+          <li><b>3) Building Capabilities</b> — one open box for “What areas do you want to strengthen, so as to leverage in the future?”.</li>
         </ul>
       </div>
     </details>
@@ -4128,6 +4152,13 @@
     <input class="modal-input" id="pf-offering" placeholder="In a sentence, what's the product or service?" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Who's it for?</div>
     <input class="modal-input" id="pf-target" placeholder="e.g. Unfulfilled careerists and professionals" />
+    <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Which competitive advantage (from the Start page) does this leverage?</div>
+    <select class="modal-input" id="pf-ca" onchange="pfCaChanged()"></select>
+    <div id="pf-ca-warn" style="display:none;font-family:var(--sans);font-size:12px;line-height:1.5;color:var(--text);background:var(--surface2);border:0.5px solid var(--border2);border-radius:8px;padding:10px 12px;">
+      No relevant competitive advantage yet? Add one on the Start page first (in “Basing Pursuits on Competitive Advantages”), then come back. What you've typed here will be kept.
+      <div style="margin-top:8px;"><button type="button" class="pf-chip" onclick="pfGoToStartForCa()">Go to Start page →</button></div>
+    </div>
+    <div id="pf-draft-note" style="display:none;font-family:var(--sans);font-size:12px;color:var(--text-hint);">Welcome back. Your draft is restored, so pick the competitive advantage you just added.</div>
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Notes (optional)</div>
     <input class="modal-input" id="pf-notes" placeholder="Anything else worth keeping on hand" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Stage — set by you; decides the order within each tier</div>
@@ -5830,7 +5861,7 @@ function switchMasterTab(tab) {
   if (tab === 'prod') { pUpdateMetrics(); pRenderMissionActions(); }
   if (tab === 'homepage') { renderHomepage(); }
   if (tab === 'start') { renderStartTab(); }
-  if (tab === 'portfolio') { renderPortfolio(); }
+  if (tab === 'portfolio') { renderPortfolio(); if (pfDraft) pfRestoreDraft(); }
   if (tab === 'biz') { renderBizStructures(); }
   if (tab === 'missions') { renderPortfolioNotes(); }
   if (tab === 'projects') { renderProjects(); }
@@ -5878,9 +5909,73 @@ function pfSyncModalChips() {
 function selectPfStage(btn) { pfModalStage = btn.dataset.stage; pfSyncModalChips(); }
 function selectPfTier(btn) { pfModalTier = btn.dataset.tier; pfSyncModalChips(); }
 
+// ── Competitive advantage question (options come from the Start page table) ──
+let pfDraft = null;
+const PF_CA_NONE = '__none';
+function pfCaList() {
+  return loadCaRows().filter(r => (r.ca || '').trim()).map(r => ({ id: r.id, text: r.ca.trim().replace(/\s+/g, ' ') }));
+}
+function pfCaText(p) {
+  if (!p || !p.caId) return (p && p.ca) || '';
+  const hit = pfCaList().find(r => r.id === p.caId);
+  return hit ? hit.text : (p.ca || '');
+}
+function pfCaFill(selectedId, item) {
+  const sel = document.getElementById('pf-ca');
+  const list = pfCaList();
+  const short = t => t.length > 70 ? t.slice(0, 67) + '…' : t;
+  let html = `<option value="">${list.length ? '— choose one —' : '— none on the Start page yet —'}</option>`;
+  html += list.map(r => `<option value="${esc(r.id)}">${esc(short(r.text))}</option>`).join('');
+  if (item && item.caId && !list.some(r => r.id === item.caId) && item.ca) {
+    html += `<option value="${esc(item.caId)}">${esc(short(item.ca))} (no longer on the Start page)</option>`;
+  }
+  html += `<option value="${PF_CA_NONE}">None of these fit — I need to add one first</option>`;
+  sel.innerHTML = html;
+  sel.value = selectedId || '';
+  if (sel.value !== (selectedId || '')) sel.value = '';
+  pfCaChanged();
+}
+function pfCaChanged() {
+  const sel = document.getElementById('pf-ca');
+  const none = !pfCaList().length || sel.value === PF_CA_NONE;
+  document.getElementById('pf-ca-warn').style.display = none ? 'block' : 'none';
+}
+function pfGoToStartForCa() {
+  pfDraft = {
+    name: document.getElementById('pf-name').value, offering: document.getElementById('pf-offering').value,
+    target: document.getElementById('pf-target').value, notes: document.getElementById('pf-notes').value,
+    next: document.getElementById('pf-next').value, trigger: document.getElementById('pf-trigger').value,
+    stage: pfModalStage, tier: pfModalTier, status: pfStatus
+  };
+  closePortfolioModal();
+  switchMasterTab('start');
+  const t = document.getElementById('ca-rows');
+  if (t && t.scrollIntoView) t.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+function pfRestoreDraft() {
+  const d = pfDraft;
+  if (!d) return;
+  openPortfolioModal(null);   // clears pfDraft; we fill the form from the local copy
+  document.getElementById('pf-name').value = d.name;
+  document.getElementById('pf-offering').value = d.offering;
+  document.getElementById('pf-target').value = d.target;
+  document.getElementById('pf-notes').value = d.notes;
+  document.getElementById('pf-next').value = d.next;
+  document.getElementById('pf-trigger').value = d.trigger;
+  pfModalStage = d.stage; pfModalTier = d.tier; pfSyncModalChips();
+  pfStatus = d.status;
+  document.querySelectorAll('#pf-status-row .modal-status-btn').forEach(b => { b.className = 'modal-status-btn'; });
+  const sb = document.querySelector(`#pf-status-row .modal-status-btn[data-status="${pfStatus}"]`);
+  if (sb) sb.classList.add('sel-' + pfStatus);
+  document.getElementById('pf-draft-note').style.display = 'block';
+}
+
 function openPortfolioModal(editId) {
+  pfDraft = null;
   pfEditId = editId || null;
   const item = editId ? loadPortfolio().find(p => p.id === editId) : null;
+  pfCaFill(item ? item.caId : '', item);
+  document.getElementById('pf-draft-note').style.display = 'none';
   document.getElementById('pf-name').value = item ? item.name : '';
   document.getElementById('pf-offering').value = item ? item.offering : '';
   document.getElementById('pf-target').value = item ? item.target : '';
@@ -5927,6 +6022,14 @@ function confirmAddPortfolio() {
     document.getElementById('pf-next').focus();
     return;
   }
+  const caVal = document.getElementById('pf-ca').value;
+  if (!pfEditId && (!caVal || caVal === PF_CA_NONE)) {
+    errEl.textContent = caVal === PF_CA_NONE || !pfCaList().length
+      ? 'Add a relevant competitive advantage on the Start page first, then come back to finish adding this project.'
+      : 'Choose which competitive advantage this project leverages.';
+    errEl.style.display = 'block';
+    return;
+  }
   const items = loadPortfolio();
   const editing = pfEditId ? items.find(x => x.id === pfEditId) : null;
   if (!pfHasRoom(items, pfModalTier, editing)) {
@@ -5944,6 +6047,11 @@ function confirmAddPortfolio() {
     nextAction,
     parkTrigger
   };
+  if (caVal && caVal !== PF_CA_NONE) {
+    const hit = pfCaList().find(r => r.id === caVal);
+    data.caId = caVal;
+    data.ca = hit ? hit.text : ((editing && editing.ca) || '');
+  }
   if (pfEditId) {
     const idx = items.findIndex(p => p.id === pfEditId);
     if (idx !== -1) items[idx] = { ...items[idx], ...data };
@@ -6607,6 +6715,7 @@ function buildPortfolioLines() {
     else if (p.nextAction) lines.push('  Next action: ' + p.nextAction);
     if (p.offering) lines.push('  Offering: ' + p.offering);
     if (p.target) lines.push('  Target market: ' + p.target);
+    if (pfCaText(p)) lines.push('  Competitive advantage leveraged: ' + pfCaText(p));
     if (p.notes) lines.push('  Notes: ' + p.notes);
     const pnText = (pnLoad()[p.id] || '').trim();
     if (pnText) lines.push('  Project notes (Notes tab): ' + pnText.replace(/\r?\n/g, '\n    '));
@@ -6912,6 +7021,8 @@ function renderCaTable() {
     <td><button class="pf-iconbtn danger" onclick="removeCaRow('${r.id}')" title="Remove row">×</button></td>
   </tr>`).join('');
   body.querySelectorAll('.ca-ta').forEach(caAutosize);
+  renderSkillsDev();
+  renderBuildCap();
 }
 function caEdit(id, field, el) {
   const rows = loadCaRows();
@@ -6919,6 +7030,39 @@ function caEdit(id, field, el) {
   if (!r) return;
   r[field] = el.value;
   saveCaRows(rows);
+  caAutosize(el);
+  if (field === 'ca') renderSkillsDev();
+}
+// ── Start: Skills Development (one upskill note per competitive advantage) and Building Capabilities ──
+function sdLoad() { try { const m = JSON.parse(localStorage.getItem('mc_ca_upskill')); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; } }
+function sdSave(m) { try { localStorage.setItem('mc_ca_upskill', JSON.stringify(m)); } catch (e) {} }
+function sdEdit(id, el) {
+  const m = sdLoad();
+  if (el.value) m[id] = el.value; else delete m[id];
+  sdSave(m);
+  caAutosize(el);
+}
+function renderSkillsDev() {
+  const body = document.getElementById('sd-rows');
+  if (!body) return;
+  const rows = loadCaRows().filter(r => (r.ca || '').trim());
+  const m = sdLoad();
+  body.innerHTML = rows.length
+    ? rows.map(r => `<tr>
+        <td data-l="Competitive Advantage" style="white-space:pre-wrap;font-family:var(--sans);font-size:13px;line-height:1.45;color:var(--text);vertical-align:top;">${esc(r.ca.trim())}</td>
+        <td data-l="Consolidate / upskill"><textarea class="ca-ta" placeholder="What can you do to further consolidate/upskill this?" oninput="sdEdit('${r.id}', this)">${esc(m[r.id] || '')}</textarea></td>
+      </tr>`).join('')
+    : `<tr><td colspan="2" style="font-family:var(--mono);font-size:12px;color:var(--text-hint);letter-spacing:0.05em;padding:1.2rem 0;text-align:center;">add a competitive advantage in the table above and it will appear here</td></tr>`;
+  body.querySelectorAll('.ca-ta').forEach(caAutosize);
+}
+function bcSave(el) {
+  try { localStorage.setItem('mc_build_cap', el.value); } catch (e) {}
+  caAutosize(el);
+}
+function renderBuildCap() {
+  const el = document.getElementById('bc-text');
+  if (!el) return;
+  try { el.value = localStorage.getItem('mc_build_cap') || ''; } catch (e) { el.value = ''; }
   caAutosize(el);
 }
 function addCaRow() {
@@ -6936,6 +7080,7 @@ function removeCaRow(id) {
   if (!r) return;
   if ((r.ca.trim() || r.pursuits.trim()) && !confirm('Remove this row?')) return;
   saveCaRows(rows.filter(x => x.id !== id));
+  const um = sdLoad(); if (um[id] !== undefined) { delete um[id]; sdSave(um); }
   renderCaTable();
 }
 
