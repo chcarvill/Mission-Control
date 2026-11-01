@@ -2841,7 +2841,8 @@
   <button class="master-tab" id="mtab-engine" onclick="switchMasterTab('engine')">Engine Room</button>
   <button class="master-tab" id="mtab-biz" onclick="switchMasterTab('biz')">Biz Structures</button>
   <button class="master-tab" id="mtab-portfolio" onclick="switchMasterTab('portfolio')">Portfolio</button>
-  <button class="master-tab" id="mtab-workflow" onclick="switchMasterTab('workflow')">Workflow</button>
+  <button class="master-tab" id="mtab-workflowext" onclick="switchMasterTab('workflowext')">Workflow (external)</button>
+  <button class="master-tab" id="mtab-workflow" onclick="switchMasterTab('workflow')">Workflow (internal)</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Week's Projects</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Notes</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
@@ -3684,6 +3685,17 @@
   </div>
 </div>
 
+<!-- ══ WORKFLOW (EXTERNAL) PANEL ══ -->
+<div id="workflowext-panel" style="display:none;">
+  <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+    <button onclick="emailWorkflowExtView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
+  </div>
+  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 3rem;">
+    <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:12px;line-height:1.5;">Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible:</div>
+    <textarea class="ca-ta" id="wx-text" placeholder="Funnel structure…" style="min-height:420px;" oninput="wxSave(this)"></textarea>
+  </div>
+</div>
+
 <!-- ══ WORKFLOW PANEL ══ -->
 <div id="workflow-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
@@ -3712,7 +3724,8 @@
           <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
           <li><b>Biz Structures</b> — five business structures, each with a name, a short description and up to five relevant endeavours that might suit it.</li>
           <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
-          <li><b>Workflow</b> — every Portfolio endeavour with five stages beneath it, from market needs analysis through to marketing, each with a status and notes.</li>
+          <li><b>Workflow (external)</b> — one large free-text page for detailing the structure of your marketing funnel(s).</li>
+          <li><b>Workflow (internal)</b> — every Portfolio endeavour with five stages beneath it, from market needs analysis through to marketing, each with a status and notes.</li>
           <li><b>Week's Projects</b> — the week's schedule exported from Do, then the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
           <li><b>Notes</b> — a three-line notes field for every Portfolio endeavour, listed in the same Focus ON / Maintain / Parked order as Portfolio, with your missions and tasks (formerly the Missions tab) below.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
@@ -3810,7 +3823,18 @@
     </details>
 
     <details class="cp-sec">
-      <summary>Workflow</summary>
+      <summary>Workflow (external)</summary>
+      <div class="cp-body">
+        <ul>
+          <li>One big blank field under the prompt “Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible”. The box grows as you type and saves as you go.</li>
+          <li><b>✉ Email view</b> emails the whole text.</li>
+          <li>Saved in this browser only. It is not part of Portfolio → Export backup, so keep a copy of anything important.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Workflow (internal)</summary>
       <div class="cp-body">
         <ul>
           <li>Every endeavour in Portfolio appears here automatically, grouped under Focus ON, Maintain and Parked in the same order as Portfolio. Add, move or remove one in Portfolio and this tab follows.</li>
@@ -5880,6 +5904,8 @@ function switchMasterTab(tab) {
   document.getElementById('portfolio-panel').style.display = tab === 'portfolio' ? 'block' : 'none';
   document.getElementById('biz-panel').style.display = tab === 'biz' ? 'block' : 'none';
   document.getElementById('workflow-panel').style.display = tab === 'workflow' ? 'block' : 'none';
+  document.getElementById('workflowext-panel').style.display = tab === 'workflowext' ? 'block' : 'none';
+  document.getElementById('mtab-workflowext').classList.toggle('master-active', tab === 'workflowext');
   document.getElementById('mtab-workflow').classList.toggle('master-active', tab === 'workflow');
   document.getElementById('mtab-biz').classList.toggle('master-active', tab === 'biz');
   document.getElementById('projects-panel').style.display = tab === 'projects' ? 'block' : 'none';
@@ -5903,6 +5929,7 @@ function switchMasterTab(tab) {
   if (tab === 'portfolio') { renderPortfolio(); if (pfDraft) pfRestoreDraft(); }
   if (tab === 'biz') { renderBizStructures(); }
   if (tab === 'workflow') { renderWorkflow(); }
+  if (tab === 'workflowext') { renderWorkflowExt(); }
   if (tab === 'missions') { renderPortfolioNotes(); }
   if (tab === 'projects') { renderProjects(); }
   if (tab === 'do') { renderDo(); }
@@ -6174,6 +6201,23 @@ function renderPortfolioTable(items) {
 }
 
 // ── Inline edits (shared by Portfolio table, Projects tab and Weekly review) ──
+// ── Workflow (external) tab: one big free-text field for the funnel structure ──
+const WX_KEY = 'mc_workflow_ext';
+function wxSave(el) { try { localStorage.setItem(WX_KEY, el.value); } catch (e) {} caAutosize(el); }
+function renderWorkflowExt() {
+  const el = document.getElementById('wx-text');
+  if (!el) return;
+  try { el.value = localStorage.getItem(WX_KEY) || ''; } catch (e) { el.value = ''; }
+  caAutosize(el);
+}
+function emailWorkflowExtView() {
+  let txt = ''; try { txt = localStorage.getItem(WX_KEY) || ''; } catch (e) {}
+  const lines = ['WORKFLOW (EXTERNAL)', '='.repeat(50), new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), '',
+    'Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible:', '',
+    txt.trim() ? txt.trim() : '(blank)', '', 'Generated by Mission Control.'];
+  mcSendEmail('Workflow (external) (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
+}
+
 // ── Workflow tab: every Portfolio endeavour, each with the five stages from market need to marketing ──
 const WF_KEY = 'mc_workflow';
 const WF_STAGES = [
@@ -6260,7 +6304,7 @@ function emailWorkflowView() {
     });
   });
   lines.push('Generated by Mission Control.');
-  mcSendEmail('Workflow (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
+  mcSendEmail('Workflow (internal) (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
 }
 
 const PF_NOTES_KEY = 'mc_pf_notes';
