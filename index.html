@@ -2703,6 +2703,15 @@
   .wf-sel.wf-s2 { background:rgba(43,206,140,0.18); border-color:rgba(43,206,140,0.55); }
   .wf-sel:focus, .wf-note:focus { outline:none; border-color:var(--text-hint); }
   @media (max-width:700px) { .wf-wrap { padding-left:1rem; padding-right:1rem; } .wf-row { grid-template-columns:1fr 1fr; } .wf-stage { grid-column:1 / -1; font-weight:500; } .wf-note { grid-column:1 / -1; } }
+  .lc-scroll { overflow-x:auto; }
+  .lc-table { width:100%; min-width:560px; border-collapse:collapse; margin-bottom:6px; }
+  .lc-table th { font-family:var(--mono); font-size:11px; letter-spacing:0.05em; color:var(--text-hint); font-weight:400; text-align:left; padding:4px 6px; border-bottom:0.5px solid var(--border); }
+  .lc-table td { padding:4px 6px; vertical-align:middle; }
+  .lc-link { display:flex; align-items:center; gap:6px; }
+  .lc-open { font-family:var(--mono); font-size:13px; color:var(--text-hint); text-decoration:none; }
+  .lc-del { background:none; border:none; color:var(--text-hint); font-size:16px; cursor:pointer; padding:2px 6px; }
+  .lc-del:hover { color:#f87171; }
+  .lc-add { margin:2px 0 6px; font-family:var(--mono); font-size:11px; padding:5px 12px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text-secondary); cursor:pointer; letter-spacing:0.04em; }
 </style>
 <style id="visualizer-styles">
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
@@ -3676,8 +3685,10 @@
     <div class="pf-viewbar">
       <button class="pf-viewbtn" id="pf-view-table" onclick="setPfView('table')">▤ Tiers table</button>
       <button class="pf-viewbtn" id="pf-view-cards" onclick="setPfView('cards')">▦ Cards</button>
+      <button class="pf-viewbtn" id="pf-view-locations" onclick="setPfView('locations')">▥ File locations</button>
     </div>
     <div id="portfolio-table-view"></div>
+    <div id="portfolio-locations-view" style="display:none;"></div>
     <div id="portfolio-cards-view">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
     <div class="pf-grid" id="portfolio-list"></div>
@@ -3787,8 +3798,9 @@
           <li>Tap <b>✓ Done</b> when it's finished: it's logged, the box clears, and the app asks for the next one straight away.</li>
           <li>Moving an endeavour to Parked asks for a restart trigger instead.</li>
         </ul>
-        <h4>Tiers table vs Cards</h4>
-        <p>The two buttons above the list switch views. <b>Cards</b> is the original layout (offering, target market, notes, status, validation badge, Open in Do) and now also shows each endeavour's tier and stage. Your choice is remembered.</p>
+        <h4>Tiers table, Cards and File locations</h4>
+        <p>The three buttons above the list switch views: <b>File locations</b> lists each endeavour (grouped by tier) with its own table, with as many rows as you need, for recording where its files and information are stored: a location (e.g. Google Drive, Notion, a laptop folder), a link or path (web links get a ↗ button), and what is kept there. It is saved in this browser and included in Portfolio → Export backup (as a <b>locations</b> entry) and the Portfolio email.</p>
+        <p><b>Cards</b> is the original layout (offering, target market, notes, status, validation badge, Open in Do) and now also shows each endeavour's tier and stage. Your choice is remembered.</p>
         <h4>Other Portfolio tools</h4>
         <ul>
           <li><b>Validation scorecard</b> — tap an endeavour's validation badge. Six criteria (problem clarity, evidence of demand, competition and differentiation, willingness to pay, feasibility, path to first customer), each scored Not yet / Some evidence / Strong evidence, out of 12.</li>
@@ -6130,8 +6142,8 @@ function confirmAddPortfolio() {
   pfRefreshViews();
 }
 // ── Tiers table (Portfolio tab) ──────────────────────────────
-function getPfView() { return localStorage.getItem('mc_pf_view') === 'cards' ? 'cards' : 'table'; }
-function setPfView(v) { localStorage.setItem('mc_pf_view', v === 'cards' ? 'cards' : 'table'); renderPortfolio(); }
+function getPfView() { const v = localStorage.getItem('mc_pf_view'); return (v === 'cards' || v === 'locations') ? v : 'table'; }
+function setPfView(v) { localStorage.setItem('mc_pf_view', (v === 'cards' || v === 'locations') ? v : 'table'); renderPortfolio(); }
 
 function pfStageSelect(p) {
   const s = pfStageOf(p);
@@ -6201,6 +6213,75 @@ function renderPortfolioTable(items) {
 }
 
 // ── Inline edits (shared by Portfolio table, Projects tab and Weekly review) ──
+// ── Portfolio "File locations" view: per endeavour, an unlimited table of where its files/info are stored ──
+const LC_KEY = 'mc_pf_locations';
+function lcLoad() { try { const m = JSON.parse(localStorage.getItem(LC_KEY)); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; } catch (e) { return {}; } }
+function lcSaveAll(m) { try { localStorage.setItem(LC_KEY, JSON.stringify(m)); } catch (e) {} }
+function lcNewId() { return 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function lcIsUrl(v) { return /^https?:\/\/\S+$/i.test((v || '').trim()); }
+function lcEdit(pid, rid, field, el) {
+  const m = lcLoad();
+  const rows = m[pid] || [];
+  let row = rows.find(r => r.id === rid);
+  if (!row) { row = { id: rid, loc: '', link: '', what: '' }; rows.push(row); }
+  row[field] = el.value;
+  m[pid] = rows;
+  lcSaveAll(m);
+  if (field === 'link') {
+    const a = el.parentNode.querySelector('.lc-open');
+    if (a) { if (lcIsUrl(el.value)) { a.href = el.value.trim(); a.style.display = ''; } else { a.removeAttribute('href'); a.style.display = 'none'; } }
+  }
+}
+function lcAddRow(pid) {
+  const m = lcLoad();
+  const rows = m[pid] || [];
+  rows.push({ id: lcNewId(), loc: '', link: '', what: '' });
+  m[pid] = rows;
+  lcSaveAll(m);
+  renderPfLocations();
+}
+function lcDelRow(pid, rid) {
+  const m = lcLoad();
+  m[pid] = (m[pid] || []).filter(r => r.id !== rid);
+  if (!m[pid].length) delete m[pid];
+  lcSaveAll(m);
+  renderPfLocations();
+}
+function renderPfLocations() {
+  const host = document.getElementById('portfolio-locations-view');
+  if (!host || host.style.display === 'none') return;
+  const items = loadPortfolio();
+  if (!items.length) {
+    host.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:3rem 0;text-align:center;">no projects yet — add one above</div>`;
+    return;
+  }
+  const m = lcLoad();
+  host.innerHTML = ['focus', 'maintain', 'parked', 'unsorted'].map(tier => {
+    const rows = items.filter(p => pfTierOf(p) === tier).sort(pfSortByStage);
+    if (tier === 'unsorted' && !rows.length) return '';
+    const meta = PF_TIER_META[tier];
+    return `<div class="pf-tier">
+      <div class="pf-tier-head"><span class="pf-tier-title">${meta.label}</span><span class="pf-tier-count">${rows.length}</span></div>
+      ${rows.length ? rows.map(p => {
+        const list = (m[p.id] && m[p.id].length) ? m[p.id] : [{ id: lcNewId(), loc: '', link: '', what: '' }];
+        return `<div class="wf-card">
+          <div class="wf-head"><span class="wf-name">${esc(p.name)}</span></div>
+          <div class="lc-scroll"><table class="lc-table">
+            <thead><tr><th style="width:26%;">Location</th><th style="width:36%;">Link / path</th><th>What's kept there</th><th style="width:30px;"></th></tr></thead>
+            <tbody>${list.map(r => `<tr>
+              <td><input class="bs-in" type="text" placeholder="e.g. Google Drive, Notion, laptop…" value="${esc(r.loc)}" oninput="lcEdit(${p.id}, '${r.id}', 'loc', this)"></td>
+              <td><div class="lc-link"><input class="bs-in" type="text" placeholder="Link or folder path" value="${esc(r.link)}" oninput="lcEdit(${p.id}, '${r.id}', 'link', this)"><a class="lc-open" target="_blank" rel="noopener noreferrer" title="Open link"${lcIsUrl(r.link) ? ` href="${esc(r.link.trim())}"` : ' style="display:none;"'}>↗</a></div></td>
+              <td><input class="bs-in" type="text" placeholder="Files / info stored here" value="${esc(r.what)}" oninput="lcEdit(${p.id}, '${r.id}', 'what', this)"></td>
+              <td><button class="lc-del" title="Remove this row" onclick="lcDelRow(${p.id}, '${r.id}')">×</button></td>
+            </tr>`).join('')}</tbody>
+          </table></div>
+          <button class="lc-add" onclick="lcAddRow(${p.id})">+ Add row</button>
+        </div>`;
+      }).join('') : `<div class="pf-tier-empty">Nothing here.</div>`}
+    </div>`;
+  }).join('');
+}
+
 // ── Workflow (external) tab: one big free-text field for the funnel structure ──
 const WX_KEY = 'mc_workflow_ext';
 function wxSave(el) { try { localStorage.setItem(WX_KEY, el.value); } catch (e) {} caAutosize(el); }
@@ -6844,8 +6925,12 @@ function renderPortfolio() {
   const tBtn = document.getElementById('pf-view-table'), cBtn = document.getElementById('pf-view-cards');
   if (tBtn) tBtn.classList.toggle('on', pfView === 'table');
   if (cBtn) cBtn.classList.toggle('on', pfView === 'cards');
+  const lBtn = document.getElementById('pf-view-locations');
+  if (lBtn) lBtn.classList.toggle('on', pfView === 'locations');
   document.getElementById('portfolio-table-view').style.display = pfView === 'table' ? 'block' : 'none';
   document.getElementById('portfolio-cards-view').style.display = pfView === 'cards' ? 'block' : 'none';
+  document.getElementById('portfolio-locations-view').style.display = pfView === 'locations' ? 'block' : 'none';
+  renderPfLocations();
   renderPortfolioTable(loadPortfolio());
   const items = loadPortfolio();
   const listEl = document.getElementById('portfolio-list');
@@ -6893,6 +6978,11 @@ function buildPortfolioLines() {
     if (p.notes) lines.push('  Notes: ' + p.notes);
     const pnText = (pnLoad()[p.id] || '').trim();
     if (pnText) lines.push('  Project notes (Notes tab): ' + pnText.replace(/\r?\n/g, '\n    '));
+    const lcRows = (lcLoad()[p.id] || []).filter(r => (r.loc || r.link || r.what || '').trim());
+    if (lcRows.length) {
+      lines.push('  File locations:');
+      lcRows.forEach(r => lines.push('    • ' + [r.loc, r.link, r.what].map(x => (x || '').trim()).filter(Boolean).join(' — ')));
+    }
     const total = pfValidationTotal(p);
     const tier = pfValidationTier(total);
     lines.push('  Validation: ' + total + '/' + VAL_MAX + ' — ' + tier.label);
@@ -6911,7 +7001,8 @@ function emailPortfolioView() {
 function exportPortfolioJson() {
   const pn = pnLoad();
   const wfAll = wfLoad();
-  const items = loadPortfolio().map(p => { const o = pn[p.id] ? { ...p, projectNotes: pn[p.id] } : { ...p }; if (wfAll[p.id]) o.workflow = wfAll[p.id]; return o; });
+  const lcAll = lcLoad();
+  const items = loadPortfolio().map(p => { const o = pn[p.id] ? { ...p, projectNotes: pn[p.id] } : { ...p }; if (wfAll[p.id]) o.workflow = wfAll[p.id]; if (lcAll[p.id] && lcAll[p.id].length) o.locations = lcAll[p.id]; return o; });
   const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -7071,9 +7162,10 @@ function importPortfolioJson(text) {
   const items = loadPortfolio();
   const notes = pnLoad();
   const wfAllImp = wfLoad();
+  const lcAllImp = lcLoad();
   let added = 0, matched = 0, notesRestored = 0;
   data.forEach(raw => {
-    const { projectNotes, workflow, ...rec } = raw;
+    const { projectNotes, workflow, locations, ...rec } = raw;
     const nm = rec.name.trim().toLowerCase();
     // already present: same id, or same name (e.g. the sample endeavours re-created after clearing site data)
     let existing = items.find(x => rec.id != null && x.id === rec.id) || items.find(x => (x.name || '').trim().toLowerCase() === nm);
@@ -7087,10 +7179,12 @@ function importPortfolioJson(text) {
     }
     if (projectNotes && !notes[existing.id]) { notes[existing.id] = String(projectNotes); notesRestored++; }
     if (workflow && typeof workflow === 'object' && !wfAllImp[existing.id]) { wfAllImp[existing.id] = workflow; }
+    if (Array.isArray(locations) && locations.length && !(lcAllImp[existing.id] || []).length) { lcAllImp[existing.id] = locations; }
   });
   savePortfolio(items);
   localStorage.setItem(PF_NOTES_KEY, JSON.stringify(notes));
   wfSaveAll(wfAllImp);
+  lcSaveAll(lcAllImp);
   pfRefreshViews();
   say(`Backup imported: ${added} endeavour${added === 1 ? '' : 's'} added, ${matched} already in the portfolio (left as they were), ${notesRestored} note${notesRestored === 1 ? '' : 's'} restored.`);
 }
