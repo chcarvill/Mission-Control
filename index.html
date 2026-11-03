@@ -2712,6 +2712,10 @@
   .lc-del { background:none; border:none; color:var(--text-hint); font-size:16px; cursor:pointer; padding:2px 6px; }
   .lc-del:hover { color:#f87171; }
   .lc-add { margin:2px 0 6px; font-family:var(--mono); font-size:11px; padding:5px 12px; border-radius:20px; border:0.5px solid var(--border2); background:transparent; color:var(--text-secondary); cursor:pointer; letter-spacing:0.04em; }
+  .sf-row { display:grid; grid-template-columns:230px 1fr; gap:10px; align-items:start; margin-bottom:8px; }
+  .sf-label { font-family:var(--mono); font-size:11.5px; letter-spacing:0.04em; color:var(--text); padding-top:8px; }
+  .sf-area { min-height:2.6em; resize:vertical; }
+  @media (max-width:700px) { .sf-row { grid-template-columns:1fr; gap:4px; } .sf-label { padding-top:0; } }
 </style>
 <style id="visualizer-styles">
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
@@ -3685,9 +3689,11 @@
     <div class="pf-viewbar">
       <button class="pf-viewbtn" id="pf-view-table" onclick="setPfView('table')">▤ Tiers table</button>
       <button class="pf-viewbtn" id="pf-view-cards" onclick="setPfView('cards')">▦ Cards</button>
+      <button class="pf-viewbtn" id="pf-view-structure" onclick="setPfView('structure')">⛓ Structure/Funnel</button>
       <button class="pf-viewbtn" id="pf-view-locations" onclick="setPfView('locations')">▥ File locations</button>
     </div>
     <div id="portfolio-table-view"></div>
+    <div id="portfolio-structure-view" style="display:none;"></div>
     <div id="portfolio-locations-view" style="display:none;"></div>
     <div id="portfolio-cards-view">
     <div id="portfolio-empty" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:4rem 0;text-align:center;">no projects yet — add one above</div>
@@ -3798,8 +3804,9 @@
           <li>Tap <b>✓ Done</b> when it's finished: it's logged, the box clears, and the app asks for the next one straight away.</li>
           <li>Moving an endeavour to Parked asks for a restart trigger instead.</li>
         </ul>
-        <h4>Tiers table, Cards and File locations</h4>
-        <p>The three buttons above the list switch views: <b>File locations</b> lists each endeavour (grouped by tier) with its own table, with as many rows as you need, for recording where its files and information are stored: a location (e.g. Google Drive, Notion, a laptop folder), a link or path (web links get a ↗ button), and what is kept there. It is saved in this browser and included in Portfolio → Export backup (as a <b>locations</b> entry) and the Portfolio email.</p>
+        <h4>Tiers table, Cards, Structure/Funnel and File locations</h4>
+        <p>The four buttons above the list switch views. <b>Structure/Funnel</b> lists every endeavour by tier, with two rows beneath each name: its <b>Business Structure</b> (as you type, it suggests the structure names you have entered on the Biz Structures tab, but you can type anything) and its <b>Assigned Workflow (Your Funnel)</b>. It is saved in this browser and included in Portfolio → Export backup (as a <b>structure</b> entry) and the Portfolio email.</p>
+        <p><b>File locations</b> lists each endeavour (grouped by tier) with its own table, with as many rows as you need, for recording where its files and information are stored: a location (e.g. Google Drive, Notion, a laptop folder), a link or path (web links get a ↗ button), and what is kept there. It is saved in this browser and included in Portfolio → Export backup (as a <b>locations</b> entry) and the Portfolio email.</p>
         <p><b>Cards</b> is the original layout (offering, target market, notes, status, validation badge, Open in Do) and now also shows each endeavour's tier and stage. Your choice is remembered.</p>
         <h4>Other Portfolio tools</h4>
         <ul>
@@ -6142,8 +6149,8 @@ function confirmAddPortfolio() {
   pfRefreshViews();
 }
 // ── Tiers table (Portfolio tab) ──────────────────────────────
-function getPfView() { const v = localStorage.getItem('mc_pf_view'); return (v === 'cards' || v === 'locations') ? v : 'table'; }
-function setPfView(v) { localStorage.setItem('mc_pf_view', (v === 'cards' || v === 'locations') ? v : 'table'); renderPortfolio(); }
+function getPfView() { const v = localStorage.getItem('mc_pf_view'); return (v === 'cards' || v === 'locations' || v === 'structure') ? v : 'table'; }
+function setPfView(v) { localStorage.setItem('mc_pf_view', (v === 'cards' || v === 'locations' || v === 'structure') ? v : 'table'); renderPortfolio(); }
 
 function pfStageSelect(p) {
   const s = pfStageOf(p);
@@ -6213,6 +6220,56 @@ function renderPortfolioTable(items) {
 }
 
 // ── Inline edits (shared by Portfolio table, Projects tab and Weekly review) ──
+// ── Portfolio "Structure/Funnel" view: per endeavour, its Business Structure and Assigned Workflow (Your Funnel) ──
+const SF_KEY = 'mc_pf_structure';
+function sfLoad() { try { const m = JSON.parse(localStorage.getItem(SF_KEY)); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; } catch (e) { return {}; } }
+function sfSaveAll(m) { try { localStorage.setItem(SF_KEY, JSON.stringify(m)); } catch (e) {} }
+function sfEdit(pid, field, el) {
+  const m = sfLoad();
+  const cur = m[pid] || { bs: '', fn: '' };
+  cur[field] = el.value;
+  if (!cur.bs && !cur.fn) delete m[pid]; else m[pid] = cur;
+  sfSaveAll(m);
+  if (el.tagName === 'TEXTAREA') caAutosize(el);
+}
+function renderPfStructure() {
+  const host = document.getElementById('portfolio-structure-view');
+  if (!host || host.style.display === 'none') return;
+  const items = loadPortfolio();
+  if (!items.length) {
+    host.innerHTML = `<div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--text-hint);letter-spacing:0.05em;padding:3rem 0;text-align:center;">no projects yet — add one above</div>`;
+    return;
+  }
+  const m = sfLoad();
+  // suggestions come from the names typed on the Biz Structures tab (free typing is still allowed)
+  const bsNames = bizLoad().map(b => (b.name || '').trim()).filter(Boolean);
+  host.innerHTML = `<datalist id="sf-bs-list">${bsNames.map(n => `<option value="${esc(n)}"></option>`).join('')}</datalist>` +
+  ['focus', 'maintain', 'parked', 'unsorted'].map(tier => {
+    const rows = items.filter(p => pfTierOf(p) === tier).sort(pfSortByStage);
+    if (tier === 'unsorted' && !rows.length) return '';
+    const meta = PF_TIER_META[tier];
+    const over = meta.limit && rows.length > meta.limit;
+    const count = meta.limit ? `${rows.length}/${meta.limit}` : String(rows.length);
+    return `<div class="pf-tier">
+      <div class="pf-tier-head">
+        <span class="pf-tier-title">${meta.label}</span>
+        <span class="pf-tier-count${over ? ' over' : ''}">${count}${over ? ' · over the limit' : ''}</span>
+      </div>
+      ${rows.length ? rows.map(p => {
+        const v = m[p.id] || { bs: '', fn: '' };
+        return `<div class="wf-card">
+          <div class="wf-head"><span class="wf-name">${esc(p.name)}</span></div>
+          <div class="sf-row"><div class="sf-label">Business Structure</div>
+            <input class="bs-in" type="text" list="sf-bs-list" placeholder="Business structure for this endeavour…" value="${esc(v.bs)}" oninput="sfEdit(${p.id}, 'bs', this)"></div>
+          <div class="sf-row"><div class="sf-label">Assigned Workflow (Your Funnel)</div>
+            <textarea class="bs-area sf-area" rows="2" placeholder="Workflow / funnel assigned to this endeavour…" oninput="sfEdit(${p.id}, 'fn', this)">${esc(v.fn)}</textarea></div>
+        </div>`;
+      }).join('') : `<div class="pf-tier-empty">Nothing here.</div>`}
+    </div>`;
+  }).join('');
+  host.querySelectorAll('.sf-area').forEach(caAutosize);
+}
+
 // ── Portfolio "File locations" view: per endeavour, an unlimited table of where its files/info are stored ──
 const LC_KEY = 'mc_pf_locations';
 function lcLoad() { try { const m = JSON.parse(localStorage.getItem(LC_KEY)); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; } catch (e) { return {}; } }
@@ -6925,6 +6982,10 @@ function renderPortfolio() {
   const tBtn = document.getElementById('pf-view-table'), cBtn = document.getElementById('pf-view-cards');
   if (tBtn) tBtn.classList.toggle('on', pfView === 'table');
   if (cBtn) cBtn.classList.toggle('on', pfView === 'cards');
+  const sBtn = document.getElementById('pf-view-structure');
+  if (sBtn) sBtn.classList.toggle('on', pfView === 'structure');
+  document.getElementById('portfolio-structure-view').style.display = pfView === 'structure' ? 'block' : 'none';
+  renderPfStructure();
   const lBtn = document.getElementById('pf-view-locations');
   if (lBtn) lBtn.classList.toggle('on', pfView === 'locations');
   document.getElementById('portfolio-table-view').style.display = pfView === 'table' ? 'block' : 'none';
@@ -6978,6 +7039,9 @@ function buildPortfolioLines() {
     if (p.notes) lines.push('  Notes: ' + p.notes);
     const pnText = (pnLoad()[p.id] || '').trim();
     if (pnText) lines.push('  Project notes (Notes tab): ' + pnText.replace(/\r?\n/g, '\n    '));
+    const sfv = sfLoad()[p.id] || {};
+    if ((sfv.bs || '').trim()) lines.push('  Business structure: ' + sfv.bs.trim());
+    if ((sfv.fn || '').trim()) lines.push('  Assigned workflow (funnel): ' + sfv.fn.trim().replace(/\r?\n/g, '\n    '));
     const lcRows = (lcLoad()[p.id] || []).filter(r => (r.loc || r.link || r.what || '').trim());
     if (lcRows.length) {
       lines.push('  File locations:');
@@ -7002,7 +7066,8 @@ function exportPortfolioJson() {
   const pn = pnLoad();
   const wfAll = wfLoad();
   const lcAll = lcLoad();
-  const items = loadPortfolio().map(p => { const o = pn[p.id] ? { ...p, projectNotes: pn[p.id] } : { ...p }; if (wfAll[p.id]) o.workflow = wfAll[p.id]; if (lcAll[p.id] && lcAll[p.id].length) o.locations = lcAll[p.id]; return o; });
+  const sfAll = sfLoad();
+  const items = loadPortfolio().map(p => { const o = pn[p.id] ? { ...p, projectNotes: pn[p.id] } : { ...p }; if (wfAll[p.id]) o.workflow = wfAll[p.id]; if (lcAll[p.id] && lcAll[p.id].length) o.locations = lcAll[p.id]; if (sfAll[p.id]) o.structure = sfAll[p.id]; return o; });
   const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -7163,9 +7228,10 @@ function importPortfolioJson(text) {
   const notes = pnLoad();
   const wfAllImp = wfLoad();
   const lcAllImp = lcLoad();
+  const sfAllImp = sfLoad();
   let added = 0, matched = 0, notesRestored = 0;
   data.forEach(raw => {
-    const { projectNotes, workflow, locations, ...rec } = raw;
+    const { projectNotes, workflow, locations, structure, ...rec } = raw;
     const nm = rec.name.trim().toLowerCase();
     // already present: same id, or same name (e.g. the sample endeavours re-created after clearing site data)
     let existing = items.find(x => rec.id != null && x.id === rec.id) || items.find(x => (x.name || '').trim().toLowerCase() === nm);
@@ -7180,11 +7246,13 @@ function importPortfolioJson(text) {
     if (projectNotes && !notes[existing.id]) { notes[existing.id] = String(projectNotes); notesRestored++; }
     if (workflow && typeof workflow === 'object' && !wfAllImp[existing.id]) { wfAllImp[existing.id] = workflow; }
     if (Array.isArray(locations) && locations.length && !(lcAllImp[existing.id] || []).length) { lcAllImp[existing.id] = locations; }
+    if (structure && typeof structure === 'object' && !sfAllImp[existing.id]) { sfAllImp[existing.id] = { bs: String(structure.bs || ''), fn: String(structure.fn || '') }; }
   });
   savePortfolio(items);
   localStorage.setItem(PF_NOTES_KEY, JSON.stringify(notes));
   wfSaveAll(wfAllImp);
   lcSaveAll(lcAllImp);
+  sfSaveAll(sfAllImp);
   pfRefreshViews();
   say(`Backup imported: ${added} endeavour${added === 1 ? '' : 's'} added, ${matched} already in the portfolio (left as they were), ${notesRestored} note${notesRestored === 1 ? '' : 's'} restored.`);
 }
