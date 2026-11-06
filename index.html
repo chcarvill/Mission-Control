@@ -2716,6 +2716,13 @@
   .sf-label { font-family:var(--mono); font-size:11.5px; letter-spacing:0.04em; color:var(--text); padding-top:8px; }
   .sf-area { min-height:2.6em; resize:vertical; }
   @media (max-width:700px) { .sf-row { grid-template-columns:1fr; gap:4px; } .sf-label { padding-top:0; } }
+  .ld-wrap { padding:1.2rem 2.5rem 2.5rem; max-width:900px; }
+  .ld-card { border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--surface); padding:0.8rem 1rem 1rem; margin-bottom:12px; }
+  .ld-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+  .ld-num { font-family:var(--mono); font-size:11px; letter-spacing:0.08em; color:var(--text-hint); }
+  .ld-grid { display:grid; grid-template-columns:1fr 1fr; gap:4px 12px; }
+  .ld-grid .bs-label { margin:8px 0 4px; }
+  @media (max-width:700px) { .ld-wrap { padding-left:1rem; padding-right:1rem; } .ld-grid { grid-template-columns:1fr; } }
 </style>
 <style id="visualizer-styles">
   @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
@@ -2858,6 +2865,7 @@
   <button class="master-tab" id="mtab-workflowext" onclick="switchMasterTab('workflowext')">Workflow (external)</button>
   <button class="master-tab" id="mtab-workflow" onclick="switchMasterTab('workflow')">Workflow (internal)</button>
   <button class="master-tab" id="mtab-projects" onclick="switchMasterTab('projects')">Week's Projects</button>
+  <button class="master-tab" id="mtab-learning" onclick="switchMasterTab('learning')">Learning &amp; Dev</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Notes</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
@@ -3761,6 +3769,7 @@
           <li><b>Workflow (external)</b> — one large free-text page for detailing the structure of your marketing funnel(s).</li>
           <li><b>Workflow (internal)</b> — every Portfolio endeavour with five stages beneath it, from market needs analysis through to marketing, each with a status and notes.</li>
           <li><b>Week's Projects</b> — the week's schedule exported from Do, then the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
+          <li><b>Learning &amp; Dev</b> — a list of courses and training modules you're considering or taking. Each entry has four fields: Course/Training Module, Benefit, Provider and Link (web links get a ↗ button). <b>+ Add another</b> adds an entry, × removes one, and Email view sends the whole list. Saved in this browser only (it is not part of Portfolio → Export backup).</li>
           <li><b>Notes</b> — a three-line notes field for every Portfolio endeavour, listed in the same Focus ON / Maintain / Parked order as Portfolio, with your missions and tasks (formerly the Missions tab) below.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
           <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
@@ -4007,6 +4016,15 @@
       </div>
     </details>
   </div>
+</div>
+
+<!-- ══ LEARNING & DEV PANEL ══ -->
+<div id="learning-panel" style="display:none;">
+  <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
+    <button onclick="ldAdd()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">+ Add another</button>
+    <button onclick="emailLdView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
+  </div>
+  <div class="ld-wrap" id="ld-host"></div>
 </div>
 
 <!-- ══ PROJECTS PANEL ══ -->
@@ -5947,6 +5965,8 @@ function switchMasterTab(tab) {
   document.getElementById('mtab-workflow').classList.toggle('master-active', tab === 'workflow');
   document.getElementById('mtab-biz').classList.toggle('master-active', tab === 'biz');
   document.getElementById('projects-panel').style.display = tab === 'projects' ? 'block' : 'none';
+  document.getElementById('learning-panel').style.display = tab === 'learning' ? 'block' : 'none';
+  document.getElementById('mtab-learning').classList.toggle('master-active', tab === 'learning');
   document.getElementById('do-panel').style.display = tab === 'do' ? 'block' : 'none';
   document.getElementById('mtab-homepage').classList.toggle('master-active', tab === 'homepage');
   document.getElementById('mtab-start').classList.toggle('master-active', tab === 'start');
@@ -5967,6 +5987,7 @@ function switchMasterTab(tab) {
   if (tab === 'portfolio') { renderPortfolio(); if (pfDraft) pfRestoreDraft(); }
   if (tab === 'biz') { renderBizStructures(); }
   if (tab === 'mv') { renderMv(); }
+  if (tab === 'learning') { renderLd(); }
   if (tab === 'workflow') { renderWorkflow(); }
   if (tab === 'workflowext') { renderWorkflowExt(); }
   if (tab === 'missions') { renderPortfolioNotes(); }
@@ -6357,6 +6378,69 @@ function renderPfLocations() {
       }).join('') : `<div class="pf-tier-empty">Nothing here.</div>`}
     </div>`;
   }).join('');
+}
+
+// ── Learning & Dev tab: a growing list of courses/training, each with Course/Training Module, Benefit, Provider, Link ──
+const LD_KEY = 'mc_learning';
+function ldLoad() { try { const a = JSON.parse(localStorage.getItem(LD_KEY)); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
+function ldSaveAll(a) { try { localStorage.setItem(LD_KEY, JSON.stringify(a)); } catch (e) {} }
+function ldNewEntry() { return { id: 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), course: '', benefit: '', provider: '', link: '' }; }
+function ldIsUrl(v) { return /^https?:\/\/\S+$/i.test((v || '').trim()); }
+function ldEdit(id, field, el) {
+  const a = ldLoad();
+  let e = a.find(x => x.id === id);
+  if (!e) { e = { id, course: '', benefit: '', provider: '', link: '' }; a.push(e); }
+  e[field] = el.value;
+  ldSaveAll(a);
+  if (field === 'link') {
+    const o = el.parentNode.querySelector('.lc-open');
+    if (o) { if (ldIsUrl(el.value)) { o.href = el.value.trim(); o.style.display = ''; } else { o.removeAttribute('href'); o.style.display = 'none'; } }
+  }
+}
+function ldAdd() {
+  const a = ldLoad();
+  a.push(ldNewEntry());
+  ldSaveAll(a);
+  renderLd();
+  const cards = document.querySelectorAll('#ld-host .ld-card');
+  const last = cards[cards.length - 1];
+  if (last) { last.scrollIntoView({ behavior: 'smooth', block: 'center' }); const f = last.querySelector('input'); if (f) f.focus(); }
+}
+function ldDel(id) {
+  const a = ldLoad();
+  const e = a.find(x => x.id === id);
+  if (e && (e.course || e.benefit || e.provider || e.link) && !confirm('Remove this entry?')) return;
+  ldSaveAll(a.filter(x => x.id !== id));
+  renderLd();
+}
+function renderLd() {
+  const host = document.getElementById('ld-host');
+  if (!host) return;
+  const list = ldLoad();
+  const rows = list.length ? list : [ldNewEntry()];   // always show at least one blank entry (saved on first typing)
+  host.innerHTML = rows.map((e, i) => `<div class="ld-card">
+    <div class="ld-head"><span class="ld-num">#${i + 1}</span><button class="lc-del" title="Remove this entry" onclick="ldDel('${e.id}')">×</button></div>
+    <div class="ld-grid">
+      <div><div class="bs-label">Course/Training Module</div><input class="bs-in" type="text" value="${esc(e.course)}" oninput="ldEdit('${e.id}', 'course', this)"></div>
+      <div><div class="bs-label">Benefit</div><input class="bs-in" type="text" value="${esc(e.benefit)}" oninput="ldEdit('${e.id}', 'benefit', this)"></div>
+      <div><div class="bs-label">Provider</div><input class="bs-in" type="text" value="${esc(e.provider)}" oninput="ldEdit('${e.id}', 'provider', this)"></div>
+      <div><div class="bs-label">Link</div><div class="lc-link"><input class="bs-in" type="text" placeholder="https://…" value="${esc(e.link)}" oninput="ldEdit('${e.id}', 'link', this)"><a class="lc-open" target="_blank" rel="noopener noreferrer" title="Open link"${ldIsUrl(e.link) ? ` href="${esc(e.link.trim())}"` : ' style="display:none;"'}>↗</a></div></div>
+    </div>
+  </div>`).join('');
+}
+function emailLdView() {
+  const list = ldLoad().filter(e => (e.course || e.benefit || e.provider || e.link).trim());
+  const lines = ['LEARNING & DEV', '='.repeat(50), new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), ''];
+  if (!list.length) lines.push('(nothing entered yet)', '');
+  list.forEach((e, i) => {
+    lines.push(`${i + 1}. ${(e.course || '').trim() || '(untitled)'}`);
+    if ((e.benefit || '').trim()) lines.push('   Benefit: ' + e.benefit.trim());
+    if ((e.provider || '').trim()) lines.push('   Provider: ' + e.provider.trim());
+    if ((e.link || '').trim()) lines.push('   Link: ' + e.link.trim());
+    lines.push('');
+  });
+  lines.push('Generated by Mission Control.');
+  mcSendEmail('Learning & Dev (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
 }
 
 // ── Mission/Vision tab: mission, vision and personal mission statements ──
