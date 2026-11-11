@@ -2703,6 +2703,38 @@
   .wf-sel.wf-s2 { background:rgba(43,206,140,0.18); border-color:rgba(43,206,140,0.55); }
   .wf-sel:focus, .wf-note:focus { outline:none; border-color:var(--text-hint); }
   @media (max-width:700px) { .wf-wrap { padding-left:1rem; padding-right:1rem; } .wf-row { grid-template-columns:1fr 1fr; } .wf-stage { grid-column:1 / -1; font-weight:500; } .wf-note { grid-column:1 / -1; } }
+  /* The Process (Workflow internal) */
+  .wp-toggle { all:unset; box-sizing:border-box; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+  .wp-toggle:focus-visible, .wp-ph:focus-visible, .wp-btn:focus-visible, .wp-ico:focus-visible { outline:2px solid var(--active); outline-offset:2px; }
+  .wp-body { margin-top:10px; padding-top:10px; border-top:0.5px solid var(--border); }
+  .wp-q { font-family:var(--sans); font-size:13px; font-weight:500; color:var(--text); margin:0 0 3px; }
+  .wp-sub { font-family:var(--sans); font-size:12px; color:var(--text-hint); font-style:italic; margin:0 0 8px; }
+  .wp-phs { display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin-bottom:14px; }
+  .wp-ph { all:unset; box-sizing:border-box; cursor:pointer; padding:8px 10px; border:0.5px solid var(--border2); border-radius:var(--radius); background:var(--surface2); font-family:var(--sans); font-size:12px; color:var(--text-secondary); line-height:1.3; }
+  .wp-ph small { display:block; font-family:var(--mono); font-size:10.5px; color:var(--text-hint); margin-top:3px; letter-spacing:0.03em; }
+  .wp-ph.cur { border-color:var(--active); color:var(--text); background:var(--active-bg); }
+  .wp-ph.s2 small { color:var(--active); }
+  .wp-sec { margin-bottom:16px; }
+  .wp-list { list-style:none; margin:0 0 8px; padding:0; }
+  .wp-item { display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:0.5px solid var(--border); font-family:var(--sans); font-size:12.5px; color:var(--text); }
+  .wp-item:last-child { border-bottom:0; }
+  .wp-item .wp-t { flex:1; min-width:0; overflow-wrap:anywhere; }
+  .wp-item.done .wp-t { text-decoration:line-through; color:var(--text-hint); }
+  .wp-num { flex:none; width:20px; height:20px; border-radius:50%; background:var(--active-bg); color:var(--active); font-family:var(--mono); font-size:11px; display:grid; place-items:center; }
+  .wp-item input[type=checkbox] { accent-color:var(--active); width:16px; height:16px; flex:none; }
+  .wp-ico { all:unset; box-sizing:border-box; cursor:pointer; width:24px; height:24px; text-align:center; line-height:24px; border-radius:var(--radius-sm); color:var(--text-hint); font-size:13px; }
+  .wp-ico:hover { color:var(--text); background:var(--surface2); }
+  .wp-ico[disabled] { opacity:0.3; cursor:default; }
+  .wp-add { display:flex; gap:6px; }
+  .wp-add input { flex:1; min-width:0; box-sizing:border-box; font-family:var(--sans); font-size:12.5px; color:var(--text); background:var(--surface2); border:0.5px solid var(--border2); border-radius:var(--radius); padding:6px 8px; }
+  .wp-add input:focus { outline:none; border-color:var(--text-hint); }
+  .wp-btn { all:unset; box-sizing:border-box; cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:0.05em; padding:6px 14px; border-radius:var(--radius); background:var(--active-bg); color:var(--active); border:0.5px solid var(--active); }
+  .wp-obj { margin-top:10px; }
+  .wp-obj-h { font-family:var(--sans); font-size:12.5px; font-weight:500; color:var(--text); margin-bottom:2px; }
+  .wp-obj-h span { font-family:var(--mono); font-size:11px; color:var(--text-hint); font-weight:400; margin-left:6px; }
+  .wp-empty { font-family:var(--sans); font-size:12px; color:var(--text-hint); margin-bottom:6px; }
+  .wp-meta { display:grid; grid-template-columns:130px 1fr; gap:8px; margin-bottom:14px; }
+  @media (max-width:700px) { .wp-phs { grid-template-columns:1fr 1fr; } .wp-meta { grid-template-columns:1fr; } }
   .lc-scroll { overflow-x:auto; }
   .lc-table { width:100%; min-width:560px; border-collapse:collapse; margin-bottom:6px; }
   .lc-table th { font-family:var(--mono); font-size:11px; letter-spacing:0.05em; color:var(--text-hint); font-weight:400; text-align:left; padding:4px 6px; border-bottom:0.5px solid var(--border); }
@@ -3742,7 +3774,7 @@
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="emailWorkflowView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
   </div>
-  <div class="mc-mobile-pad" style="padding:1rem 2.5rem 0.2rem;font-family:var(--sans);font-size:12px;color:var(--text-hint);font-style:italic;">Every endeavour in Portfolio appears here automatically. Work each one through the stages in order, from market needs analysis to marketing.</div>
+  <div class="mc-mobile-pad" style="padding:1rem 2.5rem 0.2rem;font-family:var(--sans);font-size:12px;color:var(--text-hint);font-style:italic;">Every endeavour in Portfolio appears here automatically. Open one, pick the phase you are working through, then set out its recurring process, its objectives and the other activities needed.</div>
   <div class="wf-wrap" id="wf-host"></div>
 </div>
 
@@ -3883,8 +3915,9 @@
       <div class="cp-body">
         <ul>
           <li>Every endeavour in Portfolio appears here automatically, grouped under Focus ON, Maintain and Parked in the same order as Portfolio. Add, move or remove one in Portfolio and this tab follows.</li>
-          <li>Beneath each endeavour are five stages, in order: <b>1. Market needs analysis</b>, <b>2. Invention</b>, <b>3. Creation</b>, <b>4. Deployment</b> and <b>5. Marketing</b>. Each has a status (Not started, In progress or Done) and a notes line. The counter beside the endeavour's name shows how many stages are done.</li>
-          <li><b>✉ Email view</b> emails every endeavour with its stages, statuses and notes.</li>
+          <li>Each endeavour is a card with its progress counter (how many of its five phases are done). Tap a card to open it, then choose the phase you are working through: <b>Market needs analysis</b>, <b>Invention</b>, <b>Creation</b>, <b>Deployment</b> or <b>Marketing</b>. Each phase keeps its own status (Not started, In progress or Done) and notes.</li>
+          <li>Within a phase, set out three things: the <b>recurring process</b> (the steps you repeat to complete the phase, in order — use the arrows to reorder), your <b>objectives</b>, and a <b>tick-sheet</b> under each objective for the other activities, outside the recurring steps, needed to reach it.</li>
+          <li><b>✉ Email view</b> emails every endeavour with its phases, statuses, notes, recurring steps, objectives and tick-sheets.</li>
           <li>Everything saves as you go, in this browser. It is included in Portfolio → Export backup (as a <b>workflow</b> entry on each endeavour) and restored by Import backup.</li>
         </ul>
       </div>
@@ -6485,7 +6518,8 @@ function emailWorkflowExtView() {
   mcSendEmail('Workflow (external) (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
 }
 
-// ── Workflow tab: every Portfolio endeavour, each with the five stages from market need to marketing ──
+// ── Workflow tab ("The Process"): every Portfolio endeavour, each with five phases. Per phase: status, notes,
+//    the recurring process (ordered steps), objectives, and a tick-sheet of other activities per objective. ──
 const WF_KEY = 'mc_workflow';
 const WF_STAGES = [
   { k: 'needs',  label: 'Market needs analysis' },
@@ -6495,24 +6529,64 @@ const WF_STAGES = [
   { k: 'market', label: 'Marketing', hint: '(refer to both Communic8 apps)' }
 ];
 const WF_STATUS = ['Not started', 'In progress', 'Done'];
+const WF_UI = { open: null, ph: {}, focus: null };   // which endeavour is open, and which phase is selected for each
+function wfUid() { return Math.random().toString(36).slice(2, 9); }
 function wfLoad() { try { const m = JSON.parse(localStorage.getItem(WF_KEY)); return m && typeof m === 'object' && !Array.isArray(m) ? m : {}; } catch (e) { return {}; } }
 function wfSaveAll(m) { try { localStorage.setItem(WF_KEY, JSON.stringify(m)); } catch (e) {} }
-function wfGet(m, id, k) { const x = (m[id] || {})[k] || {}; return { s: Number(x.s) || 0, n: x.n || '' }; }
-function wfSet(id, k, field, val) {
+function wfList(a, keys) { return (Array.isArray(a) ? a : []).filter(x => x && typeof x === 'object' && typeof x.t === 'string').map(x => { const o = { id: String(x.id || wfUid()), t: x.t }; if (keys) { o.o = String(x.o || ''); o.d = !!x.d; } return o; }); }
+function wfGet(m, id, k) {
+  const x = (m[id] || {})[k] || {};
+  return { s: Number(x.s) || 0, n: typeof x.n === 'string' ? x.n : '', steps: wfList(x.steps), objs: wfList(x.objs), acts: wfList(x.acts, true) };
+}
+// Apply fn to one phase of one endeavour, drop it if it is empty, and save.
+function wfMut(id, k, fn) {
   const m = wfLoad();
-  if (!m[id]) m[id] = {};
+  if (!m[id] || typeof m[id] !== 'object') m[id] = {};
   const cur = wfGet(m, id, k);
-  cur[field] = field === 's' ? Number(val) : val;
-  if (!cur.s && !cur.n) delete m[id][k]; else m[id][k] = cur;
+  fn(cur);
+  const empty = !cur.s && !cur.n && !cur.steps.length && !cur.objs.length && !cur.acts.length;
+  if (empty) delete m[id][k]; else m[id][k] = cur;
   if (!Object.keys(m[id]).length) delete m[id];
   wfSaveAll(m);
 }
-function wfStatusChange(id, k, el) {
-  wfSet(id, k, 's', el.value);
-  el.className = 'wf-sel wf-s' + el.value;
-  const done = WF_STAGES.filter(st => wfGet(wfLoad(), id, st.k).s === 2).length;
-  const pg = document.getElementById('wf-prog-' + id);
-  if (pg) pg.textContent = done + '/' + WF_STAGES.length + ' done';
+function wfSet(id, k, field, val) { wfMut(id, k, c => { c[field] = field === 's' ? Number(val) : val; }); }
+function wfDoneCount(m, id) { return WF_STAGES.filter(st => wfGet(m, id, st.k).s === 2).length; }
+function wfTicks(c) { return { t: c.acts.length, d: c.acts.filter(a => a.d).length }; }
+
+function wfItemRow(kind, i, n, text, id, act) {
+  const ctl = `data-kind="${kind}" data-i="${i}"`;
+  return `<li class="wp-item${act && act.d ? ' done' : ''}">`
+    + (kind === 'steps' ? `<span class="wp-num">${i + 1}</span>` : '')
+    + (act ? `<input type="checkbox" data-wp="tick" data-id="${esc(id)}"${act.d ? ' checked' : ''} aria-label="Done">` : '')
+    + `<span class="wp-t">${esc(text)}</span>`
+    + (kind === 'steps' ? `<button class="wp-ico" data-wp="up" ${ctl}${i === 0 ? ' disabled' : ''} aria-label="Move up">↑</button><button class="wp-ico" data-wp="down" ${ctl}${i === n - 1 ? ' disabled' : ''} aria-label="Move down">↓</button>` : '')
+    + `<button class="wp-ico" data-wp="del" data-kind="${kind}" data-id="${esc(id)}" aria-label="Remove">×</button></li>`;
+}
+function wfAdder(key, placeholder, label) {
+  return `<div class="wp-add"><input type="text" data-in="${esc(key)}" placeholder="${esc(placeholder)}" aria-label="${esc(label)}" maxlength="200"><button class="wp-btn" data-wp="add" data-key="${esc(key)}">Add</button></div>`;
+}
+function wfPhaseBody(p, st, c) {
+  const objs = c.objs.map(o => {
+    const a = c.acts.filter(x => x.o === o.id), dn = a.filter(x => x.d).length;
+    return `<div class="wp-obj"><div class="wp-obj-h">${esc(o.t)}<span>${a.length ? dn + ' of ' + a.length + ' ticked' : ''}</span></div>
+      ${a.length ? `<ul class="wp-list">${a.map(x => wfItemRow('acts', 0, 0, x.t, x.id, x)).join('')}</ul>` : ''}
+      ${wfAdder('a:' + o.id, 'Add an activity for this objective', 'Add an activity')}</div>`;
+  }).join('');
+  return `<div class="wp-meta">
+      <select class="wf-sel wf-s${c.s}" data-wp="status" aria-label="Status">${WF_STATUS.map((t, i) => `<option value="${i}"${c.s === i ? ' selected' : ''}>${t}</option>`).join('')}</select>
+      <input class="wf-note" type="text" placeholder="Notes…" value="${esc(c.n)}" data-wp="note" aria-label="Notes">
+    </div>
+    <div class="wp-sec"><p class="wp-q">What recurring process are you running in this phase?</p>
+      <p class="wp-sub">The steps you repeat, in order, to complete it.</p>
+      ${c.steps.length ? `<ol class="wp-list">${c.steps.map((x, i) => wfItemRow('steps', i, c.steps.length, x.t, x.id)).join('')}</ol>` : '<div class="wp-empty">No steps yet.</div>'}
+      ${wfAdder('steps', 'e.g. Interview five people in the target group', 'Add a recurring step')}</div>
+    <div class="wp-sec"><p class="wp-q">What specific objectives do you have for this phase?</p>
+      <p class="wp-sub">What must be true for you to call it complete.</p>
+      ${c.objs.length ? `<ul class="wp-list">${c.objs.map(x => wfItemRow('objs', 0, 0, x.t, x.id)).join('')}</ul>` : '<div class="wp-empty">No objectives yet.</div>'}
+      ${wfAdder('objs', 'e.g. Confirm three problems people will pay to solve', 'Add an objective')}</div>
+    <div class="wp-sec"><p class="wp-q">What else needs to be done to reach these objectives?</p>
+      <p class="wp-sub">Only work outside your recurring steps. Tick each off as it is finished.</p>
+      ${c.objs.length ? objs : '<div class="wp-empty">Add an objective above and its tick-sheet appears here.</div>'}</div>`;
 }
 function renderWorkflow() {
   const host = document.getElementById('wf-host');
@@ -6535,22 +6609,71 @@ function renderWorkflow() {
         <span class="pf-tier-count${over ? ' over' : ''}">${count}${over ? ' · over the limit' : ''}</span>
       </div>
       ${rows.length ? rows.map(p => {
-        const done = WF_STAGES.filter(st => wfGet(m, p.id, st.k).s === 2).length;
-        return `<div class="wf-card">
-          <div class="wf-head"><span class="wf-name">${esc(p.name)}</span><span class="wf-prog" id="wf-prog-${p.id}">${done}/${WF_STAGES.length} done</span></div>
-          ${WF_STAGES.map((st, n) => {
-            const v = wfGet(m, p.id, st.k);
-            return `<div class="wf-row">
-              <div class="wf-stage">${n + 1}. ${st.label}${st.hint ? ` <span class="wf-hint">${st.hint}</span>` : ''}</div>
-              <select class="wf-sel wf-s${v.s}" onchange="wfStatusChange(${p.id}, '${st.k}', this)">${WF_STATUS.map((t, i) => `<option value="${i}"${v.s === i ? ' selected' : ''}>${t}</option>`).join('')}</select>
-              <input class="wf-note" type="text" placeholder="Notes…" value="${esc(v.n)}" oninput="wfSet(${p.id}, '${st.k}', 'n', this.value)">
-            </div>`;
-          }).join('')}
+        const open = WF_UI.open === p.id;
+        let body = '';
+        if (open) {
+          const sel = WF_UI.ph[p.id];
+          const cur = WF_STAGES.find(x => x.k === sel);
+          body = `<div class="wp-body"><p class="wp-q">Which phase are you working through right now?</p>
+            <div class="wp-phs" role="group" aria-label="Phase">${WF_STAGES.map(st => {
+              const c = wfGet(m, p.id, st.k), t = wfTicks(c);
+              return `<button class="wp-ph${sel === st.k ? ' cur' : ''}${c.s === 2 ? ' s2' : ''}" data-wp="phase" data-k="${st.k}" aria-pressed="${sel === st.k}">${esc(st.label)}<small>${c.s === 2 ? 'Done' : t.t ? t.d + '/' + t.t + ' ticked' : WF_STATUS[c.s]}</small></button>`;
+            }).join('')}</div>
+            ${cur ? (cur.hint ? `<p class="wp-sub"><span class="wf-hint">${cur.hint}</span></p>` : '') + wfPhaseBody(p, cur, wfGet(m, p.id, cur.k)) : ''}</div>`;
+        }
+        return `<div class="wf-card" data-pid="${esc(String(p.id))}">
+          <button class="wp-toggle" data-wp="open" aria-expanded="${open}"><span class="wf-name">${esc(p.name)}</span><span class="wf-prog">${wfDoneCount(m, p.id)}/${WF_STAGES.length} done ${open ? '▴' : '▾'}</span></button>${body}
         </div>`;
       }).join('') : `<div class="pf-tier-empty">Nothing here.</div>`}
     </div>`;
   }).join('');
+  if (WF_UI.focus) { const el = host.querySelector('[data-in="' + WF_UI.focus.replace(/"/g, '') + '"]'); if (el) el.focus(); WF_UI.focus = null; }
 }
+(function wfWire() {
+  const host = document.getElementById('wf-host');
+  if (!host) return;
+  const ctx = el => { const card = el.closest('[data-pid]'); if (!card) return null; const pid = card.dataset.pid; const k = WF_UI.ph[pid] || (WF_UI.ph[pid] = null); return { pid: isNaN(pid) ? pid : Number(pid), raw: pid, k }; };
+  host.addEventListener('click', e => {
+    const b = e.target.closest('[data-wp]'); if (!b || b.tagName === 'INPUT' || b.tagName === 'SELECT') return;
+    const c = ctx(b); if (!c) return;
+    const a = b.dataset.wp;
+    if (a === 'open') { WF_UI.open = WF_UI.open === c.raw || WF_UI.open === c.pid ? null : c.pid; if (WF_UI.open != null && !WF_UI.ph[c.raw]) { const m = wfLoad(); const first = WF_STAGES.find(st => wfGet(m, c.pid, st.k).s === 1) || null; if (first) WF_UI.ph[c.raw] = first.k; } return renderWorkflow(); }
+    if (a === 'phase') { WF_UI.ph[c.raw] = b.dataset.k; return renderWorkflow(); }
+    if (!c.k) return;
+    if (a === 'add') {
+      const key = b.dataset.key, inp = b.parentNode.querySelector('input'), v = inp.value.trim();
+      if (!v) { inp.focus(); return; }
+      wfMut(c.pid, c.k, x => {
+        if (key === 'steps') x.steps.push({ id: wfUid(), t: v });
+        else if (key === 'objs') x.objs.push({ id: wfUid(), t: v });
+        else x.acts.push({ id: wfUid(), t: v, o: key.slice(2), d: false });
+      });
+      WF_UI.focus = key; return renderWorkflow();
+    }
+    if (a === 'up' || a === 'down') {
+      const i = Number(b.dataset.i), j = i + (a === 'up' ? -1 : 1);
+      wfMut(c.pid, c.k, x => { if (j >= 0 && j < x.steps.length) { const t = x.steps[i]; x.steps[i] = x.steps[j]; x.steps[j] = t; } });
+      return renderWorkflow();
+    }
+    if (a === 'del') {
+      const kind = b.dataset.kind, id = b.dataset.id;
+      wfMut(c.pid, c.k, x => { x[kind] = x[kind].filter(y => y.id !== id); if (kind === 'objs') x.acts = x.acts.filter(y => y.o !== id); });
+      return renderWorkflow();
+    }
+  });
+  host.addEventListener('change', e => {
+    const t = e.target, c = ctx(t); if (!c || !c.k) return;
+    if (t.dataset.wp === 'status') { wfSet(c.pid, c.k, 's', t.value); renderWorkflow(); }
+    else if (t.dataset.wp === 'tick') { wfMut(c.pid, c.k, x => { x.acts.forEach(y => { if (y.id === t.dataset.id) y.d = t.checked; }); }); renderWorkflow(); }
+  });
+  host.addEventListener('input', e => {
+    const t = e.target; if (t.dataset.wp !== 'note') return;
+    const c = ctx(t); if (c && c.k) wfSet(c.pid, c.k, 'n', t.value);
+  });
+  host.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && e.target.dataset && e.target.dataset.in) { e.preventDefault(); const b = e.target.parentNode.querySelector('[data-wp="add"]'); if (b) b.click(); }
+  });
+})();
 function emailWorkflowView() {
   const items = loadPortfolio();
   const m = wfLoad();
@@ -6561,11 +6684,18 @@ function emailWorkflowView() {
     if (!rows.length) return;
     lines.push(PF_TIER_META[tier].label.toUpperCase(), '-'.repeat(50));
     rows.forEach(p => {
-      const done = WF_STAGES.filter(st => wfGet(m, p.id, st.k).s === 2).length;
-      lines.push(`${p.name} (${done}/${WF_STAGES.length} done)`);
+      lines.push(`${p.name} (${wfDoneCount(m, p.id)}/${WF_STAGES.length} done)`);
       WF_STAGES.forEach((st, n) => {
         const v = wfGet(m, p.id, st.k);
         lines.push(`  ${n + 1}. ${st.label}: ${WF_STATUS[v.s] || WF_STATUS[0]}${v.n.trim() ? ' — ' + v.n.trim() : ''}`);
+        if (v.steps.length) { lines.push('     Recurring process:'); v.steps.forEach((x, i) => lines.push(`       ${i + 1}. ${x.t}`)); }
+        if (v.objs.length) {
+          lines.push('     Objectives:');
+          v.objs.forEach(o => {
+            lines.push(`       - ${o.t}`);
+            v.acts.filter(a => a.o === o.id).forEach(a => lines.push(`           [${a.d ? 'x' : ' '}] ${a.t}`));
+          });
+        }
       });
       lines.push('');
     });
