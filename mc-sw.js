@@ -1,4 +1,4 @@
-const CACHE = 'mc-v33-network-first';
+const CACHE = 'mc-v34-network-first';
 const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js', './communic8-app.js'];
 
 self.addEventListener('install', e => {

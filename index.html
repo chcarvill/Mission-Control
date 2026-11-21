@@ -2703,6 +2703,20 @@
   .wf-sel.wf-s2 { background:rgba(43,206,140,0.18); border-color:rgba(43,206,140,0.55); }
   .wf-sel:focus, .wf-note:focus { outline:none; border-color:var(--text-hint); }
   @media (max-width:700px) { .wf-wrap { padding-left:1rem; padding-right:1rem; } .wf-row { grid-template-columns:1fr 1fr; } .wf-stage { grid-column:1 / -1; font-weight:500; } .wf-note { grid-column:1 / -1; } }
+  /* Workflow (external): funnel summary cards from The Process */
+  .wx-status { font-family:var(--mono); font-size:11px; color:var(--text-hint); letter-spacing:0.03em; margin-bottom:12px; }
+  .wx-card { background:var(--surface); border:0.5px solid var(--border); border-radius:var(--radius); padding:14px 16px; margin-bottom:12px; }
+  .wx-head { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:8px; }
+  .wx-name { font-family:var(--sans); font-size:15px; font-weight:500; color:var(--text); }
+  .wx-open { font-family:var(--mono); font-size:11px; color:var(--active); text-decoration:none; border:0.5px solid var(--active); border-radius:20px; padding:3px 12px; }
+  .wx-open:hover { background:var(--active-bg); }
+  .wx-row { display:grid; grid-template-columns:110px 1fr; gap:10px; padding:5px 0; border-top:0.5px solid var(--border); font-size:12.5px; }
+  .wx-row > span { font-family:var(--mono); font-size:10.5px; color:var(--text-hint); padding-top:2px; }
+  .wx-row > div { color:var(--text-secondary); white-space:pre-wrap; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+  .wx-warn { font-size:12px; color:var(--hold); background:var(--hold-bg); border:0.5px solid var(--hold); border-radius:var(--radius-sm); padding:6px 10px; margin-bottom:4px; }
+  .wx-missing { font-family:var(--sans); font-size:12px; color:var(--text-hint); font-style:italic; margin:4px 0 14px; }
+  .wx-notes-h { font-family:var(--mono); font-size:11px; color:var(--text-hint); letter-spacing:0.05em; margin:1.5rem 0 8px; }
+  @media (max-width:700px) { .wx-row { grid-template-columns:1fr; gap:2px; } }
   /* The Process (Workflow internal) */
   .wp-toggle { all:unset; box-sizing:border-box; cursor:pointer; width:100%; display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
   .wp-toggle:focus-visible, .wp-ph:focus-visible, .wp-btn:focus-visible, .wp-ico:focus-visible { outline:2px solid var(--active); outline-offset:2px; }
@@ -3762,8 +3776,16 @@
 <div id="workflowext-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="emailWorkflowExtView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
+    <button onclick="wxImportClick()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import summary</button>
+    <input type="file" id="wx-import-file" accept=".json,application/json" style="display:none;" />
+    <button onclick="wxSetProcessUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⚙ Process app address</button>
   </div>
-  <div class="mc-mobile-pad" style="padding:1.5rem 2.5rem 3rem;">
+  <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0;">
+    <div class="wx-status" id="wx-status"></div>
+    <div id="wx-cards"></div>
+    <div class="wx-notes-h">Your own notes on your funnels</div>
+  </div>
+  <div class="mc-mobile-pad" style="padding:0 2.5rem 3rem;">
     <div style="font-family:var(--mono);font-size:15px;letter-spacing:0.03em;color:var(--text);font-weight:500;margin-bottom:12px;line-height:1.5;">Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible:</div>
     <textarea class="ca-ta" id="wx-text" placeholder="Funnel structure…" style="min-height:420px;" oninput="wxSave(this)"></textarea>
   </div>
@@ -3798,7 +3820,7 @@
           <li><b>Engine Room</b> — takes an idea from first thought to launch, and tracks the skills it needs.</li>
           <li><b>Biz Structures</b> — five business structures, each with a name, a short description and up to five relevant endeavours that might suit it.</li>
           <li><b>Portfolio</b> — all your endeavours, organised into Focus ON, Maintain and Parked, each with a stage and a next action.</li>
-          <li><b>Workflow (external)</b> — one large free-text page for detailing the structure of your marketing funnel(s).</li>
+          <li><b>Workflow (external)</b> — a funnel summary card for each endeavour in The Process (free entry point, paid levels, funnel stages, campaign), with a free-text notes box underneath.</li>
           <li><b>Workflow (internal)</b> — every Portfolio endeavour with five stages beneath it, from market needs analysis through to marketing, each with a status and notes.</li>
           <li><b>Week's Projects</b> — the week's schedule exported from Do, then the next action of every Focus ON and Maintain endeavour, then your project cards with roadmaps.</li>
           <li><b>Learning &amp; Dev</b> — a list of courses and training modules you're considering or taking. Each entry has four fields: Course/Training Module, Benefit, Provider and Link (web links get a ↗ button). <b>+ Add another</b> adds an entry, × removes one, and Email view sends the whole list. Saved in this browser only (it is not part of Portfolio → Export backup).</li>
@@ -3903,7 +3925,8 @@
       <summary>Workflow (external)</summary>
       <div class="cp-body">
         <ul>
-          <li>One big blank field under the prompt “Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible”. The box grows as you type and saves as you go.</li>
+          <li><b>Summary cards</b> at the top show each endeavour from The Process: its free entry point (or a warning if it has none), paid levels, funnel stages and campaign. They are read-only; edit the funnel in The Process. <b>Open in The Process</b> jumps to that endeavour's funnel page. If both apps share a browser the cards update by themselves. If they don't, tap <b>Send to Mission Control</b> in The Process, then <b>⇧ Import summary</b> here. <b>⚙ Process app address</b> sets where the Open buttons point.</li>
+          <li>Under the cards, one big blank field under the prompt “Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible”. The box grows as you type and saves as you go.</li>
           <li><b>✉ Email view</b> emails the whole text.</li>
           <li>Saved in this browser only. It is not part of Portfolio → Export backup, so keep a copy of anything important.</li>
         </ul>
@@ -6501,20 +6524,102 @@ function emailMvView() {
   mcSendEmail('Mission/Vision (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
 }
 
-// ── Workflow (external) tab: one big free-text field for the funnel structure ──
+// ── Workflow (external) tab: funnel summary cards from The Process, plus one free-text notes field ──
+// The Process writes a small summary under WXS_LIVE every time it saves. Where both apps share a browser
+// (same web address root) it is read straight from there. The failsafe is the summary file exported
+// from The Process ("Send to Mission Control") and loaded here with "Import summary" (kept under WXS_SNAP).
 const WX_KEY = 'mc_workflow_ext';
+const WXS_LIVE = 'process_summary_v1';
+const WXS_SNAP = 'mc_process_snapshot';
+const WX_URL_KEY = 'mc_process_url';
+const WX_URL_DEFAULT = 'https://chcarvill.github.io/The-Process/';
 function wxSave(el) { try { localStorage.setItem(WX_KEY, el.value); } catch (e) {} caAutosize(el); }
+function wxReadSum(key) { try { const j = JSON.parse(localStorage.getItem(key)); return j && j.v === 1 && Array.isArray(j.e) ? j : null; } catch (e) { return null; } }
+function wxBest() {
+  const a = wxReadSum(WXS_LIVE), b = wxReadSum(WXS_SNAP);
+  if (a && b) return (a.at || '') >= (b.at || '') ? { s: a, src: 'live' } : { s: b, src: 'imported' };
+  if (a) return { s: a, src: 'live' };
+  if (b) return { s: b, src: 'imported' };
+  return null;
+}
+function wxUrl() { try { return localStorage.getItem(WX_URL_KEY) || WX_URL_DEFAULT; } catch (e) { return WX_URL_DEFAULT; } }
+function wxPaid(e) { return (e.paid || []).filter(t => t && (t.name || t.price)).map(t => (t.name || '') + (t.price ? ' (' + t.price + ')' : '')).join(', '); }
+function wxCards() {
+  const host = document.getElementById('wx-cards'), st = document.getElementById('wx-status');
+  if (!host || !st) return;
+  const best = wxBest();
+  if (!best) {
+    st.textContent = 'No funnel summary yet. In The Process, tap "Send to Mission Control", then use Import summary here.';
+    host.innerHTML = ''; return;
+  }
+  const when = best.s.at ? new Date(best.s.at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'an unknown time';
+  st.textContent = (best.src === 'live' ? 'Live from The Process' : 'Imported summary') + ', updated ' + when;
+  const url = wxUrl();
+  const row = (l, v) => (v || '').trim() ? `<div class="wx-row"><span>${l}</span><div>${esc(v)}</div></div>` : '';
+  host.innerHTML = best.s.e.map(e => {
+    const link = url + (url.indexOf('?') < 0 ? '?' : '&') + 'e=' + encodeURIComponent(e.id || '') + '&n=' + encodeURIComponent(e.name || '') + '&tab=funnel';
+    const c8 = /^https?:\/\//i.test(e.c8 || '') ? `<div class="wx-row"><span>Communic8</span><div><a class="wx-open" href="${esc(e.c8)}" target="_blank" rel="noopener">Open campaign</a></div></div>` : '';
+    return `<div class="wx-card"><div class="wx-head"><span class="wx-name">${esc(e.name || 'Untitled')}</span><a class="wx-open" href="${esc(link)}" target="_blank" rel="noopener">Open in The Process</a></div>
+      ${(e.free || '').trim() ? row('Free entry point', e.free) : '<div class="wx-warn">No free entry point yet</div>'}
+      ${row('Paid levels', wxPaid(e))}${row('Awareness', e.aware)}${row('Lead', e.lead)}${row('Offer', e.offer)}${row('Sale and after', e.sale)}${row('Campaign', e.channels)}${c8}</div>`;
+  }).join('');
+  const have = new Set(best.s.e.map(e => (e.name || '').trim().toLowerCase()));
+  const missing = loadPortfolio().map(p => p.name).filter(n => n && !have.has(n.trim().toLowerCase()));
+  if (missing.length) host.innerHTML += `<div class="wx-missing">In Portfolio but not yet in The Process: ${esc(missing.join(', '))}</div>`;
+}
+function wxImportClick() { const f = document.getElementById('wx-import-file'); if (f) f.click(); }
+function wxSetProcessUrl() {
+  const v = prompt('Web address of The Process app (used by the "Open in The Process" buttons):', wxUrl());
+  if (v === null) return;
+  const t = v.trim();
+  try {
+    if (!t) localStorage.removeItem(WX_URL_KEY);
+    else if (!/^https?:\/\//i.test(t)) { alert('The address needs to start with https://'); return; }
+    else localStorage.setItem(WX_URL_KEY, t);
+  } catch (e) {}
+  wxCards();
+}
+(function wxWire() {
+  const f = document.getElementById('wx-import-file');
+  if (!f) return;
+  f.addEventListener('change', () => {
+    const file = f.files[0]; if (!file) return;
+    const r = new FileReader();
+    r.onload = () => {
+      try {
+        const j = JSON.parse(r.result);
+        if (!(j && j.v === 1 && Array.isArray(j.e))) throw new Error('shape');
+        localStorage.setItem(WXS_SNAP, JSON.stringify(j));
+        wxCards();
+      } catch (e) { alert('That is not a summary file from The Process. In The Process, tap "Send to Mission Control" to make one.'); }
+    };
+    r.readAsText(file); f.value = '';
+  });
+})();
 function renderWorkflowExt() {
   const el = document.getElementById('wx-text');
   if (!el) return;
   try { el.value = localStorage.getItem(WX_KEY) || ''; } catch (e) { el.value = ''; }
   caAutosize(el);
+  wxCards();
 }
 function emailWorkflowExtView() {
   let txt = ''; try { txt = localStorage.getItem(WX_KEY) || ''; } catch (e) {}
-  const lines = ['WORKFLOW (EXTERNAL)', '='.repeat(50), new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), '',
-    'Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible:', '',
-    txt.trim() ? txt.trim() : '(blank)', '', 'Generated by Mission Control.'];
+  const lines = ['WORKFLOW (EXTERNAL)', '='.repeat(50), new Date().toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), ''];
+  const best = wxBest();
+  if (best) {
+    lines.push('FROM THE PROCESS (' + (best.src === 'live' ? 'live' : 'imported summary') + ')', '');
+    best.s.e.forEach(e => {
+      lines.push(e.name || 'Untitled');
+      const add = (l, v) => { v = (v || '').trim(); if (v) lines.push('  ' + l + ': ' + v.replace(/\r?\n/g, '\n    ')); };
+      if (!(e.free || '').trim()) lines.push('  No free entry point yet.'); else add('Free entry point', e.free);
+      add('Paid levels', wxPaid(e)); add('Awareness', e.aware); add('Lead', e.lead); add('Offer', e.offer);
+      add('Sale and after', e.sale); add('Campaign', e.channels); add('Communic8', e.c8);
+      lines.push('');
+    });
+  }
+  lines.push('NOTES', 'Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible:', '',
+    txt.trim() ? txt.trim() : '(blank)', '', 'Generated by Mission Control.');
   mcSendEmail('Workflow (external) (' + new Date().toLocaleDateString('en-AU') + ')', lines.join('\n'));
 }
 
