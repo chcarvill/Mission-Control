@@ -3778,6 +3778,7 @@
     <button onclick="emailWorkflowExtView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
     <button onclick="wxOpenProcess()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--active);background:var(--surface);color:var(--active);cursor:pointer;letter-spacing:0.05em;">Open The Process ↗</button>
     <button onclick="wxImportClick()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import summary</button>
+    <button onclick="wxExportSummary()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export summary</button>
     <input type="file" id="wx-import-file" accept=".json,application/json" style="display:none;" />
     <button onclick="wxSetProcessUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⚙ Change address</button>
   </div>
@@ -3801,6 +3802,7 @@
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="emailWorkflowView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
     <button onclick="wxOpenProcess()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--active);background:var(--surface);color:var(--active);cursor:pointer;letter-spacing:0.05em;">Open The Process ↗</button>
+    <button onclick="wxExportSummary()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇩ Export summary</button>
   </div>
   <div class="mc-mobile-pad" style="padding:1rem 2.5rem 0.2rem;font-family:var(--sans);font-size:12px;color:var(--text-hint);font-style:italic;">Every endeavour in Portfolio appears here automatically. Open one, pick the phase you are working through, then set out its recurring process, its objectives and the other activities needed.</div>
   <div class="wf-wrap" id="wf-host"></div>
@@ -3931,7 +3933,7 @@
       <summary>Workflow (external)</summary>
       <div class="cp-body">
         <ul>
-          <li><b>Summary cards</b> at the top show each endeavour from The Process: its free entry point (or a warning if it has none), paid levels, funnel stages and campaign. They are read-only; edit the funnel in The Process. <b>Open in The Process</b> jumps to that endeavour's funnel page. If both apps share a browser the cards update by themselves. If they don't, tap <b>Send to Mission Control</b> in The Process, then <b>⇧ Import summary</b> here. <b>⚙ Process app address</b> sets where the Open buttons point.</li>
+          <li><b>Summary cards</b> at the top show each endeavour from The Process: its free entry point (or a warning if it has none), paid levels, funnel stages and campaign. They are read-only; edit the funnel in The Process. <b>Open in The Process</b> jumps to that endeavour's funnel page. If both apps share a browser the cards update by themselves. If they don't, tap <b>Send to Mission Control</b> in The Process, then <b>⇧ Import summary</b> here. <b>Open The Process ↗</b> launches the app, <b>⇩ Export summary</b> downloads your endeavours, phases, file locations and business structures for The Process to import, and <b>⚙ Change address</b> sets where the Open buttons point.</li>
           <li>Under the cards, one big blank field under the prompt “Please detail the structure of your funnel(s) here - leveraging marketing to advertise a variety of products/services where possible”. The box grows as you type and saves as you go.</li>
           <li><b>✉ Email view</b> emails the whole text.</li>
           <li>Saved in this browser only. It is not part of Portfolio → Export backup, so keep a copy of anything important.</li>
@@ -6567,7 +6569,7 @@ function wxCards() {
     const c8 = /^https?:\/\//i.test(e.c8 || '') ? `<div class="wx-row"><span>Communic8</span><div><a class="wx-open" href="${esc(e.c8)}" target="_blank" rel="noopener">Open campaign</a></div></div>` : '';
     return `<div class="wx-card"><div class="wx-head"><span class="wx-name">${esc(e.name || 'Untitled')}</span><a class="wx-open" href="${esc(link)}" target="_blank" rel="noopener">Open in The Process</a></div>
       ${(e.free || '').trim() ? row('Free entry point', e.free) : '<div class="wx-warn">No free entry point yet</div>'}
-      ${row('Paid levels', wxPaid(e))}${row('Awareness', e.aware)}${row('Lead', e.lead)}${row('Offer', e.offer)}${row('Sale and after', e.sale)}${row('Campaign', e.channels)}${c8}</div>`;
+      ${row('Paid levels', wxPaid(e))}${row('Overview', e.overview)}${row('Awareness', e.aware)}${row('Lead', e.lead)}${row('Offer', e.offer)}${row('Sale and after', e.sale)}${row('Campaign', e.channels)}${c8}</div>`;
   }).join('');
   const have = new Set(best.s.e.map(e => (e.name || '').trim().toLowerCase()));
   const missing = loadPortfolio().map(p => p.name).filter(n => n && !have.has(n.trim().toLowerCase()));
@@ -6577,6 +6579,17 @@ function wxOpenProcess() {
   const link = document.createElement('a');
   link.href = wxUrl(); link.target = '_blank'; link.rel = 'noopener';
   document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+function wxExportSummary() {
+  const wf = wfLoad(), lc = lcLoad(), sf = sfLoad();
+  const e = loadPortfolio().map(p => ({ name: p.name || '', offering: p.offering || '', target: p.target || '', tier: pfTierOf(p), stage: pfStageOf(p),
+    structure: sf[p.id] || {}, locations: lc[p.id] || [], workflow: wf[p.id] || {} }));
+  const blob = new Blob([JSON.stringify({ v: 1, from: 'mission-control', at: new Date().toISOString(), e }, null, 1)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'mc-summary-' + new Date().toISOString().slice(0, 10) + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  const st = document.getElementById('wx-status');
+  if (st) st.textContent = 'Summary downloaded. In The Process, tap Import and choose that file.';
 }
 function wxImportClick() { const f = document.getElementById('wx-import-file'); if (f) f.click(); }
 function wxSetProcessUrl() {
@@ -6630,7 +6643,7 @@ function emailWorkflowExtView() {
       lines.push(e.name || 'Untitled');
       const add = (l, v) => { v = (v || '').trim(); if (v) lines.push('  ' + l + ': ' + v.replace(/\r?\n/g, '\n    ')); };
       if (!(e.free || '').trim()) lines.push('  No free entry point yet.'); else add('Free entry point', e.free);
-      add('Paid levels', wxPaid(e)); add('Awareness', e.aware); add('Lead', e.lead); add('Offer', e.offer);
+      add('Paid levels', wxPaid(e)); add('Overview', e.overview); add('Awareness', e.aware); add('Lead', e.lead); add('Offer', e.offer);
       add('Sale and after', e.sale); add('Campaign', e.channels); add('Communic8', e.c8);
       lines.push('');
     });
