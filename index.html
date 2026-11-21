@@ -3776,9 +3776,10 @@
 <div id="workflowext-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="emailWorkflowExtView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
+    <button onclick="wxOpenProcess()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--active);background:var(--surface);color:var(--active);cursor:pointer;letter-spacing:0.05em;">Open The Process ↗</button>
     <button onclick="wxImportClick()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⇧ Import summary</button>
     <input type="file" id="wx-import-file" accept=".json,application/json" style="display:none;" />
-    <button onclick="wxSetProcessUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⚙ Process app address</button>
+    <button onclick="wxSetProcessUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⚙ Change address</button>
   </div>
   <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0;">
     <div id="wx-url-row" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
@@ -3799,6 +3800,7 @@
 <div id="workflow-panel" style="display:none;">
   <div class="mc-mobile-pad" style="padding:0.75rem 2.5rem;border-bottom:0.5px solid var(--border);background:var(--bg);display:flex;flex-wrap:wrap;align-items:center;gap:10px;">
     <button onclick="emailWorkflowView()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 20px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;letter-spacing:0.05em;font-weight:500;">✉ Email view</button>
+    <button onclick="wxOpenProcess()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--active);background:var(--surface);color:var(--active);cursor:pointer;letter-spacing:0.05em;">Open The Process ↗</button>
   </div>
   <div class="mc-mobile-pad" style="padding:1rem 2.5rem 0.2rem;font-family:var(--sans);font-size:12px;color:var(--text-hint);font-style:italic;">Every endeavour in Portfolio appears here automatically. Open one, pick the phase you are working through, then set out its recurring process, its objectives and the other activities needed.</div>
   <div class="wf-wrap" id="wf-host"></div>
@@ -6570,6 +6572,11 @@ function wxCards() {
   const have = new Set(best.s.e.map(e => (e.name || '').trim().toLowerCase()));
   const missing = loadPortfolio().map(p => p.name).filter(n => n && !have.has(n.trim().toLowerCase()));
   if (missing.length) host.innerHTML += `<div class="wx-missing">In Portfolio but not yet in The Process: ${esc(missing.join(', '))}</div>`;
+}
+function wxOpenProcess() {
+  const link = document.createElement('a');
+  link.href = wxUrl(); link.target = '_blank'; link.rel = 'noopener';
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
 }
 function wxImportClick() { const f = document.getElementById('wx-import-file'); if (f) f.click(); }
 function wxSetProcessUrl() {
