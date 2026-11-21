@@ -3781,6 +3781,10 @@
     <button onclick="wxSetProcessUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:0.5px solid var(--border2);background:var(--surface);color:var(--text);cursor:pointer;letter-spacing:0.05em;">⚙ Process app address</button>
   </div>
   <div class="mc-mobile-pad" style="padding:1.25rem 2.5rem 0;">
+    <div id="wx-url-row" style="display:none;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">
+      <input type="text" id="wx-url-input" placeholder="https://chcarvill.github.io/The-Process/" style="flex:1;min-width:220px;font-family:var(--sans);font-size:13px;border:0.5px solid var(--border2);border-radius:8px;padding:8px 12px;background:var(--surface);color:var(--text);outline:none;" onkeydown="if(event.key==='Enter'){wxSaveUrl();}" />
+      <button onclick="wxSaveUrl()" style="font-family:'DM Mono',monospace;font-size:12px;padding:8px 18px;border-radius:8px;border:none;background:linear-gradient(180deg,#3ddfaa 0%,#2bce8c 50%,#1fa873 100%);color:#000;cursor:pointer;font-weight:500;">Save address</button>
+    </div>
     <div class="wx-status" id="wx-status"></div>
     <div id="wx-cards"></div>
     <div class="wx-notes-h">Your own notes on your funnels</div>
@@ -6549,8 +6553,8 @@ function wxCards() {
   if (!host || !st) return;
   const best = wxBest();
   if (!best) {
-    st.textContent = 'No funnel summary yet. In The Process, tap "Send to Mission Control", then use Import summary here.';
-    host.innerHTML = ''; return;
+    st.textContent = 'Nothing from The Process yet.';
+    host.innerHTML = '<div class="wx-card"><div class="wx-name" style="margin-bottom:6px;">No funnel summary yet</div><div style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;">The cards appear here once this browser has data from The Process. Two ways to get it:<br>1. Open The Process in this same browser. If both apps share a web address root, the cards fill in by themselves.<br>2. In The Process, tap <b>Send to Mission Control</b> to download a summary file, then tap <b>⇧ Import summary</b> above and choose it.</div></div>'; return;
   }
   const when = best.s.at ? new Date(best.s.at).toLocaleString('en-AU', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : 'an unknown time';
   st.textContent = (best.src === 'live' ? 'Live from The Process' : 'Imported summary') + ', updated ' + when;
@@ -6569,15 +6573,21 @@ function wxCards() {
 }
 function wxImportClick() { const f = document.getElementById('wx-import-file'); if (f) f.click(); }
 function wxSetProcessUrl() {
-  const v = prompt('Web address of The Process app (used by the "Open in The Process" buttons):', wxUrl());
-  if (v === null) return;
-  const t = v.trim();
-  try {
-    if (!t) localStorage.removeItem(WX_URL_KEY);
-    else if (!/^https?:\/\//i.test(t)) { alert('The address needs to start with https://'); return; }
-    else localStorage.setItem(WX_URL_KEY, t);
-  } catch (e) {}
+  const r = document.getElementById('wx-url-row'), i = document.getElementById('wx-url-input');
+  if (!r || !i) return;
+  const show = r.style.display === 'none';
+  r.style.display = show ? 'flex' : 'none';
+  if (show) { i.value = wxUrl(); i.focus(); }
+}
+function wxSaveUrl() {
+  const r = document.getElementById('wx-url-row'), i = document.getElementById('wx-url-input'), st = document.getElementById('wx-status');
+  if (!r || !i) return;
+  const t = i.value.trim();
+  if (t && !/^https?:\/\//i.test(t)) { if (st) st.textContent = 'The address needs to start with https://'; return; }
+  try { if (!t) localStorage.removeItem(WX_URL_KEY); else localStorage.setItem(WX_URL_KEY, t); } catch (e) {}
+  r.style.display = 'none';
   wxCards();
+  if (st) st.textContent = 'Address saved. ' + st.textContent;
 }
 (function wxWire() {
   const f = document.getElementById('wx-import-file');
@@ -6591,7 +6601,7 @@ function wxSetProcessUrl() {
         if (!(j && j.v === 1 && Array.isArray(j.e))) throw new Error('shape');
         localStorage.setItem(WXS_SNAP, JSON.stringify(j));
         wxCards();
-      } catch (e) { alert('That is not a summary file from The Process. In The Process, tap "Send to Mission Control" to make one.'); }
+      } catch (e) { const st = document.getElementById('wx-status'); if (st) st.textContent = 'That is not a summary file from The Process. In The Process, tap "Send to Mission Control" to make one.'; }
     };
     r.readAsText(file); f.value = '';
   });
