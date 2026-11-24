@@ -7079,9 +7079,18 @@ function pfReopenReview() {
   if (reviews[wk]) { delete reviews[wk].doneAt; saveWeeklyReviews(reviews); }
   pRenderReview();
 }
+// Two-tap delete (no browser dialog, which some browsers and installed apps block): the first tap arms the button, the second tap within 4 seconds removes the project.
+const pfDelArm = { id: null, t: null };
 function deletePortfolioItem(id, ev) {
   if (ev) ev.stopPropagation();
-  if (!confirm('Remove this project from the portfolio?')) return;
+  const b = ev && ev.currentTarget ? ev.currentTarget : null;
+  if (pfDelArm.id !== id) {
+    pfDelArm.id = id;
+    if (b) { const label = b.textContent; b.textContent = 'Delete?'; b.title = 'Tap again to remove'; clearTimeout(pfDelArm.t);
+      pfDelArm.t = setTimeout(() => { pfDelArm.id = null; if (b.isConnected) { b.textContent = label; b.title = 'Remove'; } }, 4000); }
+    return;
+  }
+  clearTimeout(pfDelArm.t); pfDelArm.id = null;
   let items = loadPortfolio();
   items = items.filter(p => p.id !== id);
   savePortfolio(items);
