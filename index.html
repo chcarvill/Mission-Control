@@ -505,6 +505,7 @@
     background: rgba(0,0,0,0.7);
     display: none; align-items: center; justify-content: center;
     z-index: 200; backdrop-filter: blur(4px);
+    padding: 12px; box-sizing: border-box;
   }
   .modal-overlay.visible { display: flex; }
   .modal {
@@ -513,6 +514,9 @@
     border-radius: var(--radius);
     padding: 1.75rem; width: 100%; max-width: 420px;
     display: flex; flex-direction: column; gap: 14px;
+    /* Tall forms (e.g. NEW MISSION) must scroll inside the screen, never run off it, so Cancel is always reachable. */
+    max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px);
+    overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   }
   .modal h2 {
     font-family: var(--mono); font-size: 13px;
@@ -544,7 +548,8 @@
   .modal-status-btn.sel-on-hold   { background: var(--hold-bg);      color: var(--hold);      border-color: var(--hold); }
   .modal-status-btn.sel-planning  { background: var(--planning-bg);  color: var(--planning);  border-color: var(--planning); }
   .modal-status-btn.sel-completed { background: var(--completed-bg); color: var(--completed); border-color: var(--completed); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end;
+    position: sticky; bottom: -1.75rem; margin-bottom: -1.75rem; padding: 12px 0 1.75rem; background: var(--surface); z-index: 1; }
   .modal-cancel {
     font-family: var(--mono); font-size: 11px;
     padding: 7px 16px; border-radius: var(--radius-sm);
@@ -3046,7 +3051,7 @@
 #engine-room-panel .er-pipe-promoted button:hover{border-color:var(--active);color:var(--active);}
 .er-modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:20px;z-index:400;backdrop-filter:blur(4px);}
 .er-modal.hidden{display:none;}
-.er-modalbox{background:var(--surface);border:0.5px solid var(--border2);width:min(500px,100%);border-radius:var(--radius);padding:24px;position:relative;}
+.er-modalbox{background:var(--surface);border:0.5px solid var(--border2);width:min(500px,100%);border-radius:var(--radius);padding:24px;position:relative;max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px);overflow-y:auto;overscroll-behavior:contain;}
 .er-modalbox h2{font-family:var(--mono);font-size:14px;letter-spacing:0.05em;color:var(--text);margin-bottom:6px;}
 .er-close{position:absolute;right:14px;top:10px;border:none;background:none;font-size:22px;color:var(--text-hint);cursor:pointer;}
 .er-close:hover{color:var(--text);}
