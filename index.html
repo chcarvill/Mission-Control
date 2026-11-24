@@ -4293,7 +4293,7 @@
 <!-- Add project modal -->
 <div class="modal-overlay" id="project-modal">
   <div class="modal">
-    <h2>NEW PROJECT</h2>
+    <h2 id="proj-modal-title">NEW PROJECT</h2>
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Project name</div>
     <input class="modal-input" id="proj-name" placeholder="e.g. Website Redesign" />
     <div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);letter-spacing:0.04em;margin-bottom:-6px;">Part of which business (within your portfolio)?</div>
@@ -4321,7 +4321,7 @@
     </div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="closeProjectModal()">Cancel</button>
-      <button class="modal-confirm" onclick="confirmAddProject()">Add project</button>
+      <button class="modal-confirm" id="proj-confirm-btn" onclick="confirmAddProject()">Add project</button>
     </div>
   </div>
 </div>
@@ -4375,6 +4375,7 @@
       <button class="modal-status-btn" data-status="completed" onclick="selectPfStatus(this)">Shelved</button>
     </div>
     <div class="modal-actions">
+      <button class="modal-cancel" id="pf-modal-delete" style="display:none;margin-right:auto;color:#f87171;border-color:#f87171;" onclick="pfModalDelete()">Delete project</button>
       <button class="modal-cancel" onclick="closePortfolioModal()">Cancel</button>
       <button class="modal-confirm" id="pf-confirm-btn" onclick="confirmAddPortfolio()">Add project</button>
     </div>
@@ -5851,11 +5852,17 @@ function handleCommunic8ReturnParams() {
 // ── Project modal state ──
 let projCat = '';
 
-function openProjectModal() {
-  document.getElementById('proj-name').value = '';
-  document.getElementById('proj-business').value = '';
-  document.getElementById('proj-department').value = '';
-  document.getElementById('proj-description').value = '';
+let projEditId = null;
+function openProjectModal(editId) {
+  projEditId = editId || null;
+  const ep = projEditId ? loadProjects().find(p => p.id === projEditId) : null;
+  if (projEditId && !ep) projEditId = null;
+  document.getElementById('proj-name').value = ep ? (ep.name || '') : '';
+  document.getElementById('proj-business').value = ep ? (ep.business || '') : '';
+  document.getElementById('proj-department').value = ep ? (ep.department || '') : '';
+  document.getElementById('proj-description').value = ep ? (ep.description || '') : '';
+  document.getElementById('proj-modal-title').textContent = ep ? 'EDIT PROJECT' : 'NEW PROJECT';
+  document.getElementById('proj-confirm-btn').textContent = ep ? 'Save changes' : 'Add project';
   projCat = '';
   document.querySelectorAll('#proj-cat-row .modal-cat-btn').forEach(b => {
     b.classList.remove('selected');
@@ -5863,8 +5870,9 @@ function openProjectModal() {
     b.style.background = '';
     b.style.color = '';
   });
-  const noneBtn = document.querySelector('#proj-cat-row .modal-cat-btn[data-cat=""]');
-  if (noneBtn) selectProjCat(noneBtn);
+  const catBtn = document.querySelector('#proj-cat-row .modal-cat-btn[data-cat="' + (ep ? (ep.category || '') : '') + '"]')
+    || document.querySelector('#proj-cat-row .modal-cat-btn[data-cat=""]');
+  if (catBtn) selectProjCat(catBtn);
   document.getElementById('project-modal').classList.add('visible');
   setTimeout(() => document.getElementById('proj-name').focus(), 50);
 }
@@ -5889,6 +5897,25 @@ function confirmAddProject() {
   const name = document.getElementById('proj-name').value.trim();
   if (!name) { document.getElementById('proj-name').focus(); return; }
   const projects = loadProjects();
+  if (projEditId) {
+    const ep = projects.find(p => p.id === projEditId);
+    if (ep) {
+      ep.name = name;
+      ep.business = document.getElementById('proj-business').value.trim();
+      ep.department = document.getElementById('proj-department').value.trim();
+      ep.description = document.getElementById('proj-description').value.trim();
+      ep.category = projCat;
+      saveProjects(projects);
+      // Missions copy the project's name and department when they are created, so keep linked missions in step.
+      const ventures = load();
+      ventures.forEach(v => { if (v.projectId === ep.id) { v.venture = ep.name; v.department = ep.department || ep.business || ''; } });
+      save(ventures);
+    }
+    projEditId = null;
+    closeProjectModal();
+    renderProjects();
+    return;
+  }
   const newProject = {
     id: Date.now(),
     name,
@@ -5907,8 +5934,17 @@ function confirmAddProject() {
   // roadmap right away, once, at creation time.
   openRoadmapModal(newProject.id);
 }
-function deleteProject(id) {
-  if (!confirm('Delete this project? Missions linked to it will be unlinked but not deleted.')) return;
+const projDelArm = { id: null, t: null };
+function deleteProject(id, ev) {
+  // Two-tap delete (no browser dialog): first tap arms the button, second tap within 4 seconds deletes.
+  const b = ev && ev.currentTarget ? ev.currentTarget : null;
+  if (projDelArm.id !== id) {
+    projDelArm.id = id;
+    if (b) { const label = b.textContent; b.textContent = 'Delete? (missions stay)'; b.title = 'Tap again to delete. Linked missions are unlinked, not deleted.'; clearTimeout(projDelArm.t);
+      projDelArm.t = setTimeout(() => { projDelArm.id = null; if (b.isConnected) { b.textContent = label; b.title = 'Delete project'; } }, 4000); }
+    return;
+  }
+  clearTimeout(projDelArm.t); projDelArm.id = null;
   let projects = loadProjects();
   projects = projects.filter(p => p.id !== id);
   saveProjects(projects);
@@ -5953,7 +5989,10 @@ function renderProjects() {
           <div style="font-family:var(--mono);font-size:14px;font-weight:600;color:var(--text-primary);letter-spacing:0.04em;">${p.name}</div>
           ${p.business ? `<div style="font-family:var(--mono);font-size:11px;color:var(--text-hint);margin-top:2px;">part of <span style="color:var(--text-secondary)">${p.business}</span>${p.department ? ' · ' + p.department : ''}</div>` : ''}
         </div>
-        <button onclick="deleteProject(${p.id})" style="background:none;border:none;cursor:pointer;color:var(--text-hint);font-size:16px;line-height:1;padding:0 2px;" title="Delete project">×</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button onclick="openProjectModal(${p.id})" style="background:none;border:0.5px solid var(--border2);border-radius:8px;cursor:pointer;color:var(--text-secondary);font-family:var(--mono);font-size:11px;padding:5px 12px;letter-spacing:0.03em;" title="Edit project">✎ Edit</button>
+          <button onclick="deleteProject(${p.id}, event)" style="background:none;border:none;cursor:pointer;color:var(--text-hint);font-size:16px;line-height:1;padding:4px 6px;" title="Delete project">×</button>
+        </div>
       </div>
       ${p.description ? `<div style="font-family:var(--mono);font-size:11px;color:var(--text-secondary);margin-bottom:8px;line-height:1.5;">${p.description}</div>` : ''}
       <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:8px;">
@@ -6184,12 +6223,29 @@ function openPortfolioModal(editId) {
   pfSyncModalChips();
   document.getElementById('pf-modal-title').textContent = item ? 'EDIT PROJECT' : 'NEW PROJECT';
   document.getElementById('pf-confirm-btn').textContent = item ? 'Save changes' : 'Add project';
+  const pfDelBtn = document.getElementById('pf-modal-delete');
+  pfDelBtn.style.display = item ? '' : 'none'; pfDelBtn.textContent = 'Delete project'; pfModalDelArmed = false;
   pfStatus = item ? item.status : 'active';
   document.querySelectorAll('#pf-status-row .modal-status-btn').forEach(b => { b.className = 'modal-status-btn'; });
   const activeBtn = document.querySelector(`#pf-status-row .modal-status-btn[data-status="${pfStatus}"]`);
   if (activeBtn) activeBtn.classList.add('sel-' + pfStatus);
   document.getElementById('portfolio-modal').classList.add('visible');
   setTimeout(() => document.getElementById('pf-name').focus(), 50);
+}
+// Delete from inside the edit pop-up: first tap arms the button, second tap removes the project (no browser dialog).
+let pfModalDelArmed = false;
+function pfModalDelete() {
+  if (!pfEditId) return;
+  const b = document.getElementById('pf-modal-delete');
+  if (!pfModalDelArmed) {
+    pfModalDelArmed = true; b.textContent = 'Tap again to delete';
+    setTimeout(() => { pfModalDelArmed = false; if (b) b.textContent = 'Delete project'; }, 4000);
+    return;
+  }
+  pfModalDelArmed = false;
+  savePortfolio(loadPortfolio().filter(p => p.id !== pfEditId));
+  closePortfolioModal();
+  renderPortfolio();
 }
 function closePortfolioModal() {
   document.getElementById('portfolio-modal').classList.remove('visible');
@@ -6297,7 +6353,7 @@ function pfRowHtml(p, tier) {
     <td data-l="Tier">${pfTierSelect(p)}</td>
     <td data-l="${isParked ? 'Restart trigger' : 'Next action'}">${pfNextActionField(p, tier)}</td>
     <td data-l="Validation"><span class="pf-val-badge ${vt.cls}" onclick="openValidationModal(${p.id}, event)" title="Click to score">${total ? `${total}/${VAL_MAX} · ` : ''}${vt.label}</span></td>
-    <td><div class="pf-actrow"><button class="pf-iconbtn" onclick="switchMasterTab('do')">Do →</button><button class="pf-iconbtn danger" onclick="deletePortfolioItem(${p.id}, event)" title="Remove">×</button></div></td>
+    <td><div class="pf-actrow"><button class="pf-iconbtn" onclick="openPortfolioModal(${p.id})">✎ Edit</button><button class="pf-iconbtn" onclick="switchMasterTab('do')">Do →</button><button class="pf-iconbtn danger" onclick="deletePortfolioItem(${p.id}, event)" title="Remove">×</button></div></td>
   </tr>`;
 }
 function renderPortfolioTable(items) {
@@ -8839,7 +8895,7 @@ function pInitCharts() {
 
 <div id="mc-install-banner" style="display:none;position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);
 background:#16181c;border:0.5px solid #2bce8c;border-radius:10px;padding:0.9rem 1.25rem;
-display:flex;align-items:center;gap:12px;z-index:300;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
+align-items:center;gap:12px;z-index:150;box-shadow:0 8px 32px rgba(0,0,0,0.5);">
   <span style="font-family:'DM Mono',monospace;font-size:12px;color:#e8eaed;letter-spacing:0.04em;">Install Mission Control</span>
   <button id="mc-install-btn" style="font-family:'DM Mono',monospace;font-size:11px;padding:5px 14px;
     border-radius:20px;border:none;background:#2bce8c;color:#000;cursor:pointer;font-weight:500;">Install</button>
