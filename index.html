@@ -2919,6 +2919,7 @@
   <button class="master-tab" id="mtab-learning" onclick="switchMasterTab('learning')">Learning &amp; Dev</button>
   <button class="master-tab" id="mtab-missions" onclick="switchMasterTab('missions')">Notes</button>
   <button class="master-tab" id="mtab-prod" onclick="switchMasterTab('prod')">Productiveness</button>
+  <button class="master-tab" id="mtab-omnis" onclick="switchMasterTab('omnis')">Omnis</button>
   <button class="master-tab" id="mtab-do" onclick="switchMasterTab('do')">Do</button>
   <button class="master-tab" id="mtab-compendium" onclick="switchMasterTab('compendium')">Compendium</button>
 </div>
@@ -3120,6 +3121,9 @@
 <div id="er-modal" class="er-modal hidden">
   <div class="er-modalbox"><button class="er-close" onclick="EngineRoom.closeForm()">×</button><h2 id="er-formTitle">Add</h2><form id="er-form" class="er-form"></form></div>
 </div>
+
+<!-- ══ OMNIS PANEL (built by omnis-app.js) ══ -->
+<div id="omnis-panel" style="display:none;"></div>
 
 <!-- ══ DO PANEL ══ -->
 <div id="do-panel" style="display:none;">
@@ -3839,6 +3843,7 @@
           <li><b>Learning &amp; Dev</b> — a list of courses and training modules you're considering or taking. Each entry has four fields: Course/Training Module, Benefit, Provider and Link (web links get a ↗ button). <b>+ Add another</b> adds an entry, × removes one, and Email view sends the whole list. Saved in this browser only (it is not part of Portfolio → Export backup).</li>
           <li><b>Notes</b> — a three-line notes field for every Portfolio endeavour, listed in the same Focus ON / Maintain / Parked order as Portfolio, with your missions and tasks (formerly the Missions tab) below.</li>
           <li><b>Productiveness</b> — goals vs action, time wasters, today's log, the weekly report and the 20-minute weekly review.</li>
+          <li><b>Omnis</b> — a map of your projects and the spreadsheets inside them, with a link to open each spreadsheet and a diagram of how its tabs feed one another. Saved in this browser only (it is not part of Portfolio → Export backup).</li>
           <li><b>Do</b> — the daily and weekly task engine, with nine sub-tabs.</li>
           <li><b>Compendium</b> — this guide.</li>
         </ul>
@@ -4038,6 +4043,20 @@
           <li><b>Step 3 (~5 min)</b> — one note: what moved, what's stuck, one thing to do differently. It saves when you tap away.</li>
           <li><b>Mark this week's review done</b> to record it. The last six reviews are listed below with their notes. You can reopen the current week's review if you need to.</li>
         </ul>
+      </div>
+    </details>
+
+    <details class="cp-sec">
+      <summary>Omnis — projects and spreadsheets</summary>
+      <div class="cp-body">
+        <h4>The front page</h4>
+        <p>Each project is a box with its name. Under the name, every spreadsheet in that project has two icons: the <b>grid</b> opens the spreadsheet from the link you saved (it is greyed out until you add one), and the <b>diagram</b> opens the project's detail view. Clicking the project name opens the detail view too.</p>
+        <h4>The detail view</h4>
+        <p>Shows each spreadsheet with its tabs. A tab is coloured by what it is for: <b>Enter data</b>, <b>Automatic</b> (dashed), <b>Reference</b> or <b>Notes</b>. A line with an arrowhead means one tab feeds another. Hover a tab to light up its lines. <b>← All projects</b> goes back.</p>
+        <h4>Changing things</h4>
+        <p>Press <b>Edit layout</b>. On the front page you can rename and recolour projects, add or delete projects and spreadsheets, drag a spreadsheet by its ⋮⋮ handle into another project, and paste each spreadsheet's link into the box under its name (links must start with https://), and type a note of where the file lives on your computer in the second box (a note only, not a link; it then shows under the spreadsheet's name). In a project's detail view you can rename and add tabs, change a tab's type, and press <b>Draw links</b>, then click a tab and the tab it feeds to add a line (click the same pair again to remove it). Delete buttons ask you to press twice.</p>
+        <h4>Keeping a copy</h4>
+        <p>Omnis saves in this browser only and is not part of Portfolio → Export backup. In Edit layout, <b>Save or load layout</b> shows your whole map, including links, as text to copy somewhere safe and paste back later.</p>
       </div>
     </details>
 
@@ -6076,6 +6095,8 @@ function switchMasterTab(tab) {
   document.getElementById('learning-panel').style.display = tab === 'learning' ? 'block' : 'none';
   document.getElementById('mtab-learning').classList.toggle('master-active', tab === 'learning');
   document.getElementById('do-panel').style.display = tab === 'do' ? 'block' : 'none';
+  document.getElementById('omnis-panel').style.display = tab === 'omnis' ? 'block' : 'none';
+  document.getElementById('mtab-omnis').classList.toggle('master-active', tab === 'omnis');
   document.getElementById('mtab-homepage').classList.toggle('master-active', tab === 'homepage');
   document.getElementById('mtab-start').classList.toggle('master-active', tab === 'start');
   document.getElementById('mtab-portfolio').classList.toggle('master-active', tab === 'portfolio');
@@ -6101,6 +6122,7 @@ function switchMasterTab(tab) {
   if (tab === 'missions') { renderPortfolioNotes(); }
   if (tab === 'projects') { renderProjects(); }
   if (tab === 'do') { renderDo(); }
+  if (tab === 'omnis' && typeof renderOmnis === 'function') { renderOmnis(); }
   if (tab === 'engine') { EngineRoom.render(); }
 }
 
@@ -9188,5 +9210,6 @@ const EngineRoom = (function () {
 </dialog>
 <script src="do-app.js"></script>
 <script src="ascent-app.js"></script>
+<script src="omnis-app.js"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
-const CACHE = 'mc-v34-network-first';
-const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js', './communic8-app.js'];
+const CACHE = 'mc-v35-network-first';
+const ASSETS = ['./index.html', './mc-manifest.json', './do-app.js', './ascent-app.js', './communic8-app.js', './omnis-app.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
