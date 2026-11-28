@@ -68,9 +68,14 @@
     "#omnis-panel .om-ib svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}",
     "#omnis-panel .om-url{flex:1 1 100%;font-family:var(--sans);font-size:12.5px;color:var(--text);background:var(--surface2);border:.5px solid var(--border2);border-radius:var(--radius-sm);padding:7px 9px}",
     "#omnis-panel .om-url:focus{outline:none;border-color:var(--text-hint)}",
-    "#omnis-panel .om-loc{flex:1 1 100%;font-family:var(--mono);font-size:11px;color:var(--text-hint);word-break:break-all}",
-    "#omnis-panel.om-edit .om-row .om-loc{display:none}",
-    "#omnis-panel .om-fh+.om-loc{margin:-3px 0 9px}",
+    "#omnis-panel .om-locs{flex:1 1 100%;display:flex;flex-direction:column;gap:3px;min-width:0}",
+    "#omnis-panel .om-loc{display:flex;gap:6px;min-width:0;font-family:var(--mono);font-size:11px;color:var(--text-hint)}",
+    "#omnis-panel .om-loc>span:first-child{flex:none}",
+    "#omnis-panel .om-loc .om-val{min-width:0;word-break:break-all}",
+    "#omnis-panel .om-loc a{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--c);text-decoration:none}",
+    "#omnis-panel .om-loc a:hover{text-decoration:underline}",
+    "#omnis-panel.om-edit .om-row .om-locs{display:none}",
+    "#omnis-panel .om-fh+.om-locs{margin:-3px 0 9px}",
     "#omnis-panel .om-foot{padding:0 16px 14px}",
     "#omnis-panel .om-ed{display:none}",
     "#omnis-panel.om-edit .om-ed{display:flex;gap:6px;align-items:center}",
@@ -164,12 +169,19 @@
   }
   function delLabel(key) { return armed === key ? "Click again to delete" : "Delete"; }
 
+  function locs(f) {
+    var h = "";
+    if (okurl(f.url)) h += '<div class="om-loc"><span>Online:</span><a href="' + esc(f.url) + '" target="_blank" rel="noopener noreferrer" title="' + esc(f.url) + '">' + esc(f.url) + '</a></div>';
+    if (f.loc) h += '<div class="om-loc"><span>Saved at:</span><span class="om-val">' + esc(f.loc) + '</span></div>';
+    return h ? '<div class="om-locs">' + h + '</div>' : "";
+  }
+
   function row(f, p) {
     return '<li class="om-row" data-f="' + esc(f.id) + '"><span class="om-grip" title="Drag to another project">\u22ee\u22ee</span>' +
       '<span class="om-fn" data-e="f:' + esc(f.id) + '" contenteditable="' + ce() + '">' + esc(f.name) + '</span>' + openBtn(f) +
       '<button class="om-ib" data-act="open" data-p="' + esc(p.id) + '" title="See how the tabs connect" aria-label="Show details for ' + esc(f.name) + '">' + ID + '</button>' +
       '<span class="om-ed"><button class="pf-iconbtn' + (armed === "f" + f.id ? " armed" : "") + '" data-act="delf" data-f="' + esc(f.id) + '">' + delLabel("f" + f.id) + '</button></span>' +
-      (f.loc ? '<div class="om-loc">Saved at: ' + esc(f.loc) + '</div>' : '') +
+      locs(f) +
       '<input class="om-ed om-url" data-url="' + esc(f.id) + '" value="' + esc(f.url || "") + '" placeholder="Paste the spreadsheet link (https://\u2026)" aria-label="Link for ' + esc(f.name) + '">' +
       '<input class="om-ed om-url" data-loc="' + esc(f.id) + '" maxlength="300" value="' + esc(f.loc || "") + '" placeholder="Where it lives on your computer (a note only, not a link)" aria-label="Location note for ' + esc(f.name) + '"></li>';
   }
@@ -185,7 +197,7 @@
   function fileHtml(f) {
     return '<div class="om-file" data-f="' + esc(f.id) + '"><div class="om-fh"><span class="om-nm" data-e="f:' + esc(f.id) + '" contenteditable="' + ce() + '">' + esc(f.name) + '</span>' + openBtn(f) +
       '<span class="om-ed"><button class="pf-iconbtn" data-act="addt" data-f="' + esc(f.id) + '">Add tab</button></span></div>' +
-      (f.loc ? '<div class="om-loc">Saved at: ' + esc(f.loc) + '</div>' : '') + '<div class="om-tabs">' +
+      locs(f) + '<div class="om-tabs">' +
       (f.tabs.map(function (t) {
         return '<div class="om-chip t-' + esc(t.type) + '" data-t="' + esc(t.id) + '" title="' + esc(TL[t.type] || "") + '"><span data-e="t:' + esc(t.id) + '" contenteditable="' + ce() + '">' + esc(t.name) + '</span>' +
           '<span class="om-ed"><button class="pf-iconbtn" data-act="ty" data-t="' + esc(t.id) + '" title="Change type">' + esc(TL[t.type] || "") + '</button>' +
