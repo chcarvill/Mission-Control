@@ -12,13 +12,39 @@
   var TL = { data: "Enter data", auto: "Automatic", ref: "Reference", note: "Notes" };
   function T(id, name, type) { return { id: id, name: name, type: type }; }
 
+  // Pipelines are plain text: one step per line, "Step | What happens | Where | Done when | Status".
+  // A line starting with # is the title.
+  var EC_PL = [
+    "# Lesson pipeline",
+    "Ground the idea | Decide who the lesson is for, what it teaches and how it links to the curriculum. | You, then a new row on the Lessons sheet | Title, year level(s), subject and a one-line purpose are written down. | Idea",
+    "Bounce ideas off Claude | Test, stretch and challenge the idea. | Claude | You have a strongest version, and nothing is final yet. | Idea",
+    "Consolidate | Settle the final idea and write the summary. | Lessons sheet | The summary is final and the curriculum code is checked. | Drafting",
+    "Create the lesson plan | Write the full lesson in the template and make the Word file. | Claude, then Word | It follows the template, and the file is named with a version and saved with the lesson. | Written, then Word file ready",
+    "Upload to Supabase | Put the file in the right bucket. | Supabase storage | The bucket is public or private as intended, and the file name matches the sheet exactly. | Word file ready",
+    "Add the SQL | Ask Claude for the insert code, one row for each year level. | Claude, then Supabase | It ran without errors, and there is a row for every year level. | Word file ready",
+    "Update the HTML if necessary | Only when the website itself has to change, such as a new subject or year level. | Website files | The change is published and refreshed, or you have noted that no HTML change is needed. | Word file ready",
+    "Confirm it works | Open the lesson from the live site in a private window, from every year level. | Live site | It opens correctly from each year level, and the Lessons sheet says Live. | Live"
+  ].join("\n");
+  var CP_PL = [
+    "# Photo pipeline (draft, from your workbook)",
+    "Idea | Decide the subject, the occasion, and which card designs will use it. | Photos tab: Subject / description, Intended occasion. | Which designs? Does the contrast rule apply to them? Is there a clear, even area near the top where the title will go? | Before Captured",
+    "Take the photo | Shoot it with the card in mind and leave room for the title along the top. | Photos tab: File name, Date captured. | Light on top with a darker body, or dark on top with a lighter body. | Captured",
+    "Contrast check | Compare the top portion of the photo with the body. | Contrast check log on the Pipeline tab. | Pass: the top is clearly lighter than the body, or clearly darker. Fail: the tones are mixed or similar, so neither a dark nor a white title will read. | Captured",
+    "Edit and prepare | Crop and rotate to the shape the design needs (the Envelope picture is square and upright). | Photos tab: Status. | Looks right in a preview of the design, and the title area is clear. | Edited",
+    "Approve | Final look on a mock card, with the title in the colour the contrast check gave. | Photos tab: Status. | Title is readable at print size. | Approved",
+    "Insert code | SQL for the cards table: ask Claude, giving the slot name and file name. | Claude, then Supabase | | Approved",
+    "Upload | Put the file in the right bucket (free-cards or premium-cards) with the agreed file name. If the page finds it through the cards table, add or edit that row. | Storage files tab. | File name matches exactly (capitals, hyphens, extension). In the cards table, the slot name is in the slot column and the file name is in print_path. | Approved",
+    "Add to the organiser | Artwork tab: one row for the photo. Availability tab: one row for each design that offers it. | Artwork and Availability tabs. | Names match exactly. Category is set and Usable? is decided. | Approved",
+    "Publish and check | Put the new index.html on the site, hard refresh, and open each design that offers the photo. | Photos tab: Deployed to design, and Status = Deployed. | The photo shows, there is no \u201cdid not load\u201d note at the top, the title is readable, and the print preview looks right. | Deployed"
+  ].join("\n");
+
   function seed() {
     return {
       projects: [
-        { id: "ec", name: "EduCobber lesson tracker", color: "#60a5fa", files: [{ id: "ecf", name: "EduCobber lesson tracker", url: "", tabs: [
+        { id: "ec", name: "EduCobber lesson tracker", color: "#60a5fa", files: [{ id: "ecf", name: "EduCobber lesson tracker", url: "", pl: EC_PL, tabs: [
           T("ec-ov", "Overview", "auto"), T("ec-pi", "Pipelines", "ref"), T("ec-le", "Lessons", "data"), T("ec-dl", "Drafting Lessons", "note"),
           T("ec-db", "Drafting Edu Books", "note"), T("ec-bg", "Books and Games", "data"), T("ec-li", "Lists", "ref"), T("ec-rm", "Read me", "ref")] }] },
-        { id: "cp", name: "Card Portfolio Organiser", color: "#f59e0b", files: [{ id: "cpf", name: "Card Portfolio Organiser", url: "", tabs: [
+        { id: "cp", name: "Card Portfolio Organiser", color: "#f59e0b", files: [{ id: "cpf", name: "Card Portfolio Organiser", url: "", pl: CP_PL, tabs: [
           T("cp-sh", "Start Here", "ref"), T("cp-pi", "Pipeline", "note"), T("cp-su", "Summary", "auto"), T("cp-de", "Designs", "data"),
           T("cp-aw", "Artwork", "data"), T("cp-sf", "Storage files", "ref"), T("cp-av", "Availability", "data"), T("cp-ph", "Photos", "data")] }] }
       ],
@@ -27,9 +53,14 @@
     };
   }
 
-  var S, edit = false, linking = false, pend = null, view = null, armed = null, dragId = null;
+  var S, edit = false, linking = false, pend = null, view = null, armed = null, dragId = null, openPl = {};
   try { S = JSON.parse(localStorage.getItem(KEY)); } catch (e) { S = null; }
   if (!S || !Array.isArray(S.projects) || !Array.isArray(S.links)) { S = seed(); save(); }
+  (function () { // layouts saved before pipelines existed: add the starting pipelines once
+    var sp = { ecf: EC_PL, cpf: CP_PL }, changed = false;
+    S.projects.forEach(function (p) { (p.files || []).forEach(function (f) { if (f.pl === undefined) { f.pl = sp[f.id] || ""; changed = true; } }); });
+    if (changed) save();
+  })();
   function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
 
   // ---------- styles (scoped to #omnis-panel, built on the app's own tokens) ----------
@@ -76,6 +107,23 @@
     "#omnis-panel .om-loc a:hover{text-decoration:underline}",
     "#omnis-panel.om-edit .om-row .om-locs{display:none}",
     "#omnis-panel .om-fh+.om-locs{margin:-3px 0 9px}",
+    "#omnis-panel .om-pl{flex:1 1 100%;min-width:0;margin-top:2px}",
+    "#omnis-panel .om-pl>summary{cursor:pointer;list-style:none;font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--text-secondary);padding:4px 0}",
+    "#omnis-panel .om-pl>summary::-webkit-details-marker{display:none}",
+    "#omnis-panel .om-pl>summary::before{content:'\\25b8';display:inline-block;width:1.3em;color:var(--c)}",
+    "#omnis-panel .om-pl[open]>summary::before{content:'\\25be'}",
+    "#omnis-panel .om-pl>summary:hover{color:var(--text)}",
+    "#omnis-panel .om-steps{list-style:none;margin:6px 0 4px;padding:0;counter-reset:omstep;display:flex;flex-direction:column;gap:8px}",
+    "#omnis-panel .om-steps>li{counter-increment:omstep;position:relative;padding:8px 10px 8px 36px;border:.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface2)}",
+    "#omnis-panel .om-steps>li::before{content:counter(omstep);position:absolute;left:9px;top:8px;width:19px;height:19px;border-radius:50%;background:var(--c);color:#0e0f11;font:600 10.5px/19px var(--mono);text-align:center}",
+    "#omnis-panel .om-sn{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}",
+    "#omnis-panel .om-steps dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-family:var(--sans);font-size:12px}",
+    "#omnis-panel .om-steps dt{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-hint);padding-top:2px}",
+    "#omnis-panel .om-steps dd{margin:0;color:var(--text-secondary)}",
+    "#omnis-panel.om-edit .om-row .om-pl{display:none}",
+    "#omnis-panel.om-edit textarea.om-ed{display:block}",
+    "#omnis-panel textarea.om-pltext{height:180px;font-size:11.5px;line-height:1.4}",
+    "#omnis-panel .om-helpline{flex:1 1 100%;font-family:var(--sans);font-size:11px;color:var(--text-hint);margin-top:-4px}",
     "#omnis-panel .om-foot{padding:0 16px 14px}",
     "#omnis-panel .om-ed{display:none}",
     "#omnis-panel.om-edit .om-ed{display:flex;gap:6px;align-items:center}",
@@ -176,14 +224,39 @@
     return h ? '<div class="om-locs">' + h + '</div>' : "";
   }
 
+  function parsePl(t) {
+    var title = "", steps = [];
+    String(t || "").split("\n").forEach(function (ln) {
+      ln = ln.trim();
+      if (!ln) return;
+      if (ln.charAt(0) === "#") { title = ln.replace(/^#+\s*/, ""); return; }
+      var parts = ln.split("|").map(function (x) { return x.trim(); });
+      if (parts[0]) steps.push(parts);
+    });
+    return { title: title, steps: steps };
+  }
+  function plHtml(f) {
+    var d = parsePl(f.pl);
+    if (!d.steps.length) return "";
+    var h = '<details class="om-pl" data-pl="' + esc(f.id) + '"' + (openPl[f.id] ? " open" : "") + '><summary>' + esc(d.title || "Pipeline") + " \u00b7 " + d.steps.length + (d.steps.length === 1 ? " step" : " steps") + '</summary><ol class="om-steps">';
+    d.steps.forEach(function (st) {
+      h += '<li><div class="om-sn">' + esc(st[0]) + '</div><dl>';
+      [["What", st[1]], ["Where", st[2]], ["Done when", st[3]], ["Status", st[4]]].forEach(function (x) { if (x[1]) h += "<dt>" + x[0] + "</dt><dd>" + esc(x[1]) + "</dd>"; });
+      h += "</dl></li>";
+    });
+    return h + "</ol></details>";
+  }
+
   function row(f, p) {
     return '<li class="om-row" data-f="' + esc(f.id) + '"><span class="om-grip" title="Drag to another project">\u22ee\u22ee</span>' +
       '<span class="om-fn" data-e="f:' + esc(f.id) + '" contenteditable="' + ce() + '">' + esc(f.name) + '</span>' + openBtn(f) +
       '<button class="om-ib" data-act="open" data-p="' + esc(p.id) + '" title="See how the tabs connect" aria-label="Show details for ' + esc(f.name) + '">' + ID + '</button>' +
       '<span class="om-ed"><button class="pf-iconbtn' + (armed === "f" + f.id ? " armed" : "") + '" data-act="delf" data-f="' + esc(f.id) + '">' + delLabel("f" + f.id) + '</button></span>' +
-      locs(f) +
+      locs(f) + plHtml(f) +
       '<input class="om-ed om-url" data-url="' + esc(f.id) + '" value="' + esc(f.url || "") + '" placeholder="Paste the spreadsheet link (https://\u2026)" aria-label="Link for ' + esc(f.name) + '">' +
-      '<input class="om-ed om-url" data-loc="' + esc(f.id) + '" maxlength="300" value="' + esc(f.loc || "") + '" placeholder="Where it lives on your computer (a note only, not a link)" aria-label="Location note for ' + esc(f.name) + '"></li>';
+      '<input class="om-ed om-url" data-loc="' + esc(f.id) + '" maxlength="300" value="' + esc(f.loc || "") + '" placeholder="Where it lives on your computer (a note only, not a link)" aria-label="Location note for ' + esc(f.name) + '">' +
+      '<textarea class="om-ed om-url om-pltext" data-plx="' + esc(f.id) + '" spellcheck="false" aria-label="Pipeline steps for ' + esc(f.name) + '" placeholder="Pipeline: one step per line">' + esc(f.pl || "") + '</textarea>' +
+      '<div class="om-ed om-helpline">Pipeline: one step per line as Step | What happens | Where | Done when | Status. A line starting with # is the title.</div></li>';
   }
   function card(p) {
     return '<section class="om-card" data-p="' + esc(p.id) + '" style="--c:' + okc(p.color) + '"><div class="om-ph">' +
@@ -197,7 +270,7 @@
   function fileHtml(f) {
     return '<div class="om-file" data-f="' + esc(f.id) + '"><div class="om-fh"><span class="om-nm" data-e="f:' + esc(f.id) + '" contenteditable="' + ce() + '">' + esc(f.name) + '</span>' + openBtn(f) +
       '<span class="om-ed"><button class="pf-iconbtn" data-act="addt" data-f="' + esc(f.id) + '">Add tab</button></span></div>' +
-      locs(f) + '<div class="om-tabs">' +
+      locs(f) + plHtml(f) + '<div class="om-tabs">' +
       (f.tabs.map(function (t) {
         return '<div class="om-chip t-' + esc(t.type) + '" data-t="' + esc(t.id) + '" title="' + esc(TL[t.type] || "") + '"><span data-e="t:' + esc(t.id) + '" contenteditable="' + ce() + '">' + esc(t.name) + '</span>' +
           '<span class="om-ed"><button class="pf-iconbtn" data-act="ty" data-t="' + esc(t.id) + '" title="Change type">' + esc(TL[t.type] || "") + '</button>' +
@@ -319,6 +392,8 @@
     if (i) { var p = find("p", i); p.color = e.target.value; e.target.closest(".om-card").style.setProperty("--c", p.color); save(); }
   });
   P.addEventListener("change", function (e) {
+    var px = e.target.dataset && e.target.dataset.plx;
+    if (px) { var pf = find("f", px); pf.pl = e.target.value; toast("Pipeline saved."); save(); render(); return; }
     var lc = e.target.dataset && e.target.dataset.loc;
     if (lc) { var lf = find("f", lc); lf.loc = e.target.value.trim(); toast(lf.loc ? "Location note saved." : "Location note removed."); save(); render(); return; }
     var i = e.target.dataset && e.target.dataset.url;
@@ -328,6 +403,10 @@
     f.url = v; toast(v ? "Link saved." : "Link removed."); save(); render();
   });
 
+  V.addEventListener("toggle", function (e) { // remember which pipelines are open across redraws
+    var d = e.target;
+    if (d && d.matches && d.matches("details.om-pl")) { openPl[d.dataset.pl] = d.open; draw(); }
+  }, true);
   V.addEventListener("mouseover", function (e) {
     var c = e.target.closest(".om-chip[data-t]");
     if (!c || linking) return;
